@@ -3,471 +3,416 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>BUIZNES IMPERIA | ULTIMATE PLATINUM</title>
+    <title>BUIZNES IMPERIA | INFERNO SUPREME</title>
     
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
 
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;500;700;900&family=Plus+Jakarta+Sans:wght@400;600;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;700;900&family=Space+Grotesk:wght@300;700&display=swap" rel="stylesheet">
     
     <style>
         :root {
-            --p-green: #22c55e;
-            --p-blue: #3b82f6;
-            --p-purple: #a855f7;
-            --p-orange: #f97316;
-            --p-yellow: #fbbf24;
-            --bg: #020617;
-            --glass: rgba(255, 255, 255, 0.03);
-            --glass-bright: rgba(255, 255, 255, 0.08);
-            --border: rgba(255, 255, 255, 0.1);
-            --shadow: 0 20px 50px rgba(0,0,0,0.5);
+            --fire-gold: #f59e0b;
+            --fire-orange: #f97316;
+            --fire-red: #ef4444;
+            --deep-dark: #09090b;
+            --glass: rgba(255, 255, 255, 0.05);
+            --neon-blue: #3b82f6;
+            --neon-green: #22c55e;
         }
 
-        /* --- БАЗОВІ СТИЛІ --- */
-        * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; outline: none; }
+        /* --- ЕКСТРЕМАЛЬНИЙ ФОН (ГАРЯЧІ КОЛЬОРИ) --- */
         body, html { 
-            background: var(--bg); color: #fff; font-family: 'Plus Jakarta Sans', sans-serif; 
-            height: 100dvh; width: 100%; overflow: hidden; position: fixed; 
+            margin: 0; padding: 0; width: 100%; height: 100dvh; 
+            background: var(--deep-dark); color: #fff; 
+            font-family: 'Space Grotesk', sans-serif; overflow: hidden; position: fixed;
         }
 
-        /* --- AUTH SCREEN: ДІАГОНАЛЬНИЙ ГРАДІЄНТ --- */
-        #auth-layer { 
-            position: fixed; inset: 0; z-index: 10000; 
-            display: flex; align-items: center; justify-content: center; padding: 20px;
-            background: linear-gradient(-45deg, var(--p-yellow), var(--p-orange), var(--p-blue), #2563eb, var(--p-purple));
+        .inferno-bg {
+            position: fixed; inset: 0; z-index: -1;
+            background: linear-gradient(135deg, #450a0a, #7f1d1d, #991b1b, #b91c1c, #450a0a);
             background-size: 400% 400%;
-            animation: rainbowBG 12s ease infinite;
+            animation: magmaFlow 8s cubic-bezier(0.4, 0, 0.2, 1) infinite;
         }
 
-        @keyframes rainbowBG {
+        @keyframes magmaFlow {
             0% { background-position: 0% 50%; }
             50% { background-position: 100% 50%; }
             100% { background-position: 0% 50%; }
         }
 
-        .auth-container {
-            width: 100%; max-width: 440px; background: rgba(2, 6, 23, 0.85); 
-            backdrop-filter: blur(40px); border-radius: 50px; padding: 50px 40px;
-            border: 1px solid rgba(255, 255, 255, 0.15); box-shadow: var(--shadow);
-            text-align: center; position: relative; overflow: hidden;
+        /* --- AUTH: CRYSTAL VIBRANCE STYLE --- */
+        #auth-view { 
+            display: flex; align-items: center; justify-content: center; height: 100%; padding: 25px;
+            z-index: 100; position: relative;
         }
 
-        .auth-container::before {
-            content: ''; position: absolute; top: -50%; left: -50%; width: 200%; height: 200%;
-            background: radial-gradient(circle, rgba(59, 130, 246, 0.1) 0%, transparent 70%);
-            pointer-events: none;
+        .auth-card {
+            width: 100%; max-width: 460px; background: rgba(0, 0, 0, 0.85);
+            backdrop-filter: blur(50px); border-radius: 60px; padding: 60px 40px;
+            border: 2px solid rgba(249, 115, 22, 0.3); box-shadow: 0 0 80px rgba(239, 68, 68, 0.3);
+            text-align: center; position: relative;
         }
 
-        .auth-logo { font-family: 'Outfit'; font-size: 3rem; font-weight: 900; letter-spacing: -2px; margin-bottom: 10px; }
-        .auth-subtitle { color: #94a3b8; font-size: 0.95rem; margin-bottom: 35px; line-height: 1.5; }
-
-        .input-group { position: relative; margin-bottom: 20px; text-align: left; }
-        .input-group label { display: block; font-size: 0.75rem; font-weight: 800; color: #64748b; margin-left: 20px; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 1px; }
-        
-        .auth-input { 
-            width: 100%; background: var(--glass); border: 1px solid var(--border); 
-            padding: 22px 25px; border-radius: 25px; color: #fff; font-size: 1rem;
-            transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-        .auth-input:focus { border-color: var(--p-blue); background: var(--glass-bright); box-shadow: 0 0 20px rgba(59, 130, 246, 0.2); }
-
-        .auth-btn { 
-            width: 100%; background: #fff; color: #000; border: none; 
-            padding: 24px; border-radius: 25px; font-weight: 900; font-family: 'Outfit'; 
-            font-size: 1.25rem; cursor: pointer; transition: 0.3s; margin-top: 15px;
-            box-shadow: 0 10px 30px rgba(255,255,255,0.1);
-        }
-        .auth-btn:active { transform: scale(0.95); opacity: 0.8; }
-
-        #auth-status { 
-            margin-top: 20px; font-size: 0.85rem; padding: 12px; border-radius: 15px; 
-            display: none; animation: fadeIn 0.3s;
+        .auth-card h1 { 
+            font-family: 'Outfit'; font-size: 3.8rem; font-weight: 900; 
+            background: linear-gradient(to right, #fbbf24, #ef4444);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+            margin-bottom: 5px; letter-spacing: -2px;
         }
 
-        /* --- APP INTERFACE --- */
-        #app-shell { display: none; height: 100dvh; flex-direction: column; opacity: 0; transition: 1s ease; }
-        
-        .header { padding: 40px 25px 20px; text-align: center; }
-        .user-tag { background: rgba(34, 197, 94, 0.1); color: var(--p-green); padding: 6px 15px; border-radius: 100px; font-size: 0.7rem; font-weight: 900; text-transform: uppercase; letter-spacing: 2px; }
+        .auth-tagline { color: #f87171; font-size: 0.85rem; font-weight: 700; text-transform: uppercase; letter-spacing: 3px; margin-bottom: 40px; }
 
-        .main-balance { font-family: 'Outfit'; font-size: 5.5rem; font-weight: 900; letter-spacing: -4px; margin: 15px 0; line-height: 0.9; }
-        .sub-stats { color: #64748b; font-weight: 700; font-size: 0.9rem; }
+        .form-group { text-align: left; margin-bottom: 25px; }
+        .form-group label { display: block; font-size: 0.7rem; font-weight: 800; color: #94a3b8; margin-left: 25px; margin-bottom: 10px; text-transform: uppercase; }
 
-        .xp-frame { width: 200px; height: 10px; background: rgba(255,255,255,0.05); margin: 20px auto; border-radius: 20px; position: relative; border: 1px solid var(--border); }
-        #xp-inner { height: 100%; background: linear-gradient(90deg, var(--p-blue), var(--p-green)); border-radius: 20px; width: 0%; transition: 0.5s; }
+        .field-input { 
+            width: 100%; background: rgba(255,255,255,0.06); border: 2px solid rgba(255,255,255,0.1);
+            padding: 24px 30px; border-radius: 30px; color: #fff; font-size: 1.1rem;
+            transition: 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        .field-input:focus { border-color: var(--fire-orange); background: rgba(255,255,255,0.1); box-shadow: 0 0 30px rgba(249, 115, 22, 0.2); transform: scale(1.02); }
 
-        /* CLICKER */
-        .click-container { flex: 1; display: flex; align-items: center; justify-content: center; position: relative; }
-        .big-coin { 
-            width: 260px; height: 260px; border-radius: 50%;
-            background: radial-gradient(circle at 30% 30%, #fbbf24, #d97706);
+        .btn-inferno { 
+            width: 100%; padding: 26px; border-radius: 30px; border: none;
+            background: linear-gradient(90deg, #f59e0b, #ef4444); color: #fff;
+            font-family: 'Outfit'; font-size: 1.4rem; font-weight: 900; cursor: pointer;
+            box-shadow: 0 15px 35px rgba(239, 68, 68, 0.4); transition: 0.3s;
+        }
+        .btn-inferno:active { transform: scale(0.92); opacity: 0.9; }
+
+        #status-msg { margin-top: 25px; min-height: 1.2em; font-weight: 700; font-size: 0.9rem; padding: 15px; border-radius: 20px; display: none; }
+
+        /* --- GAME INTERFACE --- */
+        #game-ui { display: none; height: 100dvh; flex-direction: column; opacity: 0; transition: 1.2s cubic-bezier(0.4, 0, 0.2, 1); }
+
+        .top-hud { padding: 50px 30px 20px; text-align: center; }
+        .rank-badge { background: linear-gradient(90deg, var(--fire-gold), var(--fire-orange)); padding: 8px 20px; border-radius: 100px; font-size: 0.75rem; font-weight: 900; text-transform: uppercase; letter-spacing: 2.5px; box-shadow: 0 5px 15px rgba(245, 158, 11, 0.3); }
+
+        .cash-display { font-family: 'Outfit'; font-size: 6rem; font-weight: 900; margin: 20px 0; letter-spacing: -4px; color: #fff; text-shadow: 0 10px 40px rgba(0,0,0,0.5); }
+        .income-rate { color: #94a3b8; font-weight: 700; font-size: 1rem; }
+
+        .progress-container { width: 240px; height: 12px; background: rgba(255,255,255,0.05); border: 2px solid rgba(255,255,255,0.1); margin: 25px auto; border-radius: 30px; overflow: hidden; box-shadow: inset 0 2px 4px rgba(0,0,0,0.5); }
+        .progress-fill { height: 100%; background: linear-gradient(90deg, #3b82f6, #22c55e); width: 0%; transition: 0.6s ease-out; }
+
+        /* CORE CLICKER */
+        .tap-zone { flex: 1; display: flex; align-items: center; justify-content: center; position: relative; }
+        .inferno-coin { 
+            width: 280px; height: 280px; border-radius: 50%;
+            background: radial-gradient(circle at 35% 35%, #fbbf24, #b45309, #78350f);
             display: flex; align-items: center; justify-content: center;
-            font-family: 'Outfit'; font-size: 8.5rem; font-weight: 900; color: #78350f;
-            box-shadow: 0 40px 100px rgba(0,0,0,0.7), inset 0 -10px 20px rgba(0,0,0,0.2), inset 0 10px 20px rgba(255,255,255,0.4);
-            border: 14px solid #fef3c7; cursor: pointer; transition: 0.1s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            z-index: 5;
+            font-family: 'Outfit'; font-size: 9rem; font-weight: 900; color: #451a03;
+            border: 15px solid #fffbeb; cursor: pointer;
+            box-shadow: 0 50px 120px rgba(0,0,0,0.8), inset 0 0 60px rgba(0,0,0,0.4);
+            transition: 0.08s; z-index: 10;
         }
-        .big-coin:active { transform: scale(0.85) rotate(-3deg); }
+        .inferno-coin:active { transform: scale(0.85) rotate(5deg); }
 
-        /* SCREENS */
-        .screen { display: none; height: 100%; overflow-y: auto; padding: 20px 25px 160px; }
-        .screen.active { display: block; animation: screenIn 0.5s both; }
-        @keyframes screenIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        /* UPGRADES SCREEN */
+        .scroll-view { display: none; height: 100%; overflow-y: auto; padding: 30px 25px 180px; }
+        .scroll-view.active { display: block; animation: slideUp 0.6s cubic-bezier(0.23, 1, 0.32, 1) both; }
+        @keyframes slideUp { from { opacity: 0; transform: translateY(50px); } to { opacity: 1; transform: translateY(0); } }
 
-        /* SHOP CARDS */
-        .section-title { font-family: 'Outfit'; font-size: 2.2rem; margin-bottom: 25px; font-weight: 900; }
-        
-        .upgrade-item { 
-            background: var(--glass); border: 1px solid var(--border); 
-            border-radius: 35px; padding: 25px; display: flex; 
-            justify-content: space-between; align-items: center; margin-bottom: 15px;
-            transition: 0.3s;
+        .card-upgrade { 
+            background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 40px; padding: 28px; display: flex; 
+            justify-content: space-between; align-items: center; margin-bottom: 18px;
+            backdrop-filter: blur(10px);
         }
-        .upgrade-item:active { transform: scale(0.97); background: var(--glass-bright); }
+        .card-upgrade:active { transform: scale(0.96); background: rgba(255,255,255,0.07); }
 
-        .up-info h4 { font-size: 1.1rem; margin-bottom: 5px; font-weight: 800; }
-        .up-info p { font-size: 0.8rem; color: #94a3b8; font-weight: 600; }
+        .up-meta h4 { font-size: 1.25rem; margin-bottom: 6px; font-weight: 700; color: #fff; }
+        .up-meta p { font-size: 0.85rem; color: #64748b; font-weight: 600; }
 
-        .price-tag { 
-            background: var(--p-blue); color: #fff; border: none; 
-            padding: 15px 25px; border-radius: 20px; font-weight: 900; 
-            font-size: 0.9rem; min-width: 100px;
+        .btn-buy { 
+            background: #fff; color: #000; border: none; padding: 18px 28px;
+            border-radius: 22px; font-weight: 900; font-size: 1rem;
+            box-shadow: 0 8px 20px rgba(255,255,255,0.1);
         }
-        .price-tag.locked { background: #1e293b; color: #475569; }
+        .btn-buy.afford { background: var(--fire-orange); color: #fff; }
 
         /* LEADERBOARD */
-        .rank-card { background: var(--glass); border-radius: 30px; border: 1px solid var(--border); overflow: hidden; }
-        .rank-row { display: flex; justify-content: space-between; align-items: center; padding: 20px 25px; border-bottom: 1px solid var(--border); }
-        .rank-row:last-child { border: none; }
-        .rank-row.me { background: rgba(59, 130, 246, 0.1); border-left: 4px solid var(--p-blue); }
-        .rank-name { display: flex; align-items: center; gap: 15px; font-weight: 700; }
-        .rank-pos { color: var(--p-blue); font-weight: 900; width: 30px; }
+        .top-list { background: rgba(0,0,0,0.4); border-radius: 40px; border: 1px solid var(--glass); overflow: hidden; }
+        .top-row { display: flex; justify-content: space-between; padding: 25px; border-bottom: 1px solid rgba(255,255,255,0.05); font-weight: 700; }
+        .top-row.me { background: rgba(245, 158, 11, 0.1); color: var(--fire-gold); }
 
-        /* NAVIGATION */
-        .nav-bar { 
-            position: fixed; bottom: 0; width: 100%; background: rgba(2, 6, 23, 0.95); 
-            backdrop-filter: blur(30px); border-top: 1px solid var(--border);
-            display: flex; justify-content: space-around; padding: 25px 15px 50px; z-index: 1000;
+        /* NAV */
+        .bottom-nav { 
+            position: fixed; bottom: 0; width: 100%; background: rgba(9,9,11,0.98);
+            backdrop-filter: blur(40px); border-top: 2px solid rgba(255,255,255,0.05);
+            display: flex; justify-content: space-around; padding: 30px 10px 55px; z-index: 1000;
         }
-        .nav-item { 
-            background: none; border: none; color: #475569; font-weight: 900; 
-            font-size: 0.75rem; display: flex; flex-direction: column; 
-            align-items: center; gap: 8px; transition: 0.3s;
+        .nav-link { 
+            background: none; border: none; color: #3f3f46; font-weight: 900;
+            display: flex; flex-direction: column; align-items: center; gap: 8px;
+            transition: 0.4s;
         }
-        .nav-item.active { color: var(--p-green); transform: translateY(-5px); }
-        .nav-item span { text-transform: uppercase; letter-spacing: 1px; }
+        .nav-link.active { color: var(--fire-gold); transform: translateY(-8px); }
 
         /* FX */
-        .float-val { position: fixed; color: var(--p-green); font-weight: 900; font-size: 2.8rem; pointer-events: none; animation: floatUp 0.9s cubic-bezier(0.22, 1, 0.36, 1) forwards; z-index: 2000; text-shadow: 0 10px 20px rgba(0,0,0,0.5); }
-        @keyframes floatUp { 0% { opacity: 1; transform: translateY(0) scale(1); } 100% { opacity: 0; transform: translateY(-200px) scale(1.5); } }
+        .coin-pop { position: fixed; color: #fbbf24; font-weight: 900; font-size: 3rem; pointer-events: none; animation: popRise 1s forwards; z-index: 5000; text-shadow: 0 10px 30px rgba(0,0,0,1); }
+        @keyframes popRise { 0% { opacity: 1; transform: translateY(0); } 100% { opacity: 0; transform: translateY(-250px) scale(1.6); } }
 
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
     </style>
 </head>
 <body>
 
-    <div id="auth-layer">
-        <div class="auth-container">
-            <div class="auth-logo">BUIZNES</div>
-            <p class="auth-subtitle">Увійдіть у свій крипто-портфель, щоб почати масштабування імперії</p>
+    <div class="inferno-bg"></div>
+
+    <div id="auth-view">
+        <div class="auth-card">
+            <h1>BUIZNES</h1>
+            <div class="auth-tagline">Inferno Edition</div>
             
-            <div class="input-group">
-                <label>Ваша пошта</label>
-                <input type="email" id="auth-email" class="auth-input" placeholder="example@gmail.com">
+            <div class="form-group">
+                <label>Корпоративна Пошта</label>
+                <input type="email" id="email-f" class="field-input" placeholder="mail@empire.com">
             </div>
 
-            <div class="input-group">
-                <label>Секретний пароль</label>
-                <input type="password" id="auth-pass" class="auth-input" placeholder="••••••••">
+            <div class="form-group">
+                <label>Ключ Доступу</label>
+                <input type="password" id="pass-f" class="field-input" placeholder="••••••••">
             </div>
 
-            <button class="auth-btn" id="btn-submit" onclick="executeAuth()">ПІДКЛЮЧИТИСЬ ДО БАЗИ</button>
-            <div id="auth-status"></div>
+            <button class="btn-inferno" onclick="initiateAuth()">ВІДКРИТИ ПОРТФЕЛЬ</button>
+            <div id="status-msg"></div>
         </div>
     </div>
 
-    <div id="app-shell">
+    <div id="game-ui">
         
-        <div id="screen-main" class="screen active">
-            <div class="header">
-                <span class="user-tag" id="tag-rank">Hobo Investor</span>
-                <h1 class="main-balance" id="val-cash">$ 0</h1>
-                <p class="sub-stats" id="val-pps">Авто-дохід: $0 / сек</p>
-                <div class="xp-frame"><div id="xp-inner"></div></div>
-                <p id="tag-lvl" style="font-size: 0.7rem; font-weight: 900; color: #475569;">LEVEL 1</p>
+        <div id="scr-game" class="scroll-view active">
+            <div class="top-hud">
+                <span class="rank-badge" id="u-rank">Завантаження...</span>
+                <h1 class="cash-display" id="u-cash">$ 0</h1>
+                <div class="income-rate" id="u-pps">Income: $0 / sec</div>
+                <div class="progress-container"><div id="p-bar" class="progress-fill"></div></div>
+                <div style="font-size: 0.8rem; font-weight: 900; color: #52525b;" id="u-lvl">LVL 1</div>
             </div>
 
-            <div class="click-container">
-                <div class="big-coin" onclick="handleTap(event)">B</div>
-            </div>
-        </div>
-
-        <div id="screen-shop" class="screen">
-            <h2 class="section-title">MARKET</h2>
-            <div id="shop-list">
-                <div class="upgrade-item">
-                    <div class="up-info">
-                        <h4>Ручний Майнінг</h4>
-                        <p id="desc-click">Зараз: +1 за тап</p>
-                    </div>
-                    <button class="price-tag" onclick="buyItem('click')" id="cost-click">$50</button>
-                </div>
-
-                <div class="upgrade-item">
-                    <div class="up-info">
-                        <h4>Ферма Богла</h4>
-                        <p id="desc-auto1">+$2 / сек автоматично</p>
-                    </div>
-                    <button class="price-tag" onclick="buyItem('auto1')" id="cost-auto1">$300</button>
-                </div>
-
-                <div class="upgrade-item">
-                    <div class="up-info">
-                        <h4>Офіс розробки</h4>
-                        <p id="desc-auto2">+$15 / сек автоматично</p>
-                    </div>
-                    <button class="price-tag" onclick="buyItem('auto2')" id="cost-auto2">$2,500</button>
-                </div>
-
-                <div class="upgrade-item">
-                    <div class="up-info">
-                        <h4>Дата-центр</h4>
-                        <p id="desc-auto3">+$120 / сек автоматично</p>
-                    </div>
-                    <button class="price-tag" onclick="buyItem('auto3')" id="cost-auto3">$18,000</button>
-                </div>
+            <div class="tap-zone">
+                <div class="inferno-coin" onclick="handleInteraction(event)">B</div>
             </div>
         </div>
 
-        <div id="screen-top" class="screen">
-            <h2 class="section-title">GLOBAL TOP</h2>
-            <div class="rank-card" id="leader-board">
-                </div>
+        <div id="scr-shop" class="scroll-view">
+            <h2 style="font-family:'Outfit'; font-size: 3rem; margin-bottom: 35px; letter-spacing: -2px;">UPGRADES</h2>
+            
+            <div class="card-upgrade">
+                <div class="up-meta"><h4>Muscle Click</h4><p>Збільшує прибуток за тап</p></div>
+                <button class="btn-buy" id="b-click" onclick="buyProcess('click')">$50</button>
+            </div>
+
+            <div class="card-upgrade">
+                <div class="up-meta"><h4>Crypto Bot</h4><p>+$3 / сек пасивно</p></div>
+                <button class="btn-buy" id="b-bot" onclick="buyProcess('bot')">$400</button>
+            </div>
+
+            <div class="card-upgrade">
+                <div class="up-meta"><h4>Luxury Office</h4><p>+$22 / сек пасивно</p></div>
+                <button class="btn-buy" id="b-office" onclick="buyProcess('office')">$3,200</button>
+            </div>
+
+            <div class="card-upgrade">
+                <div class="up-meta"><h4>Mainframe AI</h4><p>+$180 / сек пасивно</p></div>
+                <button class="btn-buy" id="b-ai" onclick="buyProcess('ai')">$25,000</button>
+            </div>
+
+            <div class="card-upgrade">
+                <div class="up-meta"><h4>Space Station</h4><p>+$1,200 / сек пасивно</p></div>
+                <button class="btn-buy" id="b-space" onclick="buyProcess('space')">$200,000</button>
+            </div>
         </div>
 
-        <nav class="nav-bar">
-            <button class="nav-item active" onclick="changeTab('main')">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2L2 12h3v8h6v-6h2v6h6v-8h3L12 2z"/></svg>
-                <span>Головна</span>
+        <div id="scr-top" class="scroll-view">
+            <h2 style="font-family:'Outfit'; font-size: 3rem; margin-bottom: 35px; letter-spacing: -2px;">FORBES TOP</h2>
+            <div class="top-list" id="global-board"></div>
+        </div>
+
+        <nav class="bottom-nav">
+            <button class="nav-link active" onclick="switchNav('game')">
+                <svg width="28" height="28" viewBox="0 0 24 24" fill="currentColor"><path d="M11.5 1L2 6v2l9.5 5 9.5-5V6L11.5 1zM2 10v2l9.5 5 9.5-5v-2l-9.5 5L2 10zm0 4v2l9.5 5 9.5-5v-2l-9.5 5L2 14z"/></svg>
+                <span>EMPIRE</span>
             </button>
-            <button class="nav-item" onclick="changeTab('shop')">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M12 18H6v-4h6V9l8 5-8 5v-1zm-2-9V5l-8 5 8 5V9z"/></svg>
-                <span>Ринок</span>
+            <button class="nav-link" onclick="switchNav('shop')">
+                <svg width="28" height="28" viewBox="0 0 24 24" fill="currentColor"><path d="M7 18c-1.1 0-1.99.9-1.99 2S5.9 22 7 22s2-.9 2-2-.9-2-2-2zM1 2v2h2l3.6 7.59-1.35 2.45c-.16.28-.25.61-.25.96 0 1.1.9 2 2 2h12v-2H7.42c-.14 0-.25-.11-.25-.25l.03-.12.9-1.63h7.45c.75 0 1.41-.41 1.75-1.03l3.58-6.49c.08-.14.12-.31.12-.48 0-.55-.45-1-1-1H5.21l-.94-2H1zm16 16c-1.1 0-1.99.9-1.99 2s.89 2 1.99 2 2-.9 2-2-.9-2-2-2z"/></svg>
+                <span>SHOP</span>
             </button>
-            <button class="nav-item" onclick="changeTab('top')">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l2.4 7.2h7.6l-6.1 4.4 2.3 7.2-6.2-4.5-6.2 4.5 2.3-7.2-6.1-4.4h7.6z"/></svg>
-                <span>Топи</span>
+            <button class="nav-link" onclick="switchNav('top')">
+                <svg width="28" height="28" viewBox="0 0 24 24" fill="currentColor"><path d="M12 1L9 9l-8 .5 6 5.5-2 8 7-4.5 7 4.5-2-8 6-5.5-8-.5L12 1z"/></svg>
+                <span>TOP 10</span>
             </button>
         </nav>
     </div>
 
     <script>
-        // --- CONFIG & GLOBAL STATE ---
-        const firebaseConfig = { databaseURL: "https://buiznesimperia-default-rtdb.firebaseio.com/" };
+        // --- FIREBASE ENGINE V14.0 ---
+        const fbConf = { databaseURL: "https://buiznesimperia-default-rtdb.firebaseio.com/" };
         
-        let state = {
-            money: 0,
-            power: 1,
-            pps: 0,
-            lvl: 1,
-            exp: 0,
-            lastSave: Date.now()
+        let session = {
+            m: 0, p: 1, s: 0, l: 1, e: 0,
+            uid: null, nick: ""
         };
 
-        let activeUser = null;
-        let isSaving = false;
+        let dbRef = null;
 
-        // --- AUTH ENGINE: ANTI-INITIALIZATION ERROR ---
-        function executeAuth() {
-            const email = document.getElementById('auth-email').value;
-            const pass = document.getElementById('auth-pass').value;
-            const status = document.getElementById('auth-status');
+        // Пряма ініціалізація ТІЛЬКИ в момент дії
+        function initiateAuth() {
+            const email = document.getElementById('email-f').value;
+            const pass = document.getElementById('pass-f').value;
+            const log = document.getElementById('status-msg');
 
             if (!email.includes('@') || pass.length < 6) {
-                showError("Введіть коректну пошту та пароль!");
+                renderLog("Invalid Email or Password (min 6 symbols)", "#ef4444");
                 return;
             }
 
-            // ПРЯМА ІНІЦІАЛІЗАЦІЯ ПЕРЕД ВИКЛИКОМ
-            if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+            if (!firebase.apps.length) firebase.initializeApp(fbConf);
             
-            status.style.display = 'block';
-            status.style.background = 'rgba(59, 130, 246, 0.2)';
-            status.style.color = '#fff';
-            status.innerText = "Авторизація через супутники...";
+            renderLog("Connecting to satellites...", "#f59e0b");
 
-            const auth = firebase.auth();
-            
-            auth.signInWithEmailAndPassword(email, pass)
-                .catch(() => auth.createUserWithEmailAndPassword(email, pass))
-                .catch(err => showError(err.message));
+            firebase.auth().signInWithEmailAndPassword(email, pass)
+                .catch(() => firebase.auth().createUserWithEmailAndPassword(email, pass))
+                .catch(err => renderLog(err.message, "#ef4444"));
         }
 
         firebase.auth().onAuthStateChanged(user => {
             if (user) {
-                activeUser = user;
-                launchGame();
+                session.uid = user.uid;
+                session.nick = user.email.split('@')[0];
+                startEmpire();
             }
         });
 
-        function showError(msg) {
-            const status = document.getElementById('auth-status');
-            status.style.display = 'block';
-            status.style.background = 'rgba(239, 68, 68, 0.2)';
-            status.style.color = '#ff4d4d';
-            status.innerText = "Помилка: " + msg;
+        function renderLog(t, c) {
+            const m = document.getElementById('status-msg');
+            m.style.display = 'block'; m.style.color = c; m.innerText = t;
         }
 
-        // --- GAME CORE ---
-        function launchGame() {
-            document.getElementById('auth-layer').style.display = 'none';
-            const shell = document.getElementById('app-shell');
-            shell.style.display = 'flex';
-            setTimeout(() => shell.style.opacity = '1', 50);
+        // --- CORE GAME LOGIC ---
+        function startEmpire() {
+            document.getElementById('auth-view').style.display = 'none';
+            const ui = document.getElementById('game-ui');
+            ui.style.display = 'flex';
+            setTimeout(() => ui.style.opacity = '1', 100);
 
-            // Sync with DB
-            const db = firebase.database();
-            db.ref('users/' + activeUser.uid).on('value', snap => {
-                if (snap.val()) {
-                    const d = snap.val();
-                    state.money = d.money || 0;
-                    state.power = d.power || 1;
-                    state.pps = d.pps || 0;
-                    state.lvl = d.lvl || 1;
-                    state.exp = d.exp || 0;
-                    updateUI();
+            dbRef = firebase.database().ref('users/' + session.uid);
+            dbRef.on('value', snap => {
+                const d = snap.val();
+                if (d) {
+                    session.m = d.m || 0; session.p = d.p || 1;
+                    session.s = d.s || 0; session.l = d.l || 1;
+                    session.e = d.e || 0;
+                    refreshUI();
                 }
             });
 
             // Timers
-            setInterval(passiveIncome, 100);
-            setInterval(syncData, 5000);
-            loadLeaderboard();
+            setInterval(() => { if (session.s > 0) { session.m += (session.s / 10); refreshUI(); } }, 100);
+            setInterval(saveToCloud, 6000);
+            loadGlobalTop();
         }
 
-        function handleTap(e) {
-            state.money += state.power;
-            state.exp += 1;
-
-            // Lvl system
-            const nextLvl = state.lvl * 100;
-            if (state.exp >= nextLvl) {
-                state.lvl++;
-                state.exp = 0;
-                if (navigator.vibrate) navigator.vibrate([100, 50, 100]);
+        function handleInteraction(ev) {
+            session.m += session.p;
+            session.e += 1;
+            
+            const nextXp = session.l * 120;
+            if (session.e >= nextXp) {
+                session.l++; session.e = 0;
+                if (navigator.vibrate) navigator.vibrate([80, 50, 80]);
             }
 
-            // Visuals
-            createPop(e);
-            updateUI();
-            if (navigator.vibrate) navigator.vibrate(15);
+            triggerPop(ev);
+            refreshUI();
+            if (navigator.vibrate) navigator.vibrate(20);
         }
 
-        function passiveIncome() {
-            if (state.pps > 0) {
-                state.money += (state.pps / 10);
-                updateUI();
-            }
-        }
-
-        function buyItem(id) {
-            let cost = 0;
+        function buyProcess(id) {
+            let price = 0;
             if (id === 'click') {
-                cost = 50 + (Math.pow(state.power, 1.5) * 40);
-                if (state.money >= cost) { state.money -= cost; state.power++; }
-            } else if (id === 'auto1') {
-                cost = 300 + (state.pps * 50);
-                if (state.money >= cost) { state.money -= cost; state.pps += 2; }
-            } else if (id === 'auto2') {
-                cost = 2500 + (state.pps * 80);
-                if (state.money >= cost) { state.money -= cost; state.pps += 15; }
-            } else if (id === 'auto3') {
-                cost = 18000 + (state.pps * 120);
-                if (state.money >= cost) { state.money -= cost; state.pps += 120; }
+                price = 50 + (Math.pow(session.p, 1.8) * 45);
+                if (session.m >= price) { session.m -= price; session.p++; }
+            } else if (id === 'bot') {
+                price = 400 + (session.s * 70);
+                if (session.m >= price) { session.m -= price; session.s += 3; }
+            } else if (id === 'office') {
+                price = 3200 + (session.s * 110);
+                if (session.m >= price) { session.m -= price; session.s += 22; }
+            } else if (id === 'ai') {
+                price = 25000 + (session.s * 160);
+                if (session.m >= price) { session.m -= price; session.s += 180; }
+            } else if (id === 'space') {
+                price = 200000 + (session.s * 250);
+                if (session.m >= price) { session.m -= price; session.s += 1200; }
             }
-            updateUI();
-            syncData();
+            refreshUI();
+            saveToCloud();
         }
 
-        // --- DATA SYNC ---
-        function syncData() {
-            if (!activeUser || isSaving) return;
-            isSaving = true;
-            firebase.database().ref('users/' + activeUser.uid).update({
-                money: state.money,
-                power: state.power,
-                pps: state.pps,
-                lvl: state.lvl,
-                exp: state.exp,
-                userName: activeUser.email.split('@')[0],
-                updatedAt: firebase.database.ServerValue.TIMESTAMP
-            }).then(() => isSaving = false);
+        // --- CLOUD SYNC ---
+        function saveToCloud() {
+            if (dbRef) dbRef.update({
+                m: session.m, p: session.p, s: session.s,
+                l: session.l, e: session.e, u: session.nick
+            });
         }
 
-        function loadLeaderboard() {
-            firebase.database().ref('users').orderByChild('money').limitToLast(10).on('value', snap => {
-                const board = document.getElementById('leader-board');
+        function loadGlobalTop() {
+            firebase.database().ref('users').orderByChild('m').limitToLast(10).on('value', snap => {
+                const board = document.getElementById('global-board');
                 board.innerHTML = '';
                 let list = [];
-                snap.forEach(child => list.push(child.val()));
+                snap.forEach(c => list.push(c.val()));
                 list.reverse().forEach((u, i) => {
-                    const isMe = u.userName === activeUser.email.split('@')[0] ? 'me' : '';
+                    const isMe = u.u === session.nick ? 'me' : '';
                     board.innerHTML += `
-                        <div class="rank-row ${isMe}">
-                            <div class="rank-name">
-                                <span class="rank-pos">${i+1}</span>
-                                <span>${u.userName}</span>
-                            </div>
-                            <b>$${Math.floor(u.money).toLocaleString()}</b>
+                        <div class="top-row ${isMe}">
+                            <span>#${i+1} ${u.u}</span>
+                            <b>$${Math.floor(u.m).toLocaleString()}</b>
                         </div>`;
                 });
             });
         }
 
-        // --- UI UTILS ---
-        function updateUI() {
-            document.getElementById('val-cash').innerText = '$ ' + Math.floor(state.money).toLocaleString();
-            document.getElementById('val-pps').innerText = `Авто-дохід: $${state.pps} / сек`;
-            document.getElementById('tag-lvl').innerText = `LEVEL ${state.lvl}`;
+        // --- VIEW ENGINES ---
+        function refreshUI() {
+            document.getElementById('u-cash').innerText = '$ ' + Math.floor(session.m).toLocaleString();
+            document.getElementById('u-pps').innerText = `Passive: $${session.s} / sec`;
+            document.getElementById('u-lvl').innerText = `LVL ${session.l}`;
             
-            const xpPct = (state.exp / (state.lvl * 100)) * 100;
-            document.getElementById('xp-inner').style.width = xpPct + '%';
+            const xpPct = (session.e / (session.l * 120)) * 100;
+            document.getElementById('p-bar').style.width = xpPct + '%';
 
-            // Rank Titles
-            let rank = "Hobo Investor";
-            if (state.lvl > 5) rank = "Street Hustler";
-            if (state.lvl > 15) rank = "Local Dealer";
-            if (state.lvl > 30) rank = "Business Shark";
-            if (state.lvl > 50) rank = "Global Tycoon";
-            document.getElementById('tag-rank').innerText = rank;
+            // Prices
+            document.getElementById('b-click').innerText = '$' + Math.floor(50 + (Math.pow(session.p, 1.8) * 45)).toLocaleString();
+            document.getElementById('b-bot').innerText = '$' + Math.floor(400 + (session.s * 70)).toLocaleString();
+            document.getElementById('b-office').innerText = '$' + Math.floor(3200 + (session.s * 110)).toLocaleString();
+            document.getElementById('b-ai').innerText = '$' + Math.floor(25000 + (session.s * 160)).toLocaleString();
+            document.getElementById('b-space').innerText = '$' + Math.floor(200000 + (session.s * 250)).toLocaleString();
 
-            // Button Costs
-            document.getElementById('cost-click').innerText = '$' + Math.floor(50 + (Math.pow(state.power, 1.5) * 40)).toLocaleString();
-            document.getElementById('cost-auto1').innerText = '$' + Math.floor(300 + (state.pps * 50)).toLocaleString();
-            document.getElementById('cost-auto2').innerText = '$' + Math.floor(2500 + (state.pps * 80)).toLocaleString();
-            document.getElementById('cost-auto3').innerText = '$' + Math.floor(18000 + (state.pps * 120)).toLocaleString();
+            let title = "Hobo Investor";
+            if (session.l > 10) title = "Street Hustler";
+            if (session.l > 30) title = "Shadow Boss";
+            if (session.l > 70) title = "Imperial Tycoon";
+            document.getElementById('u-rank').innerText = title;
         }
 
-        function createPop(e) {
-            const p = document.createElement('div');
-            p.className = 'float-val';
+        function triggerPop(e) {
+            const p = document.createElement('div'); p.className = 'coin-pop';
             p.style.left = (e.clientX || e.touches[0].clientX) + 'px';
             p.style.top = (e.clientY || e.touches[0].clientY) + 'px';
-            p.innerText = `+$${state.power}`;
-            document.body.appendChild(p);
-            setTimeout(() => p.remove(), 850);
+            p.innerText = `+$${session.p}`; document.body.appendChild(p);
+            setTimeout(() => p.remove(), 950);
         }
 
-        function changeTab(id) {
-            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-            document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-            document.getElementById('screen-' + id).classList.add('active');
+        function switchNav(id) {
+            document.querySelectorAll('.scroll-view').forEach(s => s.classList.remove('active'));
+            document.querySelectorAll('.nav-link').forEach(n => n.classList.remove('active'));
+            document.getElementById('scr-' + id).classList.add('active');
             event.currentTarget.classList.add('active');
         }
-
-        function nav(target) { changeTab(target); }
     </script>
 </body>
 </html>
