@@ -1,184 +1,281 @@
 <!DOCTYPE html>
-<html lang="uk">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Golden Equity | VIP Business Clicker</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-select=none">
+    <title>Golden Equity | Corporate Empire Builder</title>
     <style>
         :root {
             --gold: #D4AF37;
-            --dark: #0A0A0A;
-            --gray: #1A1A1A;
+            --gold-dim: #b8860b;
+            --dark: #080808;
+            --gray: #151515;
+            --text-gray: #888;
             --green: #00FF41;
         }
 
-        body {
+        body, html {
             margin: 0;
+            padding: 0;
             background-color: var(--dark);
             color: white;
-            font-family: 'Segoe UI', Roboto, sans-serif;
-            display: flex;
-            flex-direction: column;
-            height: 100vh;
-            overflow: hidden;
-            user-select: none;
+            font-family: 'Segoe UI', Roboto, Helvetica, sans-serif;
+            overflow-x: hidden;
+            height: 100%;
         }
 
-        /* Header */
-        .header {
-            background: var(--gray);
-            padding: 20px;
-            text-align: center;
-            border-bottom: 1px solid #333;
+        /* --- BACKGROUND PARTICLES (MONEY) --- */
+        #money-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+            pointer-events: none;
         }
 
-        .brand {
-            color: var(--gold);
-            font-size: 12px;
-            letter-spacing: 4px;
-            font-weight: bold;
-            margin-bottom: 5px;
-        }
-
-        #balance {
-            font-size: 40px;
-            font-weight: bold;
-            margin: 5px 0;
-        }
-
-        #income {
-            color: var(--green);
-            font-size: 14px;
-        }
-
-        /* Content Areas */
-        .tab-content {
-            flex: 1;
+        /* --- PRE-GAME SITE (LANDING PAGE) --- */
+        .site-container {
+            position: relative;
+            z-index: 10;
             display: flex;
             flex-direction: column;
             align-items: center;
-            justify-content: center;
-            padding: 20px;
-            overflow-y: auto;
+            min-height: 100vh;
+            padding: 40px 20px;
+            box-sizing: border-box;
+            opacity: 1;
+            transition: opacity 0.5s ease-out;
         }
 
+        .hero { text-align: center; margin-bottom: 60px; }
+        .hero h1 { 
+            color: var(--gold); 
+            font-size: 3.5em; 
+            letter-spacing: 8px; 
+            margin: 0; 
+            text-shadow: 0 0 20px rgba(212, 175, 55, 0.4); 
+        }
+        .hero p { color: var(--text-gray); font-size: 1.2em; letter-spacing: 2px; }
+
+        .btn-play {
+            background: none;
+            border: 2px solid var(--gold);
+            color: var(--gold);
+            padding: 15px 50px;
+            font-size: 1.2em;
+            font-weight: bold;
+            letter-spacing: 2px;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 0 15px rgba(212, 175, 55, 0.2);
+            border-radius: 30px;
+        }
+        .btn-play:hover { background: var(--gold); color: black; box-shadow: 0 0 30px rgba(212, 175, 55, 0.5); }
+
+        .about-section { max-width: 700px; width: 100%; margin: 60px 0; }
+        .card { background: var(--gray); border-radius: 12px; padding: 30px; border: 1px solid #333; margin-bottom: 30px; }
+        .card h2 { color: var(--gold); margin-top: 0; }
+        .card p { color: #ccc; line-height: 1.6; }
+        .feature-list { list-style-type: none; padding: 0; }
+        .feature-list li { margin-bottom: 10px; color: #aaa; }
+        .feature-list li::before { content: "✔ "; color: var(--gold); }
+
+        .dev-section { text-align: center; max-width: 700px; }
+        .support-btn {
+            background: #FF4444; color: white; border: none; padding: 10px 20px; border-radius: 20px;
+            font-weight: bold; text-decoration: none; display: inline-block; margin-top: 15px; cursor: pointer;
+        }
+
+        /* --- THE GAME INTERFACE (Hiding by default) --- */
+        #game-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: none; /* Show later */
+            flex-direction: column;
+            z-index: 100;
+            opacity: 0;
+            background-color: var(--dark);
+            transition: opacity 0.5s ease-in;
+        }
+
+        /* (Rest of the previous game CSS, adjusted) */
+        .game-header { background: var(--gray); padding: 15px 20px; text-align: center; border-bottom: 1px solid #333; }
+        .game-brand { color: var(--gold); font-size: 12px; letter-spacing: 4px; font-weight: bold; margin-bottom: 5px; }
+        #balance { font-size: 36px; font-weight: bold; margin: 0; }
+        #income { color: var(--green); font-size: 13px; margin-top: 3px; }
+
+        .tab-content { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 20px; overflow-y: auto; }
         #market-view { display: none; width: 100%; box-sizing: border-box; }
 
-        /* Clicker Button */
-        .main-btn {
-            width: 200px;
-            height: 200px;
-            border-radius: 50%;
-            background: var(--gray);
-            border: 3px solid var(--gold);
-            color: var(--gold);
-            font-size: 50px;
-            font-weight: bold;
-            cursor: pointer;
-            outline: none;
-            box-shadow: 0 0 30px rgba(212, 175, 55, 0.2);
-            transition: transform 0.05s;
-        }
-
+        .main-btn { width: 180px; height: 180px; border-radius: 50%; background: var(--gray); border: 3px solid var(--gold); color: var(--gold); font-size: 44px; font-weight: bold; cursor: pointer; transition: transform 0.05s; box-shadow: 0 0 25px rgba(212, 175, 55, 0.2); }
         .main-btn:active { transform: scale(0.95); }
 
-        /* Business Cards */
-        .card {
-            background: var(--gray);
-            border-radius: 12px;
-            padding: 15px;
-            margin-bottom: 15px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            border: 1px solid #333;
-        }
+        .business-card { background: var(--gray); border-radius: 12px; padding: 15px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; border: 1px solid #333; }
+        .card-info h3 { margin: 0; font-size: 15px; }
+        .card-info p { margin: 3px 0 0; color: var(--gold); font-size: 12px; }
 
-        .card-info h3 { margin: 0; font-size: 16px; }
-        .card-info p { margin: 5px 0 0; color: var(--gold); font-size: 13px; }
-
-        .buy-btn {
-            background: var(--gold);
-            color: black;
-            border: none;
-            padding: 10px 20px;
-            border-radius: 8px;
-            font-weight: bold;
-            cursor: pointer;
-        }
-
+        .buy-btn { background: var(--gold); color: black; border: none; padding: 8px 15px; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 12px; }
         .buy-btn:disabled { background: #555; cursor: not-allowed; }
 
-        /* Footer Navigation */
-        .nav {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            height: 70px;
-            background: var(--gray);
-        }
-
-        .nav-btn {
-            background: none;
-            border: none;
-            color: #888;
-            font-weight: bold;
-            cursor: pointer;
-        }
-
+        .nav { display: grid; grid-template-columns: 1fr 1fr; height: 60px; background: var(--gray); border-top: 1px solid #333; }
+        .nav-btn { background: none; border: none; color: #888; font-weight: bold; cursor: pointer; }
         .nav-btn.active { color: var(--gold); }
     </style>
 </head>
 <body>
 
-    <div class="header">
-        <div class="brand">GOLDEN EQUITY</div>
-        <div id="balance">$ 0</div>
-        <div id="income">Passive: $0/sec</div>
-    </div>
+    <canvas id="money-canvas"></canvas>
 
-    <div id="office-view" class="tab-content">
-        <button class="main-btn" onclick="handleClick()">GE</button>
-        <p style="margin-top: 30px; color: #555; letter-spacing: 1px;">TAP TO GENERATE CAPITAL</p>
-    </div>
+    <div id="site-landing" class="site-container">
+        <div class="hero">
+            <div class="brand">INTRODUCING</div>
+            <h1>GOLDEN EQUITY</h1>
+            <p>BUILD YOUR CORPORATE EMPIRE</p>
+            <button class="btn-play" onclick="startGame()">PLAY GAME</button>
+        </div>
 
-    <div id="market-view" class="tab-content">
-        <div style="width: 100%; max-width: 400px;">
+        <div class="about-section">
             <div class="card">
-                <div class="card-info">
-                    <h3>Coffee Shop</h3>
-                    <p id="cost-coffee">Cost: $50</p>
-                </div>
-                <button class="buy-btn" id="btn-coffee" onclick="buyBusiness('coffee')">BUY</button>
+                <h2>About the Game</h2>
+                <p>Welcome to <strong>Golden Equity</strong>, the ultimate corporate empire builder. Start from zero and grow your wealth into trillions of dollars. Manage investments, acquire strategic businesses, and watch your income grow passively.</p>
+                <h3>Core Features:</h3>
+                <ul class="feature-list">
+                    <li>Dynamic Clicker Mechanic with Vibrate Feedback</li>
+                    <li>Scalable Passive Income System</li>
+                    <li>Strategic Business Acquisition (Market Tab)</li>
+                    <li>Aesthetic VIP UI with Particle FX</li>
+                    <li>Progress Saving (Persistent Balance)</li>
+                    <li>Future Prestige System (Coming Soon)</li>
+                </ul>
             </div>
-
-            <div class="card">
-                <div class="card-info">
-                    <h3>IT Agency</h3>
-                    <p id="cost-it">Cost: $500</p>
-                </div>
-                <button class="buy-btn" id="btn-it" onclick="buyBusiness('it')">BUY</button>
+            
+            <div class="dev-section card">
+                <h2>Meet the Developers</h2>
+                <p>We are a two-person team of passionate beginning developers. This is our first major project, and we've put our hearts into creating a smooth, aesthetic, and engaging experience. Your feedback means everything to us.</p>
+                <p>If you like what you see and want to support our journey, please consider donating or just sharing the game with friends. We appreciate any support!</p>
+                <button class="support-btn" onclick="alert('Support feature coming soon!')">♥ Support Us</button>
             </div>
         </div>
     </div>
 
-    <div class="nav">
-        <button class="nav-btn active" id="nav-office" onclick="showTab('office')">OFFICE</button>
-        <button class="nav-btn" id="nav-market" onclick="showTab('market')">MARKET</button>
+    <div id="game-container">
+        <div class="game-header">
+            <div class="game-brand">GOLDEN EQUITY</div>
+            <div id="balance">$ 0</div>
+            <div id="income">Passive: $0/sec</div>
+        </div>
+
+        <div id="office-view" class="tab-content">
+            <button class="main-btn" onclick="handleClick()">GE</button>
+            <p style="margin-top: 25px; color: #444; letter-spacing: 1px; font-size: 12px;">TAP TO GENERATE CAPITAL</p>
+        </div>
+
+        <div id="market-view" class="tab-content">
+            <div style="width: 100%; max-width: 400px; overflow-y: auto;">
+                <div class="business-card">
+                    <div class="card-info"><h3>Small Cafe</h3><p id="cost-coffee">Cost: $50</p></div>
+                    <button class="buy-btn" id="btn-coffee" onclick="buyBusiness('coffee')">BUY</button>
+                </div>
+                <div class="business-card">
+                    <div class="card-info"><h3>IT Agency</h3><p id="cost-it">Cost: $500</p></div>
+                    <button class="buy-btn" id="btn-it" onclick="buyBusiness('it')">BUY</button>
+                </div>
+                <div class="business-card">
+                    <div class="card-info"><h3>Bank Branch</h3><p id="cost-bank">Cost: $10,000</p></div>
+                    <button class="buy-btn" id="btn-bank" onclick="buyBusiness('bank')">BUY</button>
+                </div>
+                <div class="business-card">
+                    <div class="card-info"><h3>Oil Rig</h3><p id="cost-oil">Cost: $1M</p></div>
+                    <button class="buy-btn" id="btn-oil" onclick="buyBusiness('oil')">BUY</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="nav">
+            <button class="nav-btn active" id="nav-office" onclick="showTab('office')">OFFICE</button>
+            <button class="nav-btn" id="nav-market" onclick="showTab('market')">MARKET</button>
+        </div>
     </div>
 
     <script>
-        let money = 0;
-        let income = 0;
+        // --- 1. BACKGROUND PARTICLES (MONEY) ---
+        const canvas = document.getElementById('money-canvas');
+        const ctx = canvas.getContext('2d');
+        let particles = [];
+        const moneyIcons = ['$', '₿', '€', '£', '¥'];
+
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas();
+
+        class Particle {
+            constructor() {
+                this.x = Math.random() * canvas.width;
+                this.y = Math.random() * canvas.height;
+                this.size = Math.random() * 15 + 10;
+                this.speedY = Math.random() * 0.5 + 0.1; // Slow falling
+                this.speedX = Math.random() * 0.2 - 0.1;
+                this.opacity = Math.random() * 0.2 + 0.05; // Faded
+                this.icon = moneyIcons[Math.floor(Math.random() * moneyIcons.length)];
+            }
+            update() {
+                this.y += this.speedY;
+                this.x += this.speedX;
+                if (this.y > canvas.height) { this.y = -20; this.x = Math.random() * canvas.width; }
+                if (this.x > canvas.width || this.x < 0) this.speedX = -this.speedX;
+            }
+            draw() {
+                ctx.fillStyle = `rgba(212, 175, 55, ${this.opacity})`; // Gold color
+                ctx.font = `${this.size}px Arial`;
+                ctx.fillText(this.icon, this.x, this.y);
+            }
+        }
+
+        function initParticles() { for (let i = 0; i < 50; i++) particles.push(new Particle()); }
+        function animateParticles() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            particles.forEach(p => { p.update(); p.draw(); });
+            requestAnimationFrame(animateParticles);
+        }
+        initParticles();
+        animateParticles();
+
+        // --- 2. TRANSITION LANDING TO GAME ---
+        function startGame() {
+            const site = document.getElementById('site-landing');
+            const game = document.getElementById('game-container');
+            
+            site.style.opacity = '0'; // Start fading out
+            setTimeout(() => {
+                site.style.display = 'none'; // Hide site
+                game.style.display = 'flex'; // Show game
+                setTimeout(() => { game.style.opacity = '1'; }, 50); // Fade in game
+            }, 500); // Wait for fade out
+        }
+
+        // --- 3. THE GAME LOGIC ---
+        let money = parseFloat(localStorage.getItem('ge_money')) || 0;
+        let income = parseFloat(localStorage.getItem('ge_income')) || 0;
 
         const businesses = {
-            coffee: { cost: 50, profit: 2, count: 0 },
-            it: { cost: 500, profit: 15, count: 0 }
+            coffee: { cost: parseFloat(localStorage.getItem('ge_coffee_cost')) || 50, profit: 2, count: 0 },
+            it: { cost: parseFloat(localStorage.getItem('ge_it_cost')) || 500, profit: 15, count: 0 },
+            bank: { cost: parseFloat(localStorage.getItem('ge_bank_cost')) || 10000, profit: 250, count: 0 },
+            oil: { cost: parseFloat(localStorage.getItem('ge_oil_cost')) || 1000000, profit: 25000, count: 0 }
         };
 
         function handleClick() {
             money += 1;
             updateUI();
-            if (window.navigator.vibrate) window.navigator.vibrate(10);
+            if (window.navigator.vibrate) window.navigator.vibrate(10); // Small vibrate
         }
 
         function buyBusiness(id) {
@@ -187,37 +284,62 @@
                 money -= b.cost;
                 b.count++;
                 income += b.profit;
-                b.cost = Math.floor(b.cost * 1.4);
+                b.cost = Math.floor(b.cost * 1.35); // Price increases
                 updateUI();
+                saveGame();
             }
         }
 
         function updateUI() {
-            document.getElementById('balance').innerText = `$ ${Math.floor(money).toLocaleString()}`;
-            document.getElementById('income').innerText = `Passive: $${income}/sec`;
-            document.getElementById('cost-coffee').innerText = `Cost: $${businesses.coffee.cost}`;
-            document.getElementById('cost-it').innerText = `Cost: $${businesses.it.cost}`;
+            // Money formatting
+            const format = (num) => `$ ${Math.floor(num).toLocaleString('en-US')}`;
+            
+            document.getElementById('balance').innerText = format(money);
+            document.getElementById('income').innerText = `Passive: ${format(income)}/sec`;
+            
+            // Costs
+            const setCost = (id, b) => document.getElementById(`cost-${id}`).innerText = `Cost: ${format(b.cost)}`;
+            setCost('coffee', businesses.coffee);
+            setCost('it', businesses.it);
+            setCost('bank', businesses.bank);
+            setCost('oil', businesses.oil);
 
             // Disable buttons if not enough money
-            document.getElementById('btn-coffee').disabled = money < businesses.coffee.cost;
-            document.getElementById('btn-it').disabled = money < businesses.it.cost;
+            const setBtn = (id, b) => document.getElementById(`btn-${id}`).disabled = money < b.cost;
+            setBtn('coffee', businesses.coffee);
+            setBtn('it', businesses.it);
+            setBtn('bank', businesses.bank);
+            setBtn('oil', businesses.oil);
         }
 
         function showTab(tab) {
             document.getElementById('office-view').style.display = tab === 'office' ? 'flex' : 'none';
             document.getElementById('market-view').style.display = tab === 'market' ? 'flex' : 'none';
-            
             document.getElementById('nav-office').classList.toggle('active', tab === 'office');
             document.getElementById('nav-market').classList.toggle('active', tab === 'market');
         }
 
-        // Passive income loop
+        function saveGame() {
+            localStorage.setItem('ge_money', money);
+            localStorage.setItem('ge_income', income);
+            localStorage.setItem('ge_coffee_cost', businesses.coffee.cost);
+            localStorage.setItem('ge_it_cost', businesses.it.cost);
+            localStorage.setItem('ge_bank_cost', businesses.bank.cost);
+            localStorage.setItem('ge_oil_cost', businesses.oil.cost);
+        }
+
+        // Passive income & auto-save loop
         setInterval(() => {
             if (income > 0) {
                 money += income;
                 updateUI();
+                saveGame(); // Save every second
             }
         }, 1000);
+
+        // Initial UI update
+        updateUI();
+
     </script>
 </body>
 </html>
