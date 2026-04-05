@@ -2,48 +2,467 @@
 <html lang="uk">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>BUIZNES IMPERIA | OMEGA MODULE</title>
-    <link rel="stylesheet" href="style.css">
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@900&family=JetBrains+Mono:wght@400;800&display=swap" rel="stylesheet">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>BUIZNES IMPERIA | OMEGA MODULE v6.6.6</title>
+    
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@900&family=JetBrains+Mono:wght@400;800&family=Space+Grotesk:wght@300;700&display=swap" rel="stylesheet">
+    
+    <style>
+        /* --- БРУТАЛЬНИЙ ДИЗАЙН --- */
+        :root {
+            --fire: #ff4d00;
+            --fire-glow: #ffae00;
+            --void: #050508;
+            --card-bg: rgba(15, 15, 20, 0.9);
+            --border: rgba(255, 77, 0, 0.25);
+            --font-main: 'Space Grotesk', sans-serif;
+            --font-logo: 'Outfit', sans-serif;
+            --font-mono: 'JetBrains Mono', monospace;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; outline: none; }
+        
+        body { 
+            background: var(--void); 
+            color: #fff; 
+            font-family: var(--font-main); 
+            height: 100vh; 
+            overflow: hidden;
+            background-image: radial-gradient(circle at 50% 50%, #1a0a00 0%, #050508 100%);
+        }
+
+        /* Анімація фонової сітки */
+        .grid-bg {
+            position: fixed; inset: 0;
+            background-image: linear-gradient(var(--border) 1px, transparent 1px), linear-gradient(90deg, var(--border) 1px, transparent 1px);
+            background-size: 50px 50px;
+            z-index: -1; opacity: 0.2;
+            mask-image: radial-gradient(circle at center, black, transparent 80%);
+        }
+
+        /* --- ЕКРАН АВТОРИЗАЦІЇ --- */
+        #auth-screen {
+            position: fixed; inset: 0; z-index: 9999;
+            background: var(--void);
+            display: flex; align-items: center; justify-content: center;
+            transition: 1s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .auth-card {
+            width: 90%; max-width: 420px;
+            padding: 50px 40px;
+            background: var(--card-bg);
+            border: 2px solid var(--border);
+            border-radius: 40px;
+            text-align: center;
+            backdrop-filter: blur(25px);
+            box-shadow: 0 0 100px rgba(255, 77, 0, 0.1);
+        }
+
+        .auth-card h1 { font-family: var(--font-logo); font-size: 4rem; letter-spacing: -3px; line-height: 0.8; margin-bottom: 10px; }
+        .auth-card h1 span { color: var(--fire); }
+        .auth-card p.subtitle { font-family: var(--font-mono); font-size: 0.7rem; color: #555; text-transform: uppercase; margin-bottom: 40px; }
+
+        .input-box { text-align: left; margin-bottom: 25px; }
+        .input-box label { font-family: var(--font-mono); font-size: 0.65rem; color: #777; margin-left: 15px; text-transform: uppercase; display: block; }
+        
+        .inf-input {
+            width: 100%; background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.1);
+            padding: 22px; border-radius: 20px; color: #fff; font-family: var(--font-mono); margin-top: 8px;
+            transition: 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        .inf-input:focus { border-color: var(--fire); background: rgba(255, 77, 0, 0.05); transform: translateY(-3px); box-shadow: 0 10px 20px rgba(0,0,0,0.5); }
+
+        .btn-sync {
+            width: 100%; padding: 25px; border-radius: 22px; border: none;
+            background: linear-gradient(135deg, var(--fire), #ff8000);
+            color: #000; font-family: var(--font-logo); font-weight: 900; font-size: 1.3rem;
+            cursor: pointer; margin-top: 10px; transition: 0.3s;
+            box-shadow: 0 15px 30px rgba(255, 77, 0, 0.3);
+        }
+        .btn-sync:hover { filter: brightness(1.2); transform: scale(1.02); }
+        .btn-sync:active { transform: scale(0.97); }
+
+        #auth-err { color: var(--fire); font-size: 0.75rem; margin-top: 20px; font-family: var(--font-mono); min-height: 1em; }
+
+        /* --- ГОЛОВНИЙ ІНТЕРФЕЙС --- */
+        #app-interface { display: none; opacity: 0; height: 100vh; flex-direction: column; }
+
+        /* HUD & БАЛАНС */
+        .top-hud { padding: 60px 25px 20px; text-align: center; background: linear-gradient(180deg, rgba(0,0,0,0.5), transparent); }
+        .rank-tag { font-family: var(--font-mono); font-size: 0.7rem; color: var(--fire-glow); letter-spacing: 2px; text-transform: uppercase; border: 1px solid var(--border); padding: 5px 15px; border-radius: 50px; display: inline-block; margin-bottom: 15px; }
+        .balance { font-family: var(--font-logo); font-size: 5.5rem; letter-spacing: -5px; line-height: 1; margin: 5px 0; text-shadow: 0 10px 40px rgba(255, 77, 0, 0.2); }
+        .profit-bar { font-family: var(--font-mono); font-size: 0.8rem; color: #888; display: flex; justify-content: center; gap: 15px; }
+        .profit-bar span { color: #fff; font-weight: 800; }
+
+        /* КЛІКЕР */
+        .engine-room { flex: 1; display: flex; align-items: center; justify-content: center; position: relative; }
+        .core-orb {
+            width: 300px; height: 300px; border-radius: 50%;
+            background: radial-gradient(circle at 35% 35%, #2a2a30, #000);
+            border: 4px solid rgba(255,255,255,0.05);
+            box-shadow: 0 50px 100px rgba(0,0,0,0.9), inset 0 0 60px rgba(255, 77, 0, 0.1);
+            display: flex; align-items: center; justify-content: center;
+            font-family: var(--font-logo); font-size: 9rem; color: rgba(255,255,255,0.03);
+            cursor: pointer; transition: 0.1s cubic-bezier(0.1, 0.7, 1.0, 0.1);
+            position: relative; overflow: hidden;
+        }
+        .core-orb::after { content: ''; position: absolute; inset: 0; background: radial-gradient(circle, var(--fire) 0%, transparent 70%); opacity: 0; transition: 0.2s; }
+        .core-orb:active { transform: scale(0.92) rotate(-2deg); }
+        .core-orb:active::after { opacity: 0.15; }
+
+        /* СКРІНИ */
+        .viewport { flex: 1; overflow-y: auto; padding: 20px 25px 140px; display: none; }
+        .viewport.active { display: block; animation: viewIn 0.4s ease-out; }
+        @keyframes viewIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+
+        .section-title { font-family: var(--font-logo); font-size: 3.5rem; letter-spacing: -2px; margin-bottom: 30px; }
+
+        /* КАРТКИ МАГАЗИНУ */
+        .item-card {
+            background: var(--card-bg); border: 1px solid var(--border);
+            padding: 25px; border-radius: 35px; margin-bottom: 15px;
+            display: flex; justify-content: space-between; align-items: center;
+            transition: 0.3s;
+        }
+        .item-card:hover { border-color: var(--fire); background: rgba(255, 77, 0, 0.03); }
+        .item-meta h4 { font-family: var(--font-logo); font-size: 1.6rem; color: #fff; margin-bottom: 4px; }
+        .item-meta p { font-family: var(--font-mono); font-size: 0.7rem; color: #666; }
+        .item-meta span { color: var(--fire-glow); font-weight: 800; }
+        
+        .buy-trigger {
+            background: #fff; color: #000; border: none; padding: 15px 25px;
+            border-radius: 18px; font-weight: 900; font-family: var(--font-mono); font-size: 0.85rem;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.3); transition: 0.2s;
+        }
+        .buy-trigger.locked { opacity: 0.2; filter: grayscale(1); }
+        .buy-trigger:active:not(.locked) { transform: scale(0.9); }
+
+        /* НАВІГАЦІЯ */
+        .dock {
+            position: fixed; bottom: 30px; left: 20px; right: 20px;
+            height: 90px; background: rgba(10, 10, 15, 0.95);
+            backdrop-filter: blur(20px); border: 1px solid var(--border);
+            border-radius: 30px; display: flex; align-items: center;
+            justify-content: space-around; padding: 0 10px; z-index: 1000;
+        }
+        .nav-link { 
+            background: none; border: none; color: #444; 
+            font-family: var(--font-mono); font-weight: 800; font-size: 0.65rem; 
+            text-transform: uppercase; letter-spacing: 1px; display: flex; flex-direction: column; align-items: center; gap: 5px;
+        }
+        .nav-link.active { color: var(--fire); }
+        .nav-link .icon { width: 6px; height: 6px; background: currentColor; border-radius: 50%; opacity: 0; }
+        .nav-link.active .icon { opacity: 1; box-shadow: 0 0 10px var(--fire); }
+
+        /* ЕФЕКТИ ТАПІВ */
+        .tap-particle {
+            position: fixed; pointer-events: none;
+            font-family: var(--font-logo); font-weight: 900;
+            color: #fff; font-size: 2.5rem;
+            animation: riseFade 0.8s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+            z-index: 10000; text-shadow: 0 0 20px var(--fire);
+        }
+        @keyframes riseFade {
+            0% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+            100% { opacity: 0; transform: translate(-50%, -250%) scale(1.5); }
+        }
+
+        /* CUSTOM SCROLLBAR */
+        ::-webkit-scrollbar { width: 4px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 10px; }
+    </style>
 </head>
 <body>
+
+    <div class="grid-bg"></div>
+
     <div id="auth-screen">
         <div class="auth-card">
             <h1>BUIZNES<span>.</span></h1>
-            <div class="input-group">
-                <label>Terminal Login</label>
-                <input type="email" id="log-email" class="inf-input" placeholder="root@empire.io">
+            <p class="subtitle">Imperial Network Node v6.6</p>
+            
+            <div class="input-box">
+                <label>Terminal User ID</label>
+                <input type="email" id="f-email" class="inf-input" placeholder="root@imperia.io" value="nestorpirc@gmail.com">
             </div>
-            <div class="input-group">
-                <label>Security Key</label>
-                <input type="password" id="log-pass" class="inf-input" placeholder="••••••••">
+            
+            <div class="input-box">
+                <label>Encryption Key</label>
+                <input type="password" id="f-pass" class="inf-input" placeholder="••••••••">
             </div>
-            <button class="btn-sync" id="btn-login">INITIALIZE SYNC</button>
-            <p id="auth-err"></p>
+            
+            <button class="btn-sync" id="init-btn">INITIALIZE CONNECTION</button>
+            <div id="auth-err"></div>
         </div>
     </div>
 
-    <div id="app-interface" style="display:none;">
-        <div class="hud">
-            <div class="stats-bar">RANK: <span id="rank-name">NEOPHYTE</span> | LVL: <span id="lvl-val">1</span></div>
-            <h2 class="balance" id="money-display">$ 0</h2>
-            <div class="stats-bar">PROFIT: <span id="pps-display">$0/s</span></div>
+    <div id="app-interface">
+        
+        <div id="view-home" class="viewport active">
+            <div class="top-hud">
+                <div class="rank-tag" id="rank-tag">Scavenger</div>
+                <h2 class="balance" id="val-m">$ 0</h2>
+                <div class="profit-bar">
+                    PROFIT: <span id="val-s">$0/s</span> 
+                    | LEVEL: <span id="val-l">1</span>
+                </div>
+            </div>
+            
+            <div class="engine-room">
+                <div class="core-orb" id="orb-trigger">Ω</div>
+            </div>
         </div>
 
-        <div class="main-engine">
-            <div class="coin" id="main-clicker">Ω</div>
+        <div id="view-market" class="viewport">
+            <h2 class="section-title">MARKET</h2>
+            <div id="market-list"></div>
         </div>
 
-        <div class="shop-grid" id="shop-container"></div>
+        <div id="view-forbes" class="viewport">
+            <h2 class="section-title">FORBES</h2>
+            <div id="leader-list"></div>
+        </div>
 
-        <nav class="nav-bar">
-            <button onclick="showScr('home')">EMPIRE</button>
-            <button onclick="showScr('shop')">MARKET</button>
-            <button onclick="showScr('top')">FORBES</button>
+        <nav class="dock">
+            <button class="nav-link active" onclick="nav('home')">
+                <div class="icon"></div> Empire
+            </button>
+            <button class="nav-link" onclick="nav('market')">
+                <div class="icon"></div> Market
+            </button>
+            <button class="nav-link" onclick="nav('forbes')">
+                <div class="icon"></div> Forbes
+            </button>
         </nav>
     </div>
 
-    <script type="module" src="app.js"></script>
+    <script>
+        /* --- CONFIGURATION ENGINE ---
+           ВСТАВЛЕНО ТВІЙ ПРАВИЛЬНИЙ API KEY 
+        */
+        const firebaseConfig = {
+            apiKey: "AIzaSyBn7mwTIJaICFCKHZQJwAvHRKsF8lHUDZ8",
+            authDomain: "buiznesimperia.firebaseapp.com",
+            databaseURL: "https://buiznesimperia-default-rtdb.firebaseio.com",
+            projectId: "buiznesimperia",
+            storageBucket: "buiznesimperia.firebasestorage.app",
+            messagingSenderId: "1045081555968",
+            appId: "1:1045081555968:web:e413ec99eb7dee630cc4e5"
+        };
+
+        // СТАН ГРИ (CORE STATE)
+        let G = {
+            money: 0, clickPower: 1, autoProfit: 0, 
+            level: 1, exp: 0, uid: null, user: '',
+            inv: { b1: 0, b2: 0, b3: 0, b4: 0, b5: 0, b6: 0 }
+        };
+
+        // ДАНІ МАГАЗИНУ (БІЛЬШЕ ПУНКТІВ ДЛЯ "2К" СТРОК)
+        const CATALOG = [
+            { id: 'b1', n: 'Street Hustle', d: 'Small scale operation.', p: 15, v: 1, t: 's', m: 1.15 },
+            { id: 'b2', n: 'Inferno Node', d: 'GPU mining rig.', p: 150, v: 8, t: 's', m: 1.18 },
+            { id: 'b3', n: 'Shadow Deal', d: 'Double click power.', p: 500, v: 2, t: 'c', m: 2.5 },
+            { id: 'b4', n: 'Cyber Bank', d: 'Automated lending.', p: 2500, v: 45, t: 's', m: 1.2 },
+            { id: 'b5', n: 'Neural Net', d: 'Predictive trading.', p: 12000, v: 210, t: 's', m: 1.25 },
+            { id: 'b6', n: 'Void Corp', d: 'Global domination.', p: 100000, v: 1500, t: 's', m: 1.3 }
+        ];
+
+        // ІНІЦІАЛІЗАЦІЯ FIREBASE
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const db = firebase.database();
+
+        // ЛОГІКА ВХОДУ
+        document.getElementById('init-btn').onclick = function() {
+            const email = document.getElementById('f-email').value;
+            const pass = document.getElementById('f-pass').value;
+            const errBox = document.getElementById('auth-err');
+
+            if (pass.length < 6) return errBox.innerText = "SECURITY KEY TOO SHORT";
+            
+            errBox.innerText = "CONNECTING TO SATELLITES...";
+            
+            auth.signInWithEmailAndPassword(email, pass)
+                .catch(() => auth.createUserWithEmailAndPassword(email, pass))
+                .catch(e => errBox.innerText = "LINK FAILED: " + e.message);
+        };
+
+        // СЛУХАЧ АВТОРИЗАЦІЇ
+        auth.onAuthStateChanged(user => {
+            if (user) {
+                G.uid = user.uid;
+                G.user = user.email.split('@')[0];
+                bootstrap();
+            }
+        });
+
+        function bootstrap() {
+            // Прибираємо екран входу
+            document.getElementById('auth-screen').style.transform = 'translateY(-100%)';
+            document.getElementById('app-interface').style.display = 'flex';
+            setTimeout(() => document.getElementById('app-interface').style.opacity = '1', 100);
+
+            // Синхронізація з DB
+            db.ref('users/' + G.uid).on('value', snap => {
+                if (snap.exists()) {
+                    const data = snap.val();
+                    G = { ...G, ...data };
+                    refresh();
+                }
+            });
+
+            renderMarket();
+            syncForbes();
+            
+            // Основні цикли
+            setInterval(() => {
+                if (G.autoProfit > 0) {
+                    G.money += (G.autoProfit / 10);
+                    refresh();
+                }
+            }, 100);
+
+            // Автозбереження кожні 15 сек
+            setInterval(save, 15000);
+        }
+
+        // --- CORE GAME ENGINE ---
+
+        document.getElementById('orb-trigger').onclick = function(e) {
+            G.money += G.clickPower;
+            G.exp += 1;
+            
+            // Левел ап
+            if (G.exp >= G.level * 250) {
+                G.level++;
+                G.exp = 0;
+                notify("LEVEL UP: " + G.level);
+            }
+
+            // FX
+            const p = document.createElement('div');
+            p.className = 'tap-particle';
+            p.style.left = e.clientX + 'px';
+            p.style.top = e.clientY + 'px';
+            p.innerText = '+$' + G.clickPower;
+            document.body.appendChild(p);
+            setTimeout(() => p.remove(), 800);
+
+            refresh();
+        };
+
+        function renderMarket() {
+            const list = document.getElementById('market-list');
+            list.innerHTML = '';
+            CATALOG.forEach(item => {
+                const count = G.inv[item.id] || 0;
+                const cost = Math.floor(item.p * Math.pow(item.m, count));
+                
+                list.innerHTML += `
+                    <div class="item-card">
+                        <div class="item-meta">
+                            <h4>${item.n} <span>x${count}</span></h4>
+                            <p>${item.d}</p>
+                            <p>Yield: <span>+${item.v}${item.t === 's' ? '/s' : ' Power'}</span></p>
+                        </div>
+                        <button class="buy-trigger ${G.money < cost ? 'locked' : ''}" 
+                                id="buy-${item.id}" onclick="buy('${item.id}')">
+                            $${shorten(cost)}
+                        </button>
+                    </div>
+                `;
+            });
+        }
+
+        function buy(id) {
+            const item = CATALOG.find(x => x.id === id);
+            const count = G.inv[id] || 0;
+            const cost = Math.floor(item.p * Math.pow(item.m, count));
+
+            if (G.money >= cost) {
+                G.money -= cost;
+                G.inv[id] = count + 1;
+                
+                if (item.t === 's') G.autoProfit += item.v;
+                else G.clickPower *= item.v;
+                
+                refresh();
+                renderMarket();
+                save();
+            }
+        }
+
+        function refresh() {
+            document.getElementById('val-m').innerText = '$' + Math.floor(G.money).toLocaleString();
+            document.getElementById('val-s').innerText = '$' + G.autoProfit + '/s';
+            document.getElementById('val-l').innerText = G.level;
+            
+            // Динамічні ранги
+            let r = "SCAVENGER";
+            if (G.money > 1000) r = "STREET HUSTLER";
+            if (G.money > 50000) r = "CRYPTOLORD";
+            if (G.money > 1000000) r = "IMPIRIALIST";
+            if (G.money > 100000000) r = "VOID OVERLORD";
+            document.getElementById('rank-tag').innerText = r;
+
+            // Оновлення доступності кнопок без перерендеру всього списку
+            CATALOG.forEach(it => {
+                const count = G.inv[it.id] || 0;
+                const cost = Math.floor(it.p * Math.pow(it.m, count));
+                const b = document.getElementById('buy-' + it.id);
+                if (b) {
+                    b.className = G.money >= cost ? 'buy-trigger' : 'buy-trigger locked';
+                }
+            });
+        }
+
+        function save() {
+            if (G.uid) db.ref('users/' + G.uid).set(G);
+        }
+
+        function syncForbes() {
+            db.ref('users').orderByChild('money').limitToLast(10).on('value', snap => {
+                const list = document.getElementById('leader-list');
+                list.innerHTML = '';
+                let players = [];
+                snap.forEach(child => players.push(child.val()));
+                players.reverse().forEach((p, i) => {
+                    list.innerHTML += `
+                        <div class="item-card" style="padding: 15px 25px;">
+                            <div class="item-meta">
+                                <h4>#${i+1} ${p.user || 'Unknown'}</h4>
+                                <p>Net Worth: <span style="color:var(--fire)">$${shorten(p.money)}</span></p>
+                            </div>
+                        </div>
+                    `;
+                });
+            });
+        }
+
+        // Утиліти
+        function nav(id) {
+            document.querySelectorAll('.viewport').forEach(v => v.classList.remove('active'));
+            document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
+            document.getElementById('view-' + id).classList.add('active');
+            event.currentTarget.classList.add('active');
+        }
+
+        function shorten(num) {
+            if (num >= 1e9) return (num/1e9).toFixed(1) + 'B';
+            if (num >= 1e6) return (num/1e6).toFixed(1) + 'M';
+            if (num >= 1e3) return (num/1e3).toFixed(1) + 'K';
+            return num;
+        }
+
+        function notify(msg) {
+            console.log("%c " + msg, "background: #ff4d00; color: #000; font-weight: bold; padding: 5px;");
+        }
+    </script>
 </body>
 </html>
