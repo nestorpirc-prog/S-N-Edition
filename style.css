@@ -1,276 +1,93 @@
-/* --- ГЛОБАЛЬНІ НАЛАШТУВАННЯ --- */
 :root {
-    --bg-dark: #020617;
-    --accent-green: #22c55e;
-    --accent-blue: #3b82f6;
-    --accent-gold: #fbbf24;
+    --gold: #ffae00;
+    --neon: #ff4d00;
+    --dark: #050508;
     --glass: rgba(255, 255, 255, 0.03);
-    --glass-border: rgba(255, 255, 255, 0.1);
-    --text-main: #ffffff;
-    --text-dim: #94a3b8;
-    --shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+    --border: rgba(255, 77, 0, 0.2);
 }
 
-* {
-    box-sizing: border-box;
-    margin: 0;
-    padding: 0;
-    -webkit-tap-highlight-color: transparent;
-}
+* { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Space Grotesk', sans-serif; }
 
 body {
-    background-color: var(--bg-dark);
-    color: var(--text-main);
-    font-family: 'Plus Jakarta Sans', sans-serif;
-    line-height: 1.5;
-    overflow-x: hidden;
+    background: var(--dark);
+    color: #fff;
+    height: 100vh;
+    overflow: hidden;
+    background-image: radial-gradient(circle at 50% 50%, #1a0a00 0%, #050508 100%);
 }
 
-/* --- ФОНОВИЙ КАНВАС --- */
-#canvas {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    z-index: -1;
-    opacity: 0.6;
+/* Анімація сканера */
+.scanner-line {
+    position: fixed; top: 0; width: 100%; height: 2px;
+    background: linear-gradient(90deg, transparent, var(--neon), transparent);
+    opacity: 0.3; animation: scan 4s linear infinite; z-index: -1;
+}
+@keyframes scan { 0% { top: -10%; } 100% { top: 110%; } }
+
+/* AUTH */
+#auth-screen {
+    position: fixed; inset: 0; z-index: 1000;
+    display: flex; align-items: center; justify-content: center;
+    background: var(--dark);
 }
 
-/* --- ГОЛОВНИЙ КОНТЕЙНЕР --- */
-.app-container {
-    position: relative;
-    z-index: 1;
-    max-width: 500px;
-    margin: 0 auto;
-    min-height: 100vh;
-    padding-bottom: 100px; /* Місце для футера */
+.terminal-card {
+    width: 90%; max-width: 400px; padding: 40px;
+    background: var(--glass); border: 1px solid var(--border);
+    border-radius: 40px; backdrop-filter: blur(20px); text-align: center;
 }
 
-/* --- ВЕРХНЯ ПАНЕЛЬ (ONLINE) --- */
-.top-bar {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 25px 20px;
+.terminal-card h1 { font-family: 'Outfit'; font-size: 3.5rem; letter-spacing: -3px; }
+.terminal-card span { color: var(--neon); }
+
+.input-field { text-align: left; margin-bottom: 20px; }
+.input-field label { font-family: 'JetBrains Mono'; font-size: 0.6rem; color: #555; margin-left: 10px; }
+
+.inf-input, input {
+    width: 100%; background: rgba(0,0,0,0.3); border: 1px solid var(--border);
+    padding: 18px; border-radius: 15px; color: #fff; margin-top: 5px;
+}
+
+.main-btn {
+    width: 100%; padding: 20px; border-radius: 15px; border: none;
+    background: var(--neon); color: #000; font-weight: 900; cursor: pointer;
+}
+
+/* HUD */
+.stats-header { padding: 50px 25px 20px; text-align: center; }
+.main-balance { font-family: 'Outfit'; font-size: 5rem; letter-spacing: -4px; margin: 10px 0; }
+.sub-stats { display: flex; justify-content: center; gap: 20px; font-family: 'JetBrains Mono'; font-size: 0.8rem; color: #888; }
+
+/* ORB */
+.action-zone { display: flex; justify-content: center; align-items: center; height: 40vh; }
+.orb {
+    width: 260px; height: 260px; border-radius: 50%;
+    background: radial-gradient(circle at 30% 30%, #333, #000);
+    border: 8px solid #fff; position: relative;
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer; transition: 0.1s;
+}
+.orb:active { transform: scale(0.9); }
+.orb .symbol { font-size: 6rem; opacity: 0.1; }
+
+/* SHOP */
+.panel { padding: 20px 25px 120px; height: 60vh; overflow-y: auto; }
+.item-card {
+    background: var(--glass); border: 1px solid var(--border);
+    padding: 20px; border-radius: 25px; margin-bottom: 15px;
+    display: flex; justify-content: space-between; align-items: center;
+}
+
+/* NAV */
+.bottom-nav {
+    position: fixed; bottom: 20px; left: 20px; right: 20px; height: 80px;
+    background: rgba(10,10,15,0.9); border: 1px solid var(--border);
+    border-radius: 25px; display: flex; justify-content: space-around; align-items: center;
     backdrop-filter: blur(10px);
 }
+.nav-item { background: none; border: none; color: #444; font-weight: 800; font-family: 'JetBrains Mono'; }
+.nav-item.active { color: var(--neon); }
 
-.online-badge {
-    background: rgba(0, 0, 0, 0.4);
-    border: 1px solid var(--glass-border);
-    padding: 6px 14px;
-    border-radius: 30px;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    font-size: 0.65rem;
-    font-weight: 800;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-}
-
-.pulse-dot {
-    width: 8px;
-    height: 8px;
-    background: var(--accent-green);
-    border-radius: 50%;
-    box-shadow: 0 0 10px var(--accent-green);
-    animation: pulse 2s infinite;
-}
-
-/* --- ГЕЙМ-КАРТКА (ГРОШІ) --- */
-.game-card {
-    background: var(--glass);
-    border: 1px solid var(--glass-border);
-    margin: 20px;
-    padding: 35px 25px;
-    border-radius: 40px;
-    backdrop-filter: blur(25px);
-    text-align: center;
-    box-shadow: var(--shadow);
-}
-
-.balance-label {
-    font-size: 0.7rem;
-    letter-spacing: 4px;
-    color: var(--text-dim);
-    font-weight: 800;
-    margin-bottom: 10px;
-}
-
-.balance-value {
-    font-family: 'Outfit', sans-serif;
-    font-size: 4.5rem;
-    font-weight: 900;
-    background: linear-gradient(to bottom, #fff, #94a3b8);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    filter: drop-shadow(0 10px 20px rgba(0,0,0,0.3));
-}
-
-/* --- СИСТЕМА ПРОГРЕСУ --- */
-.xp-system {
-    margin: 25px 0;
-}
-
-.xp-label {
-    display: flex;
-    justify-content: space-between;
-    font-size: 0.65rem;
-    font-weight: 800;
-    color: var(--accent-green);
-    margin-bottom: 10px;
-    padding: 0 5px;
-}
-
-.xp-bg {
-    width: 100%;
-    height: 10px;
-    background: rgba(255, 255, 255, 0.05);
-    border-radius: 20px;
-    overflow: hidden;
-    border: 1px solid rgba(255, 255, 255, 0.05);
-}
-
-.xp-fill {
-    height: 100%;
-    background: linear-gradient(90deg, var(--accent-blue), var(--accent-green));
-    border-radius: 20px;
-    box-shadow: 0 0 20px rgba(34, 197, 94, 0.4);
-    transition: width 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-}
-
-/* --- КЛІКЕР --- */
-.clicker-box {
-    padding: 40px 0;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-}
-
-.main-object {
-    width: 200px;
-    height: 200px;
-    background: radial-gradient(circle at 30% 30%, #22c55e, #14532d);
-    border-radius: 50%;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    font-size: 6rem;
-    cursor: pointer;
-    user-select: none;
-    border: 10px solid rgba(255, 255, 255, 0.1);
-    box-shadow: 0 40px 80px rgba(0, 0, 0, 0.6), 
-                inset 0 0 30px rgba(255, 255, 255, 0.2);
-    transition: transform 0.1s cubic-bezier(0.1, 0.7, 0.1, 1);
-}
-
-.main-object:active {
-    transform: scale(0.9) rotate(-3deg);
-}
-
-/* --- КАРТКА ПІДТРИМКИ (VISA) --- */
-.founders-card {
-    margin: 20px;
-    padding: 30px;
-    background: linear-gradient(135deg, rgba(30, 41, 59, 0.4), rgba(15, 23, 42, 0.4));
-    border-radius: 35px;
-    border: 1px solid var(--glass-border);
-}
-
-.card-visual {
-    background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
-    border-radius: 20px;
-    padding: 25px;
-    margin: 20px 0;
-    position: relative;
-    border: 1px solid rgba(255, 255, 255, 0.05);
-    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.4);
-}
-
-.card-visual::before {
-    content: '';
-    position: absolute;
-    width: 45px;
-    height: 35px;
-    background: linear-gradient(135deg, #fbbf24, #d97706);
-    border-radius: 6px;
-    top: 25px;
-    left: 25px;
-    opacity: 0.8;
-}
-
-.card-number {
-    font-family: 'Outfit', sans-serif;
-    font-size: 1.4rem;
-    letter-spacing: 3px;
-    margin: 60px 0 20px;
-    color: #fff;
-    text-shadow: 0 2px 4px rgba(0,0,0,0.5);
-}
-
-.card-holder {
-    font-size: 0.7rem;
-    text-transform: uppercase;
-    letter-spacing: 2px;
-    color: var(--accent-green);
-    font-weight: 800;
-}
-
-/* --- ЕФЕКТИ ТА АНІМАЦІЇ --- */
-@keyframes pulse {
-    0% { transform: scale(1); opacity: 1; }
-    50% { transform: scale(1.2); opacity: 0.5; }
-    100% { transform: scale(1); opacity: 1; }
-}
-
-.float-val {
-    position: fixed;
-    pointer-events: none;
-    font-family: 'Outfit', sans-serif;
-    font-weight: 900;
-    color: var(--accent-green);
-    font-size: 1.5rem;
-    z-index: 1000;
-    animation: floatUp 0.8s ease-out forwards;
-    text-shadow: 0 0 10px rgba(34, 197, 94, 0.5);
-}
-
-@keyframes floatUp {
-    0% { transform: translateY(0) scale(1); opacity: 1; }
-    100% { transform: translateY(-150px) scale(1.5); opacity: 0; }
-}
-
-/* --- СЕРВІСИ ТА ІНШЕ --- */
-.service-item {
-    background: var(--glass);
-    border: 1px solid var(--glass-border);
-    padding: 20px;
-    border-radius: 25px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 12px;
-    transition: 0.3s;
-}
-
-.service-item:hover {
-    background: rgba(255, 255, 255, 0.06);
-}
-
-.price-tag {
-    background: rgba(34, 197, 94, 0.15);
-    color: var(--accent-green);
-    padding: 6px 15px;
-    border-radius: 12px;
-    font-weight: 800;
-    font-size: 0.85rem;
-}
-
-/* Адаптація для маленьких екранів */
-@media (max-width: 380px) {
-    .balance-value { font-size: 3.5rem; }
-    .main-object { width: 170px; height: 170px; font-size: 5rem; }
-    .card-number { font-size: 1.1rem; }
-}
+/* FX */
+.tap-fx { position: fixed; pointer-events: none; color: var(--neon); font-family: 'Outfit'; font-weight: 900; animation: up 0.8s forwards; }
+@keyframes up { 0% { opacity: 1; transform: translateY(0); } 100% { opacity: 0; transform: translateY(-150px); } }
