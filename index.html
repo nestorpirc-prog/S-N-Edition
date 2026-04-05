@@ -3,416 +3,568 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>BUIZNES IMPERIA | INFERNO SUPREME</title>
+    <title>BUIZNES IMPERIA | OMEGA INFERNO</title>
     
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
 
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;700;900&family=Space+Grotesk:wght@300;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@100;400;700;900&family=JetBrains+Mono:wght@300;800&family=Space+Grotesk:wght@300;500;700&display=swap" rel="stylesheet">
     
     <style>
+        /* --- CSS VARIABLES & THEME --- */
         :root {
-            --fire-gold: #f59e0b;
-            --fire-orange: #f97316;
-            --fire-red: #ef4444;
-            --deep-dark: #09090b;
-            --glass: rgba(255, 255, 255, 0.05);
-            --neon-blue: #3b82f6;
-            --neon-green: #22c55e;
+            --fire-core: #ff4d00;
+            --fire-glow: #ffae00;
+            --magma-dark: #1a0505;
+            --void-black: #020203;
+            --neon-blue: #00d2ff;
+            --glass-alpha: rgba(255, 255, 255, 0.03);
+            --border-glow: rgba(255, 77, 0, 0.3);
+            --font-main: 'Space Grotesk', sans-serif;
+            --font-logo: 'Outfit', sans-serif;
+            --font-tech: 'JetBrains Mono', monospace;
         }
 
-        /* --- ЕКСТРЕМАЛЬНИЙ ФОН (ГАРЯЧІ КОЛЬОРИ) --- */
+        /* --- GLOBAL RESET --- */
+        * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
         body, html { 
-            margin: 0; padding: 0; width: 100%; height: 100dvh; 
-            background: var(--deep-dark); color: #fff; 
-            font-family: 'Space Grotesk', sans-serif; overflow: hidden; position: fixed;
+            background: var(--void-black); color: #fff; font-family: var(--font-main);
+            height: 100dvh; width: 100%; overflow: hidden; position: fixed;
+            -webkit-user-select: none; user-select: none;
         }
 
-        .inferno-bg {
+        /* --- PROCEDURAL MAGMA BACKGROUND --- */
+        #magma-canvas { position: fixed; inset: 0; z-index: -2; opacity: 0.6; }
+        .overlay-vignette { 
             position: fixed; inset: 0; z-index: -1;
-            background: linear-gradient(135deg, #450a0a, #7f1d1d, #991b1b, #b91c1c, #450a0a);
-            background-size: 400% 400%;
-            animation: magmaFlow 8s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+            background: radial-gradient(circle, transparent 20%, rgba(0,0,0,0.8) 100%),
+                        linear-gradient(0deg, rgba(255,77,0,0.1) 0%, transparent 100%);
+            pointer-events: none;
         }
 
-        @keyframes magmaFlow {
-            0% { background-position: 0% 50%; }
-            50% { background-position: 100% 50%; }
-            100% { background-position: 0% 50%; }
+        /* --- AUTH SCREEN: OMEGA STYLE --- */
+        #auth-layer {
+            position: fixed; inset: 0; z-index: 9999;
+            display: flex; align-items: center; justify-content: center; padding: 20px;
+            transition: 1.5s cubic-bezier(0.8, 0, 0.2, 1);
         }
 
-        /* --- AUTH: CRYSTAL VIBRANCE STYLE --- */
-        #auth-view { 
-            display: flex; align-items: center; justify-content: center; height: 100%; padding: 25px;
-            z-index: 100; position: relative;
+        .auth-container {
+            width: 100%; max-width: 480px; background: rgba(5, 5, 10, 0.9);
+            backdrop-filter: blur(60px); border-radius: 40px; padding: 60px 45px;
+            border: 1px solid var(--border-glow); box-shadow: 0 0 100px rgba(255, 77, 0, 0.2);
+            text-align: center; position: relative; overflow: hidden;
         }
 
-        .auth-card {
-            width: 100%; max-width: 460px; background: rgba(0, 0, 0, 0.85);
-            backdrop-filter: blur(50px); border-radius: 60px; padding: 60px 40px;
-            border: 2px solid rgba(249, 115, 22, 0.3); box-shadow: 0 0 80px rgba(239, 68, 68, 0.3);
-            text-align: center; position: relative;
+        .auth-container::after {
+            content: ''; position: absolute; top: -50%; left: -50%; width: 200%; height: 200%;
+            background: conic-gradient(from 180deg at 50% 50%, transparent 0deg, var(--fire-core) 360deg);
+            animation: rotateGlow 10s linear infinite; opacity: 0.1; z-index: -1;
         }
 
-        .auth-card h1 { 
-            font-family: 'Outfit'; font-size: 3.8rem; font-weight: 900; 
-            background: linear-gradient(to right, #fbbf24, #ef4444);
-            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-            margin-bottom: 5px; letter-spacing: -2px;
+        @keyframes rotateGlow { 100% { transform: rotate(360deg); } }
+
+        .logo-main { font-family: var(--font-logo); font-size: 4.5rem; font-weight: 900; line-height: 0.8; letter-spacing: -4px; margin-bottom: 10px; }
+        .logo-sub { color: var(--fire-glow); font-size: 0.7rem; font-weight: 800; text-transform: uppercase; letter-spacing: 5px; margin-bottom: 40px; }
+
+        .field-box { text-align: left; margin-bottom: 25px; position: relative; }
+        .field-box label { font-family: var(--font-tech); font-size: 0.65rem; color: #666; margin-left: 20px; text-transform: uppercase; display: block; margin-bottom: 8px; }
+        
+        .omega-input {
+            width: 100%; background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.1);
+            padding: 22px 25px; border-radius: 20px; color: #fff; font-size: 1rem;
+            transition: 0.3s; font-family: var(--font-tech);
         }
+        .omega-input:focus { border-color: var(--fire-core); background: rgba(255, 77, 0, 0.05); outline: none; }
 
-        .auth-tagline { color: #f87171; font-size: 0.85rem; font-weight: 700; text-transform: uppercase; letter-spacing: 3px; margin-bottom: 40px; }
-
-        .form-group { text-align: left; margin-bottom: 25px; }
-        .form-group label { display: block; font-size: 0.7rem; font-weight: 800; color: #94a3b8; margin-left: 25px; margin-bottom: 10px; text-transform: uppercase; }
-
-        .field-input { 
-            width: 100%; background: rgba(255,255,255,0.06); border: 2px solid rgba(255,255,255,0.1);
-            padding: 24px 30px; border-radius: 30px; color: #fff; font-size: 1.1rem;
-            transition: 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        .omega-btn {
+            width: 100%; background: #fff; color: #000; border: none; padding: 25px;
+            border-radius: 25px; font-weight: 900; font-family: var(--font-logo);
+            font-size: 1.3rem; cursor: pointer; transition: 0.5s; position: relative; overflow: hidden;
         }
-        .field-input:focus { border-color: var(--fire-orange); background: rgba(255,255,255,0.1); box-shadow: 0 0 30px rgba(249, 115, 22, 0.2); transform: scale(1.02); }
-
-        .btn-inferno { 
-            width: 100%; padding: 26px; border-radius: 30px; border: none;
-            background: linear-gradient(90deg, #f59e0b, #ef4444); color: #fff;
-            font-family: 'Outfit'; font-size: 1.4rem; font-weight: 900; cursor: pointer;
-            box-shadow: 0 15px 35px rgba(239, 68, 68, 0.4); transition: 0.3s;
+        .omega-btn span { position: relative; z-index: 2; }
+        .omega-btn::before {
+            content: ''; position: absolute; inset: 0; background: linear-gradient(90deg, var(--fire-core), var(--fire-glow));
+            transform: translateX(-100%); transition: 0.5s;
         }
-        .btn-inferno:active { transform: scale(0.92); opacity: 0.9; }
+        .omega-btn:hover::before { transform: translateX(0); }
+        .omega-btn:hover { color: #fff; transform: translateY(-3px); }
 
-        #status-msg { margin-top: 25px; min-height: 1.2em; font-weight: 700; font-size: 0.9rem; padding: 15px; border-radius: 20px; display: none; }
+        .error-log { margin-top: 25px; font-family: var(--font-tech); font-size: 0.75rem; min-height: 40px; border-radius: 15px; display: flex; align-items: center; justify-content: center; padding: 10px; }
 
-        /* --- GAME INTERFACE --- */
-        #game-ui { display: none; height: 100dvh; flex-direction: column; opacity: 0; transition: 1.2s cubic-bezier(0.4, 0, 0.2, 1); }
+        /* --- APPLICATION SHELL --- */
+        #root-app { display: none; opacity: 0; height: 100dvh; flex-direction: column; }
 
-        .top-hud { padding: 50px 30px 20px; text-align: center; }
-        .rank-badge { background: linear-gradient(90deg, var(--fire-gold), var(--fire-orange)); padding: 8px 20px; border-radius: 100px; font-size: 0.75rem; font-weight: 900; text-transform: uppercase; letter-spacing: 2.5px; box-shadow: 0 5px 15px rgba(245, 158, 11, 0.3); }
+        .hud-header { padding: 45px 30px 20px; text-align: center; }
+        .status-pill { background: rgba(255,255,255,0.05); padding: 6px 16px; border-radius: 100px; font-size: 0.65rem; font-weight: 900; color: var(--fire-glow); text-transform: uppercase; border: 1px solid var(--border-glow); }
 
-        .cash-display { font-family: 'Outfit'; font-size: 6rem; font-weight: 900; margin: 20px 0; letter-spacing: -4px; color: #fff; text-shadow: 0 10px 40px rgba(0,0,0,0.5); }
-        .income-rate { color: #94a3b8; font-weight: 700; font-size: 1rem; }
+        .balance-hero { font-family: var(--font-logo); font-size: 6.5rem; font-weight: 900; letter-spacing: -5px; margin: 15px 0; line-height: 0.8; }
+        .pps-counter { font-family: var(--font-tech); color: #666; font-size: 0.85rem; }
 
-        .progress-container { width: 240px; height: 12px; background: rgba(255,255,255,0.05); border: 2px solid rgba(255,255,255,0.1); margin: 25px auto; border-radius: 30px; overflow: hidden; box-shadow: inset 0 2px 4px rgba(0,0,0,0.5); }
-        .progress-fill { height: 100%; background: linear-gradient(90deg, #3b82f6, #22c55e); width: 0%; transition: 0.6s ease-out; }
+        .xp-system { width: 280px; margin: 30px auto; }
+        .xp-track { height: 4px; background: rgba(255,255,255,0.05); border-radius: 10px; overflow: hidden; position: relative; }
+        .xp-bar { height: 100%; background: var(--fire-core); width: 0%; transition: 0.4s cubic-bezier(0, 1, 0, 1); box-shadow: 0 0 15px var(--fire-core); }
+        .xp-label { display: flex; justify-content: space-between; font-size: 0.6rem; font-weight: 800; margin-top: 8px; color: #444; text-transform: uppercase; }
 
-        /* CORE CLICKER */
-        .tap-zone { flex: 1; display: flex; align-items: center; justify-content: center; position: relative; }
-        .inferno-coin { 
-            width: 280px; height: 280px; border-radius: 50%;
-            background: radial-gradient(circle at 35% 35%, #fbbf24, #b45309, #78350f);
+        /* CLICK ENGINE */
+        #game-view { flex: 1; display: flex; align-items: center; justify-content: center; position: relative; }
+        .omega-coin {
+            width: 300px; height: 300px; border-radius: 50%; position: relative;
+            background: radial-gradient(circle at 30% 30%, #ff8c00, #ff4500, #8b0000);
+            border: 15px solid rgba(255,255,255,0.9); cursor: pointer;
+            box-shadow: 0 60px 140px rgba(0,0,0,1), inset 0 0 80px rgba(0,0,0,0.5);
             display: flex; align-items: center; justify-content: center;
-            font-family: 'Outfit'; font-size: 9rem; font-weight: 900; color: #451a03;
-            border: 15px solid #fffbeb; cursor: pointer;
-            box-shadow: 0 50px 120px rgba(0,0,0,0.8), inset 0 0 60px rgba(0,0,0,0.4);
-            transition: 0.08s; z-index: 10;
+            font-family: var(--font-logo); font-size: 10rem; color: rgba(0,0,0,0.4); font-weight: 900;
+            transition: 0.05s; z-index: 50;
         }
-        .inferno-coin:active { transform: scale(0.85) rotate(5deg); }
+        .omega-coin:active { transform: scale(0.85) rotate(-5deg); filter: brightness(1.3); }
 
-        /* UPGRADES SCREEN */
-        .scroll-view { display: none; height: 100%; overflow-y: auto; padding: 30px 25px 180px; }
-        .scroll-view.active { display: block; animation: slideUp 0.6s cubic-bezier(0.23, 1, 0.32, 1) both; }
-        @keyframes slideUp { from { opacity: 0; transform: translateY(50px); } to { opacity: 1; transform: translateY(0); } }
+        /* SCREENS & CARDS */
+        .screen-content { display: none; height: 100%; overflow-y: auto; padding: 20px 25px 200px; }
+        .screen-content.active { display: block; animation: screenReveal 0.8s cubic-bezier(0.16, 1, 0.3, 1) both; }
+        @keyframes screenReveal { from { opacity: 0; transform: scale(0.95) translateY(30px); } to { opacity: 1; transform: scale(1) translateY(0); } }
 
-        .card-upgrade { 
-            background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08);
-            border-radius: 40px; padding: 28px; display: flex; 
-            justify-content: space-between; align-items: center; margin-bottom: 18px;
-            backdrop-filter: blur(10px);
+        .upgrade-card {
+            background: linear-gradient(145deg, rgba(255,255,255,0.05), rgba(255,255,255,0.01));
+            border: 1px solid rgba(255,255,255,0.05); border-radius: 35px; padding: 30px;
+            display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;
+            backdrop-filter: blur(20px); transition: 0.3s;
         }
-        .card-upgrade:active { transform: scale(0.96); background: rgba(255,255,255,0.07); }
+        .upgrade-card:hover { border-color: var(--fire-core); background: rgba(255, 77, 0, 0.03); }
 
-        .up-meta h4 { font-size: 1.25rem; margin-bottom: 6px; font-weight: 700; color: #fff; }
-        .up-meta p { font-size: 0.85rem; color: #64748b; font-weight: 600; }
+        .up-info h4 { font-family: var(--font-logo); font-size: 1.4rem; margin-bottom: 5px; }
+        .up-info p { font-size: 0.8rem; color: #777; font-weight: 500; }
 
-        .btn-buy { 
-            background: #fff; color: #000; border: none; padding: 18px 28px;
-            border-radius: 22px; font-weight: 900; font-size: 1rem;
-            box-shadow: 0 8px 20px rgba(255,255,255,0.1);
+        .buy-trigger {
+            background: #fff; color: #000; border: none; padding: 20px 30px;
+            border-radius: 20px; font-weight: 900; font-family: var(--font-tech); font-size: 0.9rem;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.2); transition: 0.2s;
         }
-        .btn-buy.afford { background: var(--fire-orange); color: #fff; }
+        .buy-trigger.locked { opacity: 0.3; filter: grayscale(1); cursor: not-allowed; }
 
-        /* LEADERBOARD */
-        .top-list { background: rgba(0,0,0,0.4); border-radius: 40px; border: 1px solid var(--glass); overflow: hidden; }
-        .top-row { display: flex; justify-content: space-between; padding: 25px; border-bottom: 1px solid rgba(255,255,255,0.05); font-weight: 700; }
-        .top-row.me { background: rgba(245, 158, 11, 0.1); color: var(--fire-gold); }
+        /* LEADERBOARD V2 */
+        .rank-container { background: rgba(0,0,0,0.5); border-radius: 40px; border: 1px solid var(--glass-alpha); overflow: hidden; }
+        .rank-entry { display: flex; align-items: center; justify-content: space-between; padding: 25px 30px; border-bottom: 1px solid rgba(255,255,255,0.03); }
+        .rank-entry.is-me { background: rgba(255, 77, 0, 0.08); border-left: 4px solid var(--fire-core); }
+        .rank-num { font-family: var(--font-tech); width: 40px; color: var(--fire-core); font-weight: 800; }
+        .rank-name { flex: 1; font-weight: 700; font-size: 1rem; }
 
-        /* NAV */
-        .bottom-nav { 
-            position: fixed; bottom: 0; width: 100%; background: rgba(9,9,11,0.98);
-            backdrop-filter: blur(40px); border-top: 2px solid rgba(255,255,255,0.05);
-            display: flex; justify-content: space-around; padding: 30px 10px 55px; z-index: 1000;
+        /* BOTTOM NAVIGATION */
+        .bottom-nav {
+            position: fixed; bottom: 0; width: 100%; background: rgba(2, 2, 3, 0.9);
+            backdrop-filter: blur(50px); border-top: 1px solid rgba(255,255,255,0.05);
+            display: flex; justify-content: space-around; padding: 25px 10px 50px; z-index: 1000;
         }
-        .nav-link { 
-            background: none; border: none; color: #3f3f46; font-weight: 900;
-            display: flex; flex-direction: column; align-items: center; gap: 8px;
-            transition: 0.4s;
+        .nav-btn {
+            background: none; border: none; color: #444; display: flex; flex-direction: column;
+            align-items: center; gap: 8px; font-weight: 900; font-family: var(--font-tech);
+            font-size: 0.6rem; text-transform: uppercase; letter-spacing: 1px; transition: 0.4s;
         }
-        .nav-link.active { color: var(--fire-gold); transform: translateY(-8px); }
+        .nav-btn.active { color: var(--fire-core); transform: translateY(-10px); }
+        .nav-btn svg { width: 28px; height: 28px; transition: 0.4s; }
+        .nav-btn.active svg { filter: drop-shadow(0 0 8px var(--fire-core)); }
 
-        /* FX */
-        .coin-pop { position: fixed; color: #fbbf24; font-weight: 900; font-size: 3rem; pointer-events: none; animation: popRise 1s forwards; z-index: 5000; text-shadow: 0 10px 30px rgba(0,0,0,1); }
-        @keyframes popRise { 0% { opacity: 1; transform: translateY(0); } 100% { opacity: 0; transform: translateY(-250px) scale(1.6); } }
+        /* NOTIFICATIONS & FX */
+        .toast { position: fixed; top: 30px; left: 50%; transform: translateX(-50%); background: #fff; color: #000; padding: 12px 25px; border-radius: 100px; font-weight: 800; z-index: 10001; font-size: 0.8rem; display: none; animation: toastIn 0.5s forwards; }
+        @keyframes toastIn { from { top: -50px; opacity: 0; } to { top: 30px; opacity: 1; } }
+
+        .particle { position: fixed; pointer-events: none; background: var(--fire-core); border-radius: 50%; z-index: 5; animation: particleOut 1s ease-out forwards; }
+        @keyframes particleOut { 0% { transform: scale(1); opacity: 1; } 100% { transform: scale(0) translateY(-100px); opacity: 0; } }
+
+        .floating-text { position: fixed; color: var(--fire-glow); font-weight: 900; font-size: 3.5rem; pointer-events: none; z-index: 60; font-family: var(--font-logo); animation: floatHigh 1.2s cubic-bezier(0.1, 0.9, 0.2, 1) forwards; text-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+        @keyframes floatHigh { 0% { opacity: 1; transform: translate(0, 0) scale(1); } 100% { opacity: 0; transform: translate(var(--dx), -300px) scale(1.8) rotate(var(--dr)); } }
 
     </style>
 </head>
 <body>
 
-    <div class="inferno-bg"></div>
+    <canvas id="magma-canvas"></canvas>
+    <div class="overlay-vignette"></div>
 
-    <div id="auth-view">
-        <div class="auth-card">
-            <h1>BUIZNES</h1>
-            <div class="auth-tagline">Inferno Edition</div>
+    <div id="auth-layer">
+        <div class="auth-container">
+            <div class="logo-main">BUIZNES</div>
+            <div class="logo-sub">Inferno Omega</div>
             
-            <div class="form-group">
-                <label>Корпоративна Пошта</label>
-                <input type="email" id="email-f" class="field-input" placeholder="mail@empire.com">
+            <div class="field-box">
+                <label>Terminal Email</label>
+                <input type="email" id="email-omega" class="omega-input" placeholder="root@imperia.io" autocomplete="off">
             </div>
 
-            <div class="form-group">
-                <label>Ключ Доступу</label>
-                <input type="password" id="pass-f" class="field-input" placeholder="••••••••">
+            <div class="field-box">
+                <label>Security Key</label>
+                <input type="password" id="pass-omega" class="omega-input" placeholder="••••••••" autocomplete="off">
             </div>
 
-            <button class="btn-inferno" onclick="initiateAuth()">ВІДКРИТИ ПОРТФЕЛЬ</button>
-            <div id="status-msg"></div>
+            <button class="omega-btn" id="btn-omega" onclick="trySystemAccess()">
+                <span>INITIALIZE SYNC</span>
+            </button>
+
+            <div id="omega-log" class="error-log"></div>
         </div>
     </div>
 
-    <div id="game-ui">
+    <div id="root-app">
         
-        <div id="scr-game" class="scroll-view active">
-            <div class="top-hud">
-                <span class="rank-badge" id="u-rank">Завантаження...</span>
-                <h1 class="cash-display" id="u-cash">$ 0</h1>
-                <div class="income-rate" id="u-pps">Income: $0 / sec</div>
-                <div class="progress-container"><div id="p-bar" class="progress-fill"></div></div>
-                <div style="font-size: 0.8rem; font-weight: 900; color: #52525b;" id="u-lvl">LVL 1</div>
+        <div id="view-main" class="screen-content active">
+            <div class="hud-header">
+                <span class="status-pill" id="rank-name">Initializing...</span>
+                <h1 class="balance-hero" id="stat-money">$ 0</h1>
+                <div class="pps-counter" id="stat-pps">Mining Rate: $0.00/s</div>
+                
+                <div class="xp-system">
+                    <div class="xp-track"><div id="xp-fill" class="xp-bar"></div></div>
+                    <div class="xp-label">
+                        <span id="lvl-cur">Level 1</span>
+                        <span id="lvl-next">Level 2</span>
+                    </div>
+                </div>
             </div>
 
-            <div class="tap-zone">
-                <div class="inferno-coin" onclick="handleInteraction(event)">B</div>
+            <div id="game-view">
+                <div class="omega-coin" onclick="performTap(event)">Ω</div>
             </div>
         </div>
 
-        <div id="scr-shop" class="scroll-view">
-            <h2 style="font-family:'Outfit'; font-size: 3rem; margin-bottom: 35px; letter-spacing: -2px;">UPGRADES</h2>
+        <div id="view-shop" class="screen-content">
+            <h2 style="font-family: var(--font-logo); font-size: 3rem; margin-bottom: 40px; letter-spacing: -2px;">BLACK MARKET</h2>
             
-            <div class="card-upgrade">
-                <div class="up-meta"><h4>Muscle Click</h4><p>Збільшує прибуток за тап</p></div>
-                <button class="btn-buy" id="b-click" onclick="buyProcess('click')">$50</button>
-            </div>
-
-            <div class="card-upgrade">
-                <div class="up-meta"><h4>Crypto Bot</h4><p>+$3 / сек пасивно</p></div>
-                <button class="btn-buy" id="b-bot" onclick="buyProcess('bot')">$400</button>
-            </div>
-
-            <div class="card-upgrade">
-                <div class="up-meta"><h4>Luxury Office</h4><p>+$22 / сек пасивно</p></div>
-                <button class="btn-buy" id="b-office" onclick="buyProcess('office')">$3,200</button>
-            </div>
-
-            <div class="card-upgrade">
-                <div class="up-meta"><h4>Mainframe AI</h4><p>+$180 / сек пасивно</p></div>
-                <button class="btn-buy" id="b-ai" onclick="buyProcess('ai')">$25,000</button>
-            </div>
-
-            <div class="card-upgrade">
-                <div class="up-meta"><h4>Space Station</h4><p>+$1,200 / сек пасивно</p></div>
-                <button class="btn-buy" id="b-space" onclick="buyProcess('space')">$200,000</button>
-            </div>
+            <div id="shop-items-container">
+                </div>
         </div>
 
-        <div id="scr-top" class="scroll-view">
-            <h2 style="font-family:'Outfit'; font-size: 3rem; margin-bottom: 35px; letter-spacing: -2px;">FORBES TOP</h2>
-            <div class="top-list" id="global-board"></div>
+        <div id="view-top" class="screen-content">
+            <h2 style="font-family: var(--font-logo); font-size: 3rem; margin-bottom: 40px; letter-spacing: -2px;">FORBES 500</h2>
+            <div class="rank-container" id="forbes-list">
+                </div>
         </div>
 
         <nav class="bottom-nav">
-            <button class="nav-link active" onclick="switchNav('game')">
-                <svg width="28" height="28" viewBox="0 0 24 24" fill="currentColor"><path d="M11.5 1L2 6v2l9.5 5 9.5-5V6L11.5 1zM2 10v2l9.5 5 9.5-5v-2l-9.5 5L2 10zm0 4v2l9.5 5 9.5-5v-2l-9.5 5L2 14z"/></svg>
-                <span>EMPIRE</span>
+            <button class="nav-btn active" onclick="navigate('main')">
+                <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2L2 12h3v8h6v-6h2v6h6v-8h3L12 2z"/></svg>
+                <span>Empire</span>
             </button>
-            <button class="nav-link" onclick="switchNav('shop')">
-                <svg width="28" height="28" viewBox="0 0 24 24" fill="currentColor"><path d="M7 18c-1.1 0-1.99.9-1.99 2S5.9 22 7 22s2-.9 2-2-.9-2-2-2zM1 2v2h2l3.6 7.59-1.35 2.45c-.16.28-.25.61-.25.96 0 1.1.9 2 2 2h12v-2H7.42c-.14 0-.25-.11-.25-.25l.03-.12.9-1.63h7.45c.75 0 1.41-.41 1.75-1.03l3.58-6.49c.08-.14.12-.31.12-.48 0-.55-.45-1-1-1H5.21l-.94-2H1zm16 16c-1.1 0-1.99.9-1.99 2s.89 2 1.99 2 2-.9 2-2-.9-2-2-2z"/></svg>
-                <span>SHOP</span>
+            <button class="nav-btn" onclick="navigate('shop')">
+                <svg viewBox="0 0 24 24" fill="currentColor"><path d="M7 18c-1.1 0-1.99.9-1.99 2S5.9 22 7 22s2-.9 2-2-.9-2-2-2zM1 2v2h2l3.6 7.59-1.35 2.45c-.16.28-.25.61-.25.96 0 1.1.9 2 2 2h12v-2H7.42c-.14 0-.25-.11-.25-.25l.03-.12.9-1.63h7.45c.75 0 1.41-.41 1.75-1.03l3.58-6.49c.08-.14.12-.31.12-.48 0-.55-.45-1-1-1H5.21l-.94-2H1zm16 16c-1.1 0-1.99.9-1.99 2s.89 2 1.99 2 2-.9 2-2-.9-2-2-2z"/></svg>
+                <span>Market</span>
             </button>
-            <button class="nav-link" onclick="switchNav('top')">
-                <svg width="28" height="28" viewBox="0 0 24 24" fill="currentColor"><path d="M12 1L9 9l-8 .5 6 5.5-2 8 7-4.5 7 4.5-2-8 6-5.5-8-.5L12 1z"/></svg>
-                <span>TOP 10</span>
+            <button class="nav-btn" onclick="navigate('top')">
+                <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 1L9 9l-8 .5 6 5.5-2 8 7-4.5 7 4.5-2-8 6-5.5-8-.5L12 1z"/></svg>
+                <span>Ranks</span>
             </button>
         </nav>
     </div>
 
+    <div class="toast" id="toast-notify">SAVED TO CLOUD</div>
+
     <script>
-        // --- FIREBASE ENGINE V14.0 ---
-        const fbConf = { databaseURL: "https://buiznesimperia-default-rtdb.firebaseio.com/" };
-        
-        let session = {
-            m: 0, p: 1, s: 0, l: 1, e: 0,
-            uid: null, nick: ""
+        /* --- CORE CONFIGURATION --- */
+        const INFERNO_CONFIG = {
+            dbUrl: "https://buiznesimperia-default-rtdb.firebaseio.com/",
+            shop: [
+                { id: 'tap', name: 'Inferno Touch', desc: 'Increases profit per tap', base: 50, mult: 1.8, val: 1, type: 'p' },
+                { id: 'bot', name: 'Neural Miner', desc: 'Automated crypto harvester', base: 500, mult: 1.5, val: 5, type: 's' },
+                { id: 'corp', name: 'Shell Company', desc: 'Laundering profits', base: 4500, mult: 1.6, val: 45, type: 's' },
+                { id: 'bank', name: 'Swiss Bank', desc: 'Global financial control', base: 35000, mult: 1.7, val: 320, type: 's' },
+                { id: 'ai', name: 'Omega AI', desc: 'Predictive market dominance', base: 250000, mult: 1.9, val: 2400, type: 's' },
+                { id: 'void', name: 'Dark Energy', desc: 'Infinite resource extraction', base: 1500000, mult: 2.1, val: 15000, type: 's' }
+            ]
         };
 
-        let dbRef = null;
+        let state = {
+            money: 0, power: 1, pps: 0,
+            lvl: 1, exp: 0,
+            uid: null, nick: 'Unknown',
+            activeScreen: 'main',
+            lastSync: Date.now()
+        };
 
-        // Пряма ініціалізація ТІЛЬКИ в момент дії
-        function initiateAuth() {
-            const email = document.getElementById('email-f').value;
-            const pass = document.getElementById('pass-f').value;
-            const log = document.getElementById('status-msg');
+        let firebaseReady = false;
 
-            if (!email.includes('@') || pass.length < 6) {
-                renderLog("Invalid Email or Password (min 6 symbols)", "#ef4444");
+        /* --- BACKGROUND CANVAS ENGINE --- */
+        const canvas = document.getElementById('magma-canvas');
+        const ctx = canvas.getContext('2d');
+        let particles = [];
+
+        function resize() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+
+        class MagmaDrop {
+            constructor() {
+                this.reset();
+            }
+            reset() {
+                this.x = Math.random() * canvas.width;
+                this.y = canvas.height + 100;
+                this.size = Math.random() * 100 + 50;
+                this.speed = Math.random() * 1 + 0.5;
+                this.opacity = Math.random() * 0.3;
+            }
+            draw() {
+                ctx.beginPath();
+                let g = ctx.createRadialGradient(this.x, this.y, 0, this.x, this.y, this.size);
+                g.addColorStop(0, `rgba(255, 77, 0, ${this.opacity})`);
+                g.addColorStop(1, 'transparent');
+                ctx.fillStyle = g;
+                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                ctx.fill();
+                this.y -= this.speed;
+                if (this.y < -100) this.reset();
+            }
+        }
+
+        function initCanvas() {
+            resize();
+            for(let i=0; i<20; i++) particles.push(new MagmaDrop());
+            function animate() {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                particles.forEach(p => p.draw());
+                requestAnimationFrame(animate);
+            }
+            animate();
+        }
+
+        /* --- FIREBASE BOOTSTRAP (ANTI-ERROR) --- */
+        function trySystemAccess() {
+            const e = document.getElementById('email-omega').value;
+            const p = document.getElementById('pass-omega').value;
+            const l = document.getElementById('omega-log');
+
+            if (e.length < 5 || p.length < 6) {
+                l.style.color = '#ff4d4d';
+                l.innerText = "PROTOCOL ERROR: INVALID CREDENTIALS";
                 return;
             }
 
-            if (!firebase.apps.length) firebase.initializeApp(fbConf);
-            
-            renderLog("Connecting to satellites...", "#f59e0b");
+            // CRITICAL: Ініціалізація лише в момент кліку
+            if (!firebase.apps.length) {
+                firebase.initializeApp({ databaseURL: INFERNO_CONFIG.dbUrl });
+            }
 
-            firebase.auth().signInWithEmailAndPassword(email, pass)
-                .catch(() => firebase.auth().createUserWithEmailAndPassword(email, pass))
-                .catch(err => renderLog(err.message, "#ef4444"));
+            l.style.color = '#ffae00';
+            l.innerText = "BYPASSING FIREWALL... ESTABLISHING SYNC";
+
+            firebase.auth().signInWithEmailAndPassword(e, p)
+                .catch(() => firebase.auth().createUserWithEmailAndPassword(e, p))
+                .catch(err => {
+                    l.style.color = '#ff4d4d';
+                    l.innerText = "CRITICAL FAIL: " + err.message;
+                });
         }
 
         firebase.auth().onAuthStateChanged(user => {
             if (user) {
-                session.uid = user.uid;
-                session.nick = user.email.split('@')[0];
-                startEmpire();
+                state.uid = user.uid;
+                state.nick = user.email.split('@')[0];
+                launchEmpire();
             }
         });
 
-        function renderLog(t, c) {
-            const m = document.getElementById('status-msg');
-            m.style.display = 'block'; m.style.color = c; m.innerText = t;
-        }
+        /* --- GAME CORE --- */
+        function launchEmpire() {
+            const auth = document.getElementById('auth-layer');
+            auth.style.transform = 'translateY(-100%)';
+            auth.style.opacity = '0';
+            setTimeout(() => auth.style.display = 'none', 1500);
 
-        // --- CORE GAME LOGIC ---
-        function startEmpire() {
-            document.getElementById('auth-view').style.display = 'none';
-            const ui = document.getElementById('game-ui');
-            ui.style.display = 'flex';
-            setTimeout(() => ui.style.opacity = '1', 100);
+            const app = document.getElementById('root-app');
+            app.style.display = 'flex';
+            setTimeout(() => app.style.opacity = '1', 500);
 
-            dbRef = firebase.database().ref('users/' + session.uid);
-            dbRef.on('value', snap => {
+            // Connect Database
+            firebase.database().ref('users/' + state.uid).on('value', snap => {
                 const d = snap.val();
                 if (d) {
-                    session.m = d.m || 0; session.p = d.p || 1;
-                    session.s = d.s || 0; session.l = d.l || 1;
-                    session.e = d.e || 0;
-                    refreshUI();
+                    state.money = d.m || 0;
+                    state.power = d.p || 1;
+                    state.pps = d.s || 0;
+                    state.lvl = d.l || 1;
+                    state.exp = d.e || 0;
+                    updateVisuals();
                 }
             });
 
-            // Timers
-            setInterval(() => { if (session.s > 0) { session.m += (session.s / 10); refreshUI(); } }, 100);
-            setInterval(saveToCloud, 6000);
-            loadGlobalTop();
+            buildShop();
+            
+            // Engines
+            setInterval(() => {
+                if (state.pps > 0) {
+                    state.money += (state.pps / 10);
+                    updateVisuals();
+                }
+            }, 100);
+
+            setInterval(cloudSave, 10000);
+            syncForbes();
         }
 
-        function handleInteraction(ev) {
-            session.m += session.p;
-            session.e += 1;
-            
-            const nextXp = session.l * 120;
-            if (session.e >= nextXp) {
-                session.l++; session.e = 0;
-                if (navigator.vibrate) navigator.vibrate([80, 50, 80]);
+        function performTap(ev) {
+            state.money += state.power;
+            state.exp += 1;
+
+            const next = state.lvl * 150;
+            if (state.exp >= next) {
+                state.lvl++;
+                state.exp = 0;
+                notify(`LEVEL UP: ${state.lvl}`);
+                if (navigator.vibrate) navigator.vibrate([100, 50, 100]);
             }
 
-            triggerPop(ev);
-            refreshUI();
+            createFloatingText(ev);
+            updateVisuals();
             if (navigator.vibrate) navigator.vibrate(20);
         }
 
-        function buyProcess(id) {
-            let price = 0;
-            if (id === 'click') {
-                price = 50 + (Math.pow(session.p, 1.8) * 45);
-                if (session.m >= price) { session.m -= price; session.p++; }
-            } else if (id === 'bot') {
-                price = 400 + (session.s * 70);
-                if (session.m >= price) { session.m -= price; session.s += 3; }
-            } else if (id === 'office') {
-                price = 3200 + (session.s * 110);
-                if (session.m >= price) { session.m -= price; session.s += 22; }
-            } else if (id === 'ai') {
-                price = 25000 + (session.s * 160);
-                if (session.m >= price) { session.m -= price; session.s += 180; }
-            } else if (id === 'space') {
-                price = 200000 + (session.s * 250);
-                if (session.m >= price) { session.m -= price; session.s += 1200; }
-            }
-            refreshUI();
-            saveToCloud();
-        }
-
-        // --- CLOUD SYNC ---
-        function saveToCloud() {
-            if (dbRef) dbRef.update({
-                m: session.m, p: session.p, s: session.s,
-                l: session.l, e: session.e, u: session.nick
+        function buildShop() {
+            const container = document.getElementById('shop-items-container');
+            container.innerHTML = '';
+            INFERNO_CONFIG.shop.forEach(item => {
+                const card = document.createElement('div');
+                card.className = 'upgrade-card';
+                card.innerHTML = `
+                    <div class="up-info">
+                        <h4 id="n-${item.id}">${item.name}</h4>
+                        <p>${item.desc}</p>
+                    </div>
+                    <button class="buy-trigger" id="btn-${item.id}" onclick="executePurchase('${item.id}')">
+                        $ 0
+                    </button>
+                `;
+                container.appendChild(card);
             });
         }
 
-        function loadGlobalTop() {
-            firebase.database().ref('users').orderByChild('m').limitToLast(10).on('value', snap => {
-                const board = document.getElementById('global-board');
+        function executePurchase(id) {
+            const item = INFERNO_CONFIG.shop.find(x => x.id === id);
+            let currentCost = 0;
+            
+            if (item.type === 'p') {
+                currentCost = Math.floor(item.base * Math.pow(item.mult, state.power));
+                if (state.money >= currentCost) {
+                    state.money -= currentCost;
+                    state.power += item.val;
+                }
+            } else {
+                // Calculation based on PPS levels
+                const count = state.pps / item.val;
+                currentCost = Math.floor(item.base * Math.pow(item.mult, count));
+                if (state.money >= currentCost) {
+                    state.money -= currentCost;
+                    state.pps += item.val;
+                }
+            }
+            updateVisuals();
+            cloudSave();
+        }
+
+        function updateVisuals() {
+            document.getElementById('stat-money').innerText = '$ ' + Math.floor(state.money).toLocaleString();
+            document.getElementById('stat-pps').innerText = `Mining Rate: $${state.pps.toFixed(2)}/s`;
+            document.getElementById('lvl-cur').innerText = `Level ${state.lvl}`;
+            document.getElementById('lvl-next').innerText = `Level ${state.lvl + 1}`;
+            
+            const xpPct = (state.exp / (state.lvl * 150)) * 100;
+            document.getElementById('xp-fill').style.width = xpPct + '%';
+
+            // Shop prices update
+            INFERNO_CONFIG.shop.forEach(item => {
+                let cost = 0;
+                if (item.type === 'p') {
+                    cost = Math.floor(item.base * Math.pow(item.mult, state.power));
+                } else {
+                    const count = state.pps / item.val;
+                    cost = Math.floor(item.base * Math.pow(item.mult, count));
+                }
+                const btn = document.getElementById('btn-' + item.id);
+                btn.innerText = '$' + cost.toLocaleString();
+                btn.className = state.money >= cost ? 'buy-trigger afford' : 'buy-trigger locked';
+            });
+
+            // Rank Logic
+            let r = "Hobo Investor";
+            if (state.lvl > 10) r = "Street Dealer";
+            if (state.lvl > 25) r = "Local Boss";
+            if (state.lvl > 50) r = "Shadow Oligarch";
+            if (state.lvl > 100) r = "World Controller";
+            if (state.lvl > 250) r = "Omega Deity";
+            document.getElementById('rank-name').innerText = r;
+        }
+
+        /* --- CLOUD & SOCIAL --- */
+        function cloudSave() {
+            if (!state.uid) return;
+            firebase.database().ref('users/' + state.uid).update({
+                m: state.money, p: state.power, s: state.pps,
+                l: state.lvl, e: state.exp, u: state.nick,
+                t: firebase.database.ServerValue.TIMESTAMP
+            });
+        }
+
+        function syncForbes() {
+            firebase.database().ref('users').orderByChild('m').limitToLast(20).on('value', snap => {
+                const board = document.getElementById('forbes-list');
                 board.innerHTML = '';
-                let list = [];
-                snap.forEach(c => list.push(c.val()));
-                list.reverse().forEach((u, i) => {
-                    const isMe = u.u === session.nick ? 'me' : '';
+                let ranks = [];
+                snap.forEach(c => ranks.push(c.val()));
+                ranks.reverse().forEach((u, i) => {
+                    const isMe = u.u === state.nick ? 'is-me' : '';
                     board.innerHTML += `
-                        <div class="top-row ${isMe}">
-                            <span>#${i+1} ${u.u}</span>
-                            <b>$${Math.floor(u.m).toLocaleString()}</b>
-                        </div>`;
+                        <div class="rank-entry ${isMe}">
+                            <span class="rank-num">#${i+1}</span>
+                            <span class="rank-name">${u.u}</span>
+                            <b style="color:var(--fire-glow)">$${Math.floor(u.m).toLocaleString()}</b>
+                        </div>
+                    `;
                 });
             });
         }
 
-        // --- VIEW ENGINES ---
-        function refreshUI() {
-            document.getElementById('u-cash').innerText = '$ ' + Math.floor(session.m).toLocaleString();
-            document.getElementById('u-pps').innerText = `Passive: $${session.s} / sec`;
-            document.getElementById('u-lvl').innerText = `LVL ${session.l}`;
+        /* --- UTILS & FX --- */
+        function createFloatingText(e) {
+            const t = document.createElement('div');
+            t.className = 'floating-text';
+            const x = e.clientX || e.touches[0].clientX;
+            const y = e.clientY || e.touches[0].clientY;
+            t.style.left = x + 'px';
+            t.style.top = y + 'px';
+            t.style.setProperty('--dx', (Math.random() * 200 - 100) + 'px');
+            t.style.setProperty('--dr', (Math.random() * 40 - 20) + 'deg');
+            t.innerText = `+$${state.power}`;
+            document.body.appendChild(t);
+            setTimeout(() => t.remove(), 1100);
             
-            const xpPct = (session.e / (session.l * 120)) * 100;
-            document.getElementById('p-bar').style.width = xpPct + '%';
-
-            // Prices
-            document.getElementById('b-click').innerText = '$' + Math.floor(50 + (Math.pow(session.p, 1.8) * 45)).toLocaleString();
-            document.getElementById('b-bot').innerText = '$' + Math.floor(400 + (session.s * 70)).toLocaleString();
-            document.getElementById('b-office').innerText = '$' + Math.floor(3200 + (session.s * 110)).toLocaleString();
-            document.getElementById('b-ai').innerText = '$' + Math.floor(25000 + (session.s * 160)).toLocaleString();
-            document.getElementById('b-space').innerText = '$' + Math.floor(200000 + (session.s * 250)).toLocaleString();
-
-            let title = "Hobo Investor";
-            if (session.l > 10) title = "Street Hustler";
-            if (session.l > 30) title = "Shadow Boss";
-            if (session.l > 70) title = "Imperial Tycoon";
-            document.getElementById('u-rank').innerText = title;
+            // Simple particles
+            for(let i=0; i<5; i++) {
+                const p = document.createElement('div');
+                p.className = 'particle';
+                p.style.width = p.style.height = (Math.random() * 8 + 4) + 'px';
+                p.style.left = x + 'px';
+                p.style.top = y + 'px';
+                document.body.appendChild(p);
+                setTimeout(() => p.remove(), 1000);
+            }
         }
 
-        function triggerPop(e) {
-            const p = document.createElement('div'); p.className = 'coin-pop';
-            p.style.left = (e.clientX || e.touches[0].clientX) + 'px';
-            p.style.top = (e.clientY || e.touches[0].clientY) + 'px';
-            p.innerText = `+$${session.p}`; document.body.appendChild(p);
-            setTimeout(() => p.remove(), 950);
+        function notify(msg) {
+            const t = document.getElementById('toast-notify');
+            t.innerText = msg;
+            t.style.display = 'block';
+            setTimeout(() => t.style.display = 'none', 3000);
         }
 
-        function switchNav(id) {
-            document.querySelectorAll('.scroll-view').forEach(s => s.classList.remove('active'));
-            document.querySelectorAll('.nav-link').forEach(n => n.classList.remove('active'));
-            document.getElementById('scr-' + id).classList.add('active');
+        function navigate(id) {
+            document.querySelectorAll('.screen-content').forEach(s => s.classList.remove('active'));
+            document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+            document.getElementById('view-' + id).classList.add('active');
             event.currentTarget.classList.add('active');
+            state.activeScreen = id;
         }
+
+        window.addEventListener('resize', resize);
+        initCanvas();
     </script>
 </body>
 </html>
