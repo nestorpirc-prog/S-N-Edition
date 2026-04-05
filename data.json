@@ -1,0 +1,23 @@
+{
+  "project": {
+    "name": "GOLDEN EQUITY",
+    "version": "2.0.1",
+    "founders": "Nestor & Sanya"
+  },
+  "levels": [
+    {"rank": "Hobo", "goal": 100, "reward": 1, "icon": "🪙", "color": "#cd7f32"},
+    {"rank": "Street Worker", "goal": 1000, "reward": 5, "icon": "🥈", "color": "#c0c0c0"},
+    {"rank": "Business Manager", "goal": 10000, "reward": 25, "icon": "👑", "color": "#ffd700"},
+    {"rank": "Director", "goal": 100000, "reward": 100, "icon": "💵", "color": "#22c55e"},
+    {"rank": "Global Tycoon", "goal": 1000000, "reward": 500, "icon": "💎", "color": "#3b82f6"}
+  ],
+  "services": [
+    {"title": "Web Architecture", "price": "from $499", "dev": "Nestor"},
+    {"title": "Visual Identity", "price": "from $250", "dev": "Sanya"},
+    {"title": "Custom Software", "price": "Market Price", "dev": "Team"}
+  ],
+  "payment": {
+    "card": "4441 1144 3338 8350",
+    "holder": "NESTOR & SANYA"
+  }
+}
