@@ -3,269 +3,400 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>GOLDEN EQUITY | NESTOR & SANYA</title>
+    <title>BUIZNES IMPERIA | NESTOR & SANYA</title>
     
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;600;900&family=Plus+Jakarta+Sans:wght@200;400;700;800&display=swap" rel="stylesheet">
     
     <style>
         :root {
             --p-green: #22c55e;
+            --p-blue: #3b82f6;
+            --p-gold: #fbbf24;
             --bg: #020617;
             --glass: rgba(255, 255, 255, 0.03);
             --glass-border: rgba(255, 255, 255, 0.08);
+            --text-main: #ffffff;
             --text-sub: #94a3b8;
         }
 
-        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-        body, html { 
-            margin: 0; padding: 0; background: var(--bg); color: #fff; 
-            font-family: 'Plus Jakarta Sans', sans-serif; height: 100%; overflow: hidden;
+        * { 
+            box-sizing: border-box; 
+            margin: 0; padding: 0; 
+            -webkit-tap-highlight-color: transparent; 
+            user-select: none;
         }
 
-        /* Анімований фон */
-        #canvas { position: fixed; inset: 0; z-index: 0; opacity: 0.5; }
+        body, html { 
+            background: var(--bg); 
+            color: var(--text-main); 
+            font-family: 'Plus Jakarta Sans', sans-serif; 
+            height: 100%; width: 100%;
+            overflow: hidden; 
+            touch-action: manipulation;
+        }
 
-        .app { position: relative; z-index: 10; height: 100dvh; display: flex; flex-direction: column; }
+        /* Анімований фон з частинками */
+        #canvas { 
+            position: fixed; inset: 0; z-index: 0; 
+            opacity: 0.6; pointer-events: none; 
+        }
 
-        /* --- СИСТЕМА ВКЛАДОК (TABS) --- */
+        .app-wrapper {
+            position: relative; z-index: 10;
+            height: 100dvh; display: flex; flex-direction: column;
+        }
+
+        /* --- ВЕРХНЯ ПАНЕЛЬ: REAL ONLINE --- */
+        .header-status {
+            padding: 20px; display: flex; justify-content: space-between; align-items: center;
+            backdrop-filter: blur(10px); background: linear-gradient(to bottom, rgba(2,6,23,0.8), transparent);
+        }
+
+        .online-box {
+            background: rgba(0,0,0,0.6); padding: 10px 18px; border-radius: 50px;
+            border: 1px solid var(--glass-border); display: flex; align-items: center; gap: 10px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+        }
+
+        .pulse-dot { 
+            width: 8px; height: 8px; background: var(--p-green); 
+            border-radius: 50%; box-shadow: 0 0 12px var(--p-green); 
+            animation: pulse-glow 2s infinite; 
+        }
+
+        #live-counter { font-size: 0.7rem; font-weight: 800; letter-spacing: 1px; color: #fff; }
+
+        @keyframes pulse-glow { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.4; transform: scale(1.3); } }
+
+        /* --- СИСТЕМА ЕКРАНІВ (TABS) --- */
         .screen { 
             display: none; height: 100%; overflow-y: auto; 
-            padding: 20px; animation: fadeIn 0.4s ease;
+            padding: 20px; animation: slideIn 0.4s cubic-bezier(0.18, 0.89, 0.32, 1.28);
+            -webkit-overflow-scrolling: touch;
         }
         .screen.active { display: block; }
 
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes slideIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
 
-        /* --- ГОЛОВНА СТОРІНКА (ПРО НАС) --- */
-        .brand-section { text-align: center; padding: 60px 0 30px; }
-        .brand-section h1 { font-family: 'Outfit'; font-size: 3.5rem; line-height: 0.9; margin: 0; letter-spacing: -2px; }
-        .brand-section h1 span { color: var(--p-green); }
+        /* --- ЕКРАН 1: ПРО НАС (THE SITE) --- */
+        .brand-hero { text-align: center; padding: 40px 0; }
+        .brand-hero h1 { font-family: 'Outfit'; font-size: 3.8rem; font-weight: 900; line-height: 0.85; letter-spacing: -3px; margin: 0; }
+        .brand-hero h1 span { color: var(--p-green); text-shadow: 0 0 30px rgba(34, 197, 94, 0.4); }
         
-        .hero-btn {
-            background: var(--p-green); color: #000; border: none;
-            padding: 20px 40px; border-radius: 50px; font-family: 'Outfit';
-            font-weight: 900; font-size: 1.2rem; cursor: pointer;
-            box-shadow: 0 0 30px rgba(34, 197, 94, 0.4); transition: 0.3s;
-            margin: 30px 0; width: 100%;
+        .start-btn {
+            background: linear-gradient(135deg, var(--p-green), #166534);
+            color: #000; border: none; padding: 22px; border-radius: 20px;
+            font-family: 'Outfit'; font-weight: 900; font-size: 1.3rem;
+            width: 100%; margin: 30px 0; cursor: pointer;
+            box-shadow: 0 15px 35px rgba(34, 197, 94, 0.2); transition: 0.2s;
         }
-        .hero-btn:active { transform: scale(0.95); opacity: 0.8; }
+        .start-btn:active { transform: scale(0.96); opacity: 0.9; }
 
         .glass-card {
             background: var(--glass); border: 1px solid var(--glass-border);
-            border-radius: 30px; padding: 25px; margin-bottom: 20px; backdrop-filter: blur(10px);
+            border-radius: 35px; padding: 30px; margin-bottom: 20px;
+            backdrop-filter: blur(15px);
         }
 
-        /* --- ГРА (CLICKER) --- */
-        .game-header { text-align: center; padding: 20px 0; }
-        .balance-val { font-family: 'Outfit'; font-size: 4rem; font-weight: 900; color: #fff; }
-        
-        .clicker-container {
-            height: 50vh; display: flex; align-items: center; justify-content: center;
+        .story-title { font-family: 'Outfit'; color: var(--p-green); font-size: 1.8rem; margin-bottom: 15px; }
+        .story-text { font-size: 1rem; line-height: 1.7; color: var(--text-sub); font-weight: 300; }
+        .story-text b { color: #fff; }
+
+        .service-row {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 15px 0; border-bottom: 1px solid var(--glass-border);
         }
-        .coin {
-            width: 220px; height: 220px; border-radius: 50%;
-            background: radial-gradient(circle at 30% 30%, #22c55e, #14532d);
+        .service-row:last-child { border: none; }
+        .service-info h4 { font-size: 1rem; margin: 0; }
+        .service-info p { font-size: 0.75rem; color: var(--text-sub); }
+        .price-tag { color: var(--p-green); font-weight: 800; font-family: 'Outfit'; }
+
+        /* VISA CARD DESIGN */
+        .visa-container {
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+            border-radius: 25px; padding: 25px; margin-top: 10px;
+            border: 1px solid rgba(255,255,255,0.1); position: relative;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+        }
+        .visa-chip { width: 45px; height: 35px; background: linear-gradient(135deg, #fbbf24, #d97706); border-radius: 6px; margin-bottom: 30px; }
+        .visa-number { font-family: 'Outfit'; font-size: 1.5rem; letter-spacing: 3px; color: #fff; margin-bottom: 20px; }
+        .visa-footer { display: flex; justify-content: space-between; align-items: flex-end; }
+        .visa-name { font-size: 0.7rem; font-weight: 800; letter-spacing: 2px; color: var(--p-green); text-transform: uppercase; }
+
+        /* --- ЕКРАН 2: ГРА (THE GAME) --- */
+        .game-stats { text-align: center; padding: 40px 0 20px; }
+        .main-balance { font-family: 'Outfit'; font-size: 5rem; font-weight: 900; line-height: 1; margin: 10px 0; }
+        .rank-label { font-size: 0.7rem; font-weight: 800; letter-spacing: 4px; color: var(--p-green); text-transform: uppercase; }
+
+        .clicker-box {
+            height: 45vh; display: flex; align-items: center; justify-content: center;
+            position: relative;
+        }
+
+        .coin-object {
+            width: 230px; height: 230px; border-radius: 50%;
+            background: radial-gradient(circle at 35% 35%, #22c55e, #14532d);
             display: flex; align-items: center; justify-content: center;
-            font-size: 6rem; cursor: pointer; transition: 0.05s;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.6); border: 8px solid var(--glass-border);
+            font-size: 7rem; cursor: pointer; transition: 0.05s;
+            box-shadow: 0 30px 70px rgba(0,0,0,0.7), inset 0 0 50px rgba(255,255,255,0.2);
+            border: 12px solid rgba(255,255,255,0.05);
+            z-index: 5;
         }
-        .coin:active { transform: scale(0.9); }
+        .coin-object:active { transform: scale(0.88) rotate(-5deg); }
+
+        /* --- ЕФЕКТИ ВИЛЬОТУ --- */
+        .float-val {
+            position: fixed; pointer-events: none; font-family: 'Outfit'; font-weight: 900;
+            color: var(--p-green); font-size: 2rem; z-index: 1000;
+            animation: float-up-fade 0.8s ease-out forwards;
+        }
+        @keyframes float-up-fade {
+            0% { opacity: 1; transform: translateY(0) scale(1); }
+            100% { opacity: 0; transform: translateY(-150px) scale(1.6); }
+        }
 
         /* --- НАВІГАЦІЯ --- */
-        .nav-bar {
-            background: rgba(2, 6, 23, 0.8); backdrop-filter: blur(20px);
+        .bottom-nav {
+            background: rgba(2, 6, 23, 0.9); backdrop-filter: blur(25px);
             border-top: 1px solid var(--glass-border);
-            display: flex; justify-content: space-around; padding: 15px 10px 30px;
+            display: flex; justify-content: space-around; padding: 15px 10px 35px;
         }
-        .nav-item { 
-            background: none; border: none; color: var(--text-sub); 
-            font-weight: 800; font-size: 0.7rem; cursor: pointer;
-            display: flex; flex-direction: column; align-items: center; gap: 5px;
+        .nav-item {
+            background: none; border: none; color: var(--text-sub);
+            display: flex; flex-direction: column; align-items: center; gap: 6px;
+            cursor: pointer; transition: 0.3s;
         }
-        .nav-item.active { color: var(--p-green); }
-        .nav-item i { font-size: 1.2rem; }
+        .nav-item.active { color: var(--p-green); transform: translateY(-5px); }
+        .nav-item i { font-size: 1.4rem; font-style: normal; }
+        .nav-item span { font-size: 0.65rem; font-weight: 900; letter-spacing: 1px; }
 
-        /* --- КАРТКА VISA --- */
-        .visa-card {
-            background: linear-gradient(135deg, #0f172a, #1e293b);
-            border-radius: 20px; padding: 20px; border: 1px solid rgba(255,255,255,0.1);
-        }
-        .card-num { font-family: 'Outfit'; font-size: 1.2rem; letter-spacing: 2px; margin: 20px 0; }
+        footer { text-align: center; padding: 40px; font-size: 0.6rem; color: var(--text-sub); opacity: 0.4; }
 
-        .float-text {
-            position: fixed; pointer-events: none; color: var(--p-green);
-            font-weight: 900; animation: floatUp 0.7s forwards; z-index: 1000;
-        }
-        @keyframes floatUp { to { transform: translateY(-100px); opacity: 0; } }
     </style>
 </head>
 <body>
 
     <canvas id="canvas"></canvas>
 
-    <div class="app">
+    <div class="app-wrapper">
         
-        <div id="screen-about" class="screen active">
-            <div class="brand-section">
-                <h1>GOLDEN<br><span>EQUITY</span></h1>
-                <p style="color: var(--text-sub); font-size: 0.8rem; letter-spacing: 2px;">NESTOR & SANYA PRODUCTION</p>
+        <header class="header-status">
+            <div class="online-box">
+                <div class="pulse-dot"></div>
+                <span id="live-counter">INITIALIZING...</span>
+            </div>
+            <div style="font-weight: 900; font-size: 0.7rem; color: var(--p-blue);">V3.0 ELITE</div>
+        </header>
+
+        <div id="tab-site" class="screen active">
+            <div class="brand-hero">
+                <p style="font-weight: 800; font-size: 0.6rem; letter-spacing: 4px; color: var(--p-green); margin-bottom: 10px;">ESTABLISHED 2024</p>
+                <h1>BUIZNES<br><span>IMPERIA</span></h1>
             </div>
 
-            <button class="hero-btn" onclick="showScreen('game')">START EMPIRE</button>
+            <button class="start-btn" onclick="switchTab('game')">START THE CLIMB</button>
 
             <div class="glass-card">
-                <h3 style="margin-top:0; color: var(--p-green);">The Legend</h3>
-                <p style="font-size: 0.9rem; color: var(--text-sub); line-height: 1.6;">
-                    From a single bronze cent found in the dust to a global digital monopoly. 
-                    <b>Nestor</b> (Architect) and <b>Sanya</b> (Aesthetics) built this portal for the ambitious. 
-                    Every tap is a transaction in your favor.
+                <h2 class="story-title">The Foundation</h2>
+                <p class="story-text">
+                    It began with a <b>bronze cent</b> lost in the rain. Others walked past, but we saw an empire. 
+                    <b>Nestor</b> engineered the architecture, <b>Sanya</b> defined the soul. 
+                    Today, Buiznes Imperia is the digital bridge between effort and absolute legacy.
                 </p>
             </div>
 
             <div class="glass-card">
-                <h3 style="margin-top:0;">Premium Services</h3>
-                <div style="font-size: 0.8rem; display: flex; justify-content: space-between; margin-bottom: 10px;">
-                    <span>Web Development (Nestor)</span>
-                    <b style="color: var(--p-green);">$499</b>
+                <h2 class="story-title" style="color: #fff;">Our Core Services</h2>
+                <div class="service-row">
+                    <div class="service-info"><h4>System Architecture</h4><p>High-load solutions by Nestor</p></div>
+                    <div class="price-tag">$499</div>
                 </div>
-                <div style="font-size: 0.8rem; display: flex; justify-content: space-between;">
-                    <span>Visual Identity (Sanya)</span>
-                    <b style="color: var(--p-green);">$250</b>
+                <div class="service-row">
+                    <div class="service-info"><h4>Visual Supremacy</h4><p>Premium UI/UX by Sanya</p></div>
+                    <div class="price-tag">$250</div>
+                </div>
+                <div class="service-row">
+                    <div class="service-info"><h4>Global Automation</h4><p>AI Bot Integration</p></div>
+                    <div class="price-tag">$799</div>
                 </div>
             </div>
 
-            <div class="visa-card">
-                <div style="font-size: 0.6rem; opacity: 0.5;">OFFICIAL SUPPORT</div>
-                <div class="card-num">4441 1144 3338 8350</div>
-                <div style="display: flex; justify-content: space-between; align-items: center;">
-                    <span style="font-size: 0.7rem; font-weight: 800; color: var(--p-green);">NESTOR & SANYA</span>
-                    <span style="font-style: italic; font-weight: 900; opacity: 0.3;">VISA</span>
+            <div class="visa-container">
+                <div class="visa-chip"></div>
+                <p style="font-size: 0.6rem; opacity: 0.5; margin-bottom: 5px;">EXCLUSIVE SUPPORT CHANNEL</p>
+                <div class="visa-number">4441 1144 3338 8350</div>
+                <div class="visa-footer">
+                    <div class="visa-name">NESTOR & SANYA CORP</div>
+                    <div style="font-style: italic; font-weight: 900; opacity: 0.3;">VISA</div>
                 </div>
             </div>
-            
-            <p style="text-align: center; font-size: 0.6rem; opacity: 0.3; margin-top: 20px;">© 2026 GOLDEN EQUITY CORP.</p>
+
+            <footer>© 2026 GOLDEN EQUITY GROUP. ALL RIGHTS RESERVED.</footer>
         </div>
 
-        <div id="screen-game" class="screen">
-            <div class="game-header">
-                <p style="font-size: 0.7rem; letter-spacing: 3px; color: var(--text-sub); margin: 0;">TOTAL EQUITY</p>
-                <div class="balance-val" id="balance">$ 0</div>
-                <div id="status-tag" style="font-size: 0.6rem; color: var(--p-green); font-weight: 800;">STATUS: HOBO</div>
+        <div id="tab-game" class="screen">
+            <div class="game-stats">
+                <p class="rank-label" id="rank-display">STATUS: HOBO</p>
+                <h1 class="main-balance" id="balance-display">$ 0</h1>
             </div>
 
-            <div class="clicker-container">
-                <div class="coin" id="coin-btn" onclick="handleTap(event)">🪙</div>
+            <div class="clicker-box">
+                <div class="coin-object" id="main-coin" onclick="handleTap(event)">🪙</div>
             </div>
 
-            <div class="glass-card" style="text-align: center;">
-                <p style="font-size: 0.7rem; color: var(--text-sub);">Keep tapping to reach <b>Global Tycoon</b> status.</p>
+            <div class="glass-card" style="text-align: center; padding: 20px;">
+                <p style="font-size: 0.75rem; color: var(--text-sub); line-height: 1.5;">
+                    Your capital is increasing. Reach <b>$1,000,000</b> to unlock <b>Global Tycoon</b> status.
+                </p>
             </div>
         </div>
 
-        <nav class="nav-bar">
-            <button class="nav-item active" id="nav-about" onclick="showScreen('about')">
-                <i>🏠</i>
-                <span>ABOUT</span>
+        <nav class="bottom-nav">
+            <button class="nav-item active" id="nav-site" onclick="switchTab('site')">
+                <i>📜</i>
+                <span>DOSSIER</span>
             </button>
-            <button class="nav-item" id="nav-game" onclick="showScreen('game')">
-                <i>🎮</i>
-                <span>GAME</span>
+            <button class="nav-item" id="nav-game" onclick="switchTab('game')">
+                <i>💎</i>
+                <span>EMPIRE</span>
             </button>
         </nav>
 
     </div>
 
     <script>
-        // --- DATA & STATE ---
-        let money = parseFloat(localStorage.getItem('ge_m')) || 0;
-        const ranks = [
-            { n: "HOBO", g: 500, i: "🪙" },
-            { n: "HUSTLER", g: 5000, i: "🥈" },
-            { n: "DIRECTOR", g: 50000, i: "💵" },
-            { n: "TYCOON", g: 1000000, i: "💎" }
+        // --- 1. FIREBASE: СПРАВЖНІЙ ОНЛАЙН ---
+        const firebaseConfig = {
+            databaseURL: "https://buiznesimperia-default-rtdb.firebaseio.com/"
+        };
+        
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.database();
+        const onlineRef = db.ref("online_sessions");
+        const myRef = onlineRef.push();
+
+        // Справжнє відстеження підключення
+        db.ref(".info/connected").on("value", (snap) => {
+            if (snap.val()) {
+                myRef.onDisconnect().remove();
+                myRef.set(true);
+            }
+        });
+
+        // Оновлення лічильника в реальному часі для всіх
+        onlineRef.on("value", (snap) => {
+            const count = snap.numChildren() || 1;
+            document.getElementById('live-counter').innerText = `${count.toLocaleString()} OPERATORS ONLINE`;
+        });
+
+        // --- 2. ГЕЙМ-ДВИГУН ---
+        let money = parseFloat(localStorage.getItem('bi_v3_money')) || 0;
+        
+        const RANKS = [
+            { name: "HOBO", goal: 500, icon: "🪙", reward: 1 },
+            { name: "HUSTLER", goal: 5000, icon: "🥈", reward: 5 },
+            { name: "DIRECTOR", goal: 50000, icon: "💵", reward: 25 },
+            { name: "TYCOON", goal: 1000000, icon: "💎", reward: 100 }
         ];
 
-        // --- NAVIGATION ENGINE ---
-        function showScreen(screenId) {
-            // Hide all screens
-            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-            document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-            
-            // Show target
-            document.getElementById('screen-' + screenId).classList.add('active');
-            document.getElementById('nav-' + screenId).classList.add('active');
-            
-            if(screenId === 'game') playSound(440, 'sine', 0.1);
-        }
-
-        // --- GAME LOGIC ---
         function handleTap(e) {
-            let lvl = getLvl();
-            let gain = 1 + (lvl * 5);
-            money += gain;
+            let lvl = getCurrentLevel();
+            let reward = RANKS[lvl].reward;
             
+            money += reward;
+            
+            // Visuals
             updateUI();
-            spawnFX(e, gain);
-            playSound(200 + (lvl * 100), 'sine', 0.05);
-            if(navigator.vibrate) navigator.vibrate(10);
+            spawnFloatText(e, reward);
             
-            localStorage.setItem('ge_m', money);
+            // Feedback
+            if(navigator.vibrate) navigator.vibrate(12);
+            playNote(200 + (lvl * 150));
+            
+            localStorage.setItem('bi_v3_money', money);
         }
 
-        function getLvl() {
+        function getCurrentLevel() {
             let l = 0;
-            ranks.forEach((r, i) => { if(money >= r.g) l = i + 1; });
-            return Math.min(l, ranks.length - 1);
+            RANKS.forEach((r, i) => { if(money >= r.goal) l = i + 1; });
+            return Math.min(l, RANKS.length - 1);
         }
 
         function updateUI() {
-            const lvl = getLvl();
-            document.getElementById('balance').innerText = '$ ' + Math.floor(money).toLocaleString();
-            document.getElementById('status-tag').innerText = 'STATUS: ' + ranks[lvl].n;
-            document.getElementById('coin-btn').innerText = ranks[lvl].i;
+            const lvl = getCurrentLevel();
+            const rank = RANKS[lvl];
+            
+            document.getElementById('balance-display').innerText = '$ ' + Math.floor(money).toLocaleString();
+            document.getElementById('rank-display').innerText = 'STATUS: ' + rank.name;
+            document.getElementById('main-coin').innerText = rank.icon;
         }
 
-        function spawnFX(e, v) {
+        function spawnFloatText(e, val) {
             const f = document.createElement('div');
-            f.className = 'float-text';
-            f.style.left = (e.clientX || e.touches[0].clientX) + 'px';
-            f.style.top = (e.clientY || e.touches[0].clientY) + 'px';
-            f.innerText = '+$' + v;
+            f.className = 'float-val';
+            const x = e.clientX || (e.touches ? e.touches[0].clientX : 0);
+            const y = e.clientY || (e.touches ? e.touches[0].clientY : 0);
+            f.style.left = x + 'px'; f.style.top = y + 'px';
+            f.innerText = '+$' + val;
             document.body.appendChild(f);
-            setTimeout(() => f.remove(), 700);
+            setTimeout(() => f.remove(), 800);
         }
 
-        // --- AUDIO ---
+        // --- 3. СЕРВІСНІ ФУНКЦІЇ ---
+        function switchTab(tabId) {
+            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+            document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+            
+            document.getElementById('tab-' + tabId).classList.add('active');
+            document.getElementById('nav-' + tabId).classList.add('active');
+            
+            if(tabId === 'game') playNote(440);
+        }
+
+        // Синтезатор звуку
         const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-        function playSound(f, t, d) {
-            const o = audioCtx.createOscillator();
-            const g = audioCtx.createGain();
-            o.type = t; o.frequency.value = f;
-            g.gain.setValueAtTime(0.1, audioCtx.currentTime);
-            g.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + d);
-            o.connect(g); g.connect(audioCtx.destination);
-            o.start(); o.stop(audioCtx.currentTime + d);
+        function playNote(freq) {
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.type = 'sine'; osc.frequency.value = freq;
+            gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + 0.1);
+            osc.connect(gain); gain.connect(audioCtx.destination);
+            osc.start(); osc.stop(audioCtx.currentTime + 0.1);
         }
 
-        // --- BACKGROUND ---
+        // Анімація фону
         const canvas = document.getElementById('canvas');
         const ctx = canvas.getContext('2d');
-        let p = [];
-        function init() {
-            canvas.width = innerWidth; canvas.height = innerHeight;
-            p = Array.from({length: 50}, () => ({x: Math.random()*canvas.width, y: Math.random()*canvas.height, s: Math.random()*2, v: Math.random()*0.5}));
+        let particles = [];
+
+        function initBG() {
+            canvas.width = window.innerWidth; canvas.height = window.innerHeight;
+            particles = Array.from({length: 45}, () => ({
+                x: Math.random() * canvas.width,
+                y: Math.random() * canvas.height,
+                v: Math.random() * 0.4 + 0.1,
+                s: Math.random() * 1.5 + 0.5
+            }));
         }
-        function draw() {
+
+        function animateBG() {
             ctx.clearRect(0,0,canvas.width, canvas.height);
-            ctx.fillStyle = 'rgba(34, 197, 94, 0.2)';
-            p.forEach(i => {
-                ctx.beginPath(); ctx.arc(i.x, i.y, i.s, 0, 7); ctx.fill();
-                i.y -= i.v; if(i.y < 0) i.y = canvas.height;
+            ctx.fillStyle = 'rgba(34, 197, 94, 0.25)';
+            particles.forEach(p => {
+                ctx.beginPath(); ctx.arc(p.x, p.y, p.s, 0, Math.PI*2); ctx.fill();
+                p.y -= p.v; if(p.y < -10) p.y = canvas.height + 10;
             });
-            requestAnimationFrame(draw);
+            requestAnimationFrame(animateBG);
         }
-        init(); draw(); window.onresize = init;
-        updateUI();
+
+        window.onload = () => {
+            initBG(); animateBG(); updateUI();
+        };
+        window.onresize = initBG;
 
     </script>
 </body>
