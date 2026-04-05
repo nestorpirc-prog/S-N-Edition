@@ -2,382 +2,720 @@
 <html lang="uk">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>BUIZNES IMPERIA | INFERNO OMEGA</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>BUIZNES IMPERIA | INFERNO OMEGA ULTIMATE</title>
     
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
 
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@900&family=JetBrains+Mono:wght@500;800&family=Space+Grotesk:wght@300;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@100;400;900&family=JetBrains+Mono:wght@300;800&family=Space+Grotesk:wght@300;700&display=swap" rel="stylesheet">
     
     <style>
+        /* --- CORE STYLES & VARIABLES --- */
         :root {
-            --inferno: linear-gradient(135deg, #ff4d00 0%, #ffae00 100%);
-            --deep-void: #050507;
-            --glass: rgba(255, 255, 255, 0.03);
-            --neon-border: rgba(255, 77, 0, 0.4);
+            --fire-main: #ff4d00;
+            --fire-glow: #ffae00;
+            --magma: #8b0000;
+            --void: #020204;
+            --glass-border: rgba(255, 77, 0, 0.2);
+            --font-logo: 'Outfit', sans-serif;
+            --font-tech: 'JetBrains Mono', monospace;
+            --font-main: 'Space Grotesk', sans-serif;
+            --anim-speed: 0.4s;
         }
 
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Space Grotesk', sans-serif; }
-        
+        * { 
+            box-sizing: border-box; 
+            margin: 0; 
+            padding: 0; 
+            -webkit-tap-highlight-color: transparent;
+            user-select: none;
+        }
+
         body, html { 
-            background: var(--deep-void); color: #fff; 
-            height: 100vh; overflow: hidden; position: fixed; width: 100%;
+            background: var(--void); 
+            color: #fff; 
+            font-family: var(--font-main);
+            height: 100dvh; 
+            width: 100%; 
+            overflow: hidden; 
+            position: fixed;
         }
 
         /* --- BACKGROUND ENGINE --- */
-        #canvas-bg { position: fixed; top: 0; left: 0; z-index: -1; filter: blur(4px); }
-
-        /* --- AUTH LAYER (THE FIX) --- */
-        #auth-screen {
-            position: fixed; inset: 0; z-index: 9999;
-            background: radial-gradient(circle at center, #1a0a05 0%, #050507 100%);
-            display: flex; align-items: center; justify-content: center; padding: 20px;
+        #particle-canvas {
+            position: fixed;
+            inset: 0;
+            z-index: -1;
+            background: radial-gradient(circle at center, #150505 0%, #020204 100%);
         }
 
-        .auth-card {
-            width: 100%; max-width: 420px; padding: 50px;
-            background: rgba(10, 10, 15, 0.8); backdrop-filter: blur(40px);
-            border-radius: 40px; border: 1px solid var(--neon-border);
-            box-shadow: 0 0 100px rgba(255, 77, 0, 0.15); text-align: center;
+        .scanline {
+            width: 100%;
+            height: 100px;
+            z-index: 1000;
+            background: linear-gradient(0deg, transparent 0%, rgba(255, 77, 0, 0.05) 50%, transparent 100%);
+            opacity: 0.1;
+            position: absolute;
+            bottom: 100%;
+            animation: scan 4s linear infinite;
+            pointer-events: none;
         }
 
-        .auth-card h1 { font-family: 'Outfit'; font-size: 4rem; line-height: 0.9; margin-bottom: 10px; }
-        .auth-card p { color: #ffae00; font-family: 'JetBrains Mono'; font-size: 0.7rem; letter-spacing: 3px; text-transform: uppercase; margin-bottom: 40px; }
+        @keyframes scan { 0% { bottom: 100%; } 100% { bottom: -100px; } }
 
-        .input-group { text-align: left; margin-bottom: 25px; }
-        .input-group label { display: block; font-size: 0.6rem; color: #666; margin-left: 15px; margin-bottom: 8px; text-transform: uppercase; font-family: 'JetBrains Mono'; }
-        
+        /* --- AUTH LAYER --- */
+        #auth-layer {
+            position: fixed;
+            inset: 0;
+            z-index: 9999;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            backdrop-filter: blur(10px);
+            transition: opacity 1s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .auth-container {
+            width: 100%;
+            max-width: 450px;
+            background: rgba(5, 5, 10, 0.95);
+            border: 1px solid var(--glass-border);
+            border-radius: 40px;
+            padding: 60px 40px;
+            text-align: center;
+            box-shadow: 0 0 100px rgba(255, 77, 0, 0.1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .auth-container::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: conic-gradient(from 180deg at 50% 50%, transparent 0deg, var(--fire-main) 360deg);
+            animation: rotateGlow 15s linear infinite;
+            opacity: 0.05;
+            z-index: -1;
+        }
+
+        @keyframes rotateGlow { 100% { transform: rotate(360deg); } }
+
+        .logo-box h1 {
+            font-family: var(--font-logo);
+            font-size: 5rem;
+            font-weight: 900;
+            letter-spacing: -5px;
+            line-height: 0.8;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+        }
+
+        .logo-box p {
+            color: var(--fire-glow);
+            font-family: var(--font-tech);
+            font-size: 0.75rem;
+            letter-spacing: 5px;
+            text-transform: uppercase;
+            margin-bottom: 50px;
+        }
+
+        .input-wrapper {
+            text-align: left;
+            margin-bottom: 30px;
+        }
+
+        .input-wrapper label {
+            display: block;
+            font-family: var(--font-tech);
+            font-size: 0.65rem;
+            color: #666;
+            margin-left: 20px;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+        }
+
         .inferno-input {
-            width: 100%; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.1);
-            padding: 20px; border-radius: 20px; color: #fff; font-size: 1rem; transition: 0.3s;
+            width: 100%;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 22px 25px;
+            color: #fff;
+            font-size: 1rem;
+            font-family: var(--font-tech);
+            transition: 0.3s;
         }
-        .inferno-input:focus { border-color: #ff4d00; background: rgba(255, 77, 0, 0.05); outline: none; }
 
-        .btn-init {
-            width: 100%; padding: 22px; border-radius: 22px; border: none;
-            background: var(--inferno); color: #000; font-weight: 900;
-            font-size: 1.2rem; cursor: pointer; font-family: 'Outfit';
-            transition: 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        .inferno-input:focus {
+            border-color: var(--fire-main);
+            background: rgba(255, 77, 0, 0.05);
+            outline: none;
+            box-shadow: 0 0 20px rgba(255, 77, 0, 0.1);
         }
-        .btn-init:active { transform: scale(0.95); }
 
-        /* --- GAME ENGINE STYLE --- */
-        #game-ui { display: none; height: 100vh; flex-direction: column; opacity: 0; transition: 1s; }
-
-        .header { padding: 40px 20px; text-align: center; }
-        .money-display { font-family: 'Outfit'; font-size: 5.5rem; letter-spacing: -4px; margin-bottom: 5px; }
-        .stats-row { font-family: 'JetBrains Mono'; font-size: 0.8rem; color: #ffae00; opacity: 0.8; }
-
-        .clicker-zone { flex: 1; display: flex; align-items: center; justify-content: center; position: relative; }
-        .main-coin {
-            width: 280px; height: 280px; border-radius: 50%;
-            background: radial-gradient(circle at 30% 30%, #ffae00, #ff4d00, #410);
-            box-shadow: 0 40px 80px rgba(0,0,0,0.8), inset 0 -10px 40px rgba(0,0,0,0.5);
-            display: flex; align-items: center; justify-content: center;
-            font-size: 8rem; font-family: 'Outfit'; cursor: pointer;
-            transition: 0.1s cubic-bezier(0, 0, 0, 1); z-index: 10;
+        .main-btn {
+            width: 100%;
+            background: var(--fire-main);
+            color: #000;
+            border: none;
+            border-radius: 25px;
+            padding: 25px;
+            font-family: var(--font-logo);
+            font-weight: 900;
+            font-size: 1.3rem;
+            cursor: pointer;
+            transition: 0.4s;
+            position: relative;
+            overflow: hidden;
+            margin-top: 20px;
         }
-        .main-coin:active { transform: scale(0.9) rotate(-3deg); }
 
-        /* --- SHOP & TABS --- */
-        .content-screen { display: none; padding: 20px; overflow-y: auto; height: calc(100% - 150px); }
-        .active-screen { display: block; animation: slideUp 0.5s forwards; }
-        @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        .main-btn:active { transform: scale(0.96); }
+        .main-btn span { position: relative; z-index: 2; }
 
-        .item-card {
-            background: var(--glass); border: 1px solid rgba(255,255,255,0.05);
-            padding: 25px; border-radius: 30px; margin-bottom: 15px;
-            display: flex; justify-content: space-between; align-items: center;
+        .error-msg {
+            margin-top: 25px;
+            font-family: var(--font-tech);
+            font-size: 0.7rem;
+            color: var(--fire-main);
+            min-height: 20px;
+            text-transform: uppercase;
         }
-        .item-info h3 { font-size: 1.2rem; margin-bottom: 4px; font-family: 'Outfit'; }
-        .item-info p { font-size: 0.75rem; color: #888; }
-        
-        .buy-btn {
-            background: #fff; color: #000; border: none; padding: 15px 25px;
-            border-radius: 15px; font-weight: 800; font-family: 'JetBrains Mono';
-        }
-        .buy-btn.locked { opacity: 0.2; }
 
-        .nav-bar {
-            position: fixed; bottom: 0; width: 100%; padding: 20px 20px 40px;
-            background: rgba(5, 5, 7, 0.95); backdrop-filter: blur(20px);
-            display: flex; justify-content: space-around; border-top: 1px solid rgba(255,255,255,0.05);
+        /* --- GAME INTERFACE --- */
+        #root-app {
+            display: none;
+            flex-direction: column;
+            height: 100vh;
+            opacity: 0;
+            transition: 1.5s cubic-bezier(0.4, 0, 0.2, 1);
         }
-        .nav-item { background: none; border: none; color: #444; font-weight: 800; font-size: 0.7rem; text-transform: uppercase; }
-        .nav-item.active { color: #ff4d00; }
 
-        /* --- FX --- */
-        .tap-fx { position: absolute; pointer-events: none; color: #ffae00; font-weight: 900; font-family: 'Outfit'; font-size: 3rem; animation: tapFloat 1s forwards; z-index: 100; }
-        @keyframes tapFloat { 0% { opacity: 1; transform: translateY(0); } 100% { opacity: 0; transform: translateY(-200px) scale(1.5); } }
-        
-        #notify { position: fixed; top: 20px; left: 50%; transform: translateX(-50%); background: #fff; color: #000; padding: 10px 25px; border-radius: 50px; font-weight: 800; display: none; z-index: 10000; }
+        .top-hud {
+            padding: 50px 30px 20px;
+            text-align: center;
+        }
+
+        .rank-pill {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--glass-border);
+            padding: 6px 15px;
+            border-radius: 100px;
+            font-size: 0.6rem;
+            font-weight: 900;
+            color: var(--fire-glow);
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        .main-balance {
+            font-family: var(--font-logo);
+            font-size: 6rem;
+            font-weight: 900;
+            letter-spacing: -6px;
+            margin: 15px 0;
+            line-height: 0.8;
+            text-shadow: 0 10px 40px rgba(0,0,0,0.5);
+        }
+
+        .mining-rate {
+            font-family: var(--font-tech);
+            font-size: 0.85rem;
+            color: #666;
+        }
+
+        .xp-container {
+            width: 250px;
+            margin: 30px auto;
+        }
+
+        .xp-track {
+            height: 3px;
+            background: rgba(255,255,255,0.05);
+            border-radius: 10px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .xp-bar {
+            height: 100%;
+            background: var(--fire-main);
+            width: 0%;
+            box-shadow: 0 0 15px var(--fire-main);
+            transition: 0.4s;
+        }
+
+        /* CLICK ENGINE */
+        .clicker-view {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+
+        .omega-coin {
+            width: 320px;
+            height: 320px;
+            border-radius: 50%;
+            background: radial-gradient(circle at 30% 30%, #ff8c00, #ff4500, #410);
+            border: 15px solid rgba(255,255,255,0.9);
+            box-shadow: 0 60px 100px rgba(0,0,0,0.8), inset 0 0 60px rgba(0,0,0,0.6);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: var(--font-logo);
+            font-size: 10rem;
+            font-weight: 900;
+            color: rgba(0,0,0,0.3);
+            transition: 0.05s;
+            z-index: 10;
+        }
+
+        .omega-coin:active {
+            transform: scale(0.85) rotate(-5deg);
+            filter: brightness(1.2);
+        }
+
+        /* --- SCREENS & CARDS --- */
+        .screen {
+            display: none;
+            height: 100%;
+            overflow-y: auto;
+            padding: 20px 25px 200px;
+        }
+
+        .screen.active {
+            display: block;
+            animation: fadeIn 0.6s forwards;
+        }
+
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+
+        .card {
+            background: linear-gradient(145deg, rgba(255,255,255,0.05), rgba(255,255,255,0.01));
+            border: 1px solid rgba(255,255,255,0.05);
+            border-radius: 35px;
+            padding: 25px;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .card-info h3 { font-family: var(--font-logo); font-size: 1.5rem; margin-bottom: 5px; }
+        .card-info p { font-size: 0.8rem; color: #777; font-family: var(--font-tech); }
+
+        .buy-trigger {
+            background: #fff;
+            color: #000;
+            border: none;
+            padding: 18px 25px;
+            border-radius: 18px;
+            font-weight: 900;
+            font-family: var(--font-tech);
+            font-size: 0.85rem;
+            transition: 0.2s;
+        }
+
+        .buy-trigger.locked { opacity: 0.2; filter: grayscale(1); }
+
+        /* NAVIGATION */
+        .nav-dock {
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+            padding: 30px 20px 50px;
+            background: linear-gradient(0deg, var(--void) 70%, transparent 100%);
+            backdrop-filter: blur(20px);
+            display: flex;
+            justify-content: space-around;
+            z-index: 1000;
+        }
+
+        .nav-item {
+            background: none;
+            border: none;
+            color: #444;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.65rem;
+            font-weight: 900;
+            text-transform: uppercase;
+            font-family: var(--font-tech);
+            transition: 0.3s;
+        }
+
+        .nav-item.active { color: var(--fire-main); transform: translateY(-5px); }
+
+        /* FX */
+        .floating-val {
+            position: fixed;
+            pointer-events: none;
+            color: var(--fire-glow);
+            font-family: var(--font-logo);
+            font-weight: 900;
+            font-size: 4rem;
+            animation: floatAway 1.2s cubic-bezier(0.1, 0.9, 0.2, 1) forwards;
+            z-index: 100;
+            text-shadow: 0 0 30px rgba(255, 77, 0, 0.5);
+        }
+
+        @keyframes floatAway {
+            0% { opacity: 1; transform: translateY(0) scale(1); }
+            100% { opacity: 0; transform: translateY(-300px) scale(2); }
+        }
+
+        #notification {
+            position: fixed;
+            top: 40px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #fff;
+            color: #000;
+            padding: 12px 30px;
+            border-radius: 100px;
+            font-weight: 900;
+            font-size: 0.8rem;
+            z-index: 10001;
+            display: none;
+        }
     </style>
 </head>
 <body>
 
-    <canvas id="canvas-bg"></canvas>
-    <div id="notify">SAVED</div>
+    <canvas id="particle-canvas"></canvas>
+    <div class="scanline"></div>
+    <div id="notification">СИСТЕМА СИНХРОНІЗОВАНА</div>
 
-    <div id="auth-screen">
-        <div class="auth-card">
-            <h1>BUIZNES</h1>
-            <p>Inferno Omega v4.0</p>
-            
-            <div class="input-group">
-                <label>Terminal Email</label>
-                <input type="email" id="email" class="inferno-input" placeholder="user@empire.io">
+    <div id="auth-layer">
+        <div class="auth-container">
+            <div class="logo-box">
+                <h1>BUIZNES</h1>
+                <p>Inferno Omega v6.6.6</p>
             </div>
 
-            <div class="input-group">
-                <label>Security Key</label>
-                <input type="password" id="pass" class="inferno-input" placeholder="••••••••">
+            <div class="input-wrapper">
+                <label>Terminal Login</label>
+                <input type="email" id="email-in" class="inferno-input" placeholder="root@imperia.io" autocomplete="off">
             </div>
 
-            <button class="btn-init" onclick="handleAuth()">INITIALIZE SYNC</button>
-            <div id="auth-err" style="color: #ff4d00; font-size: 0.7rem; margin-top: 20px; font-family: 'JetBrains Mono';"></div>
+            <div class="input-wrapper">
+                <label>Access Key</label>
+                <input type="password" id="pass-in" class="inferno-input" placeholder="••••••••" autocomplete="off">
+            </div>
+
+            <button class="main-btn" onclick="initInfernoSync()">
+                <span>INITIALIZE SYNC</span>
+            </button>
+
+            <div id="error-log" class="error-msg"></div>
         </div>
     </div>
 
-    <div id="game-ui">
-        <div id="screen-main" class="content-screen active-screen">
-            <div class="header">
-                <div class="stats-row">RANK: <span id="rank">HOBO</span></div>
-                <div class="money-display" id="m-val">$ 0</div>
-                <div class="stats-row">MINING: +$<span id="s-val">0</span>/s</div>
+    <div id="root-app">
+        <div id="view-home" class="screen active">
+            <div class="top-hud">
+                <span class="rank-pill" id="display-rank">Initializing...</span>
+                <h2 class="main-balance" id="display-money">$ 0</h2>
+                <div class="mining-rate" id="display-pps">Mining: $0.00/s</div>
+                
+                <div class="xp-container">
+                    <div class="xp-track"><div id="xp-bar" class="xp-bar"></div></div>
+                </div>
             </div>
 
-            <div class="clicker-zone">
-                <div class="main-coin" onclick="tap(event)">Ω</div>
+            <div class="clicker-view">
+                <div class="omega-coin" onclick="handleTap(event)">Ω</div>
             </div>
         </div>
 
-        <div id="screen-shop" class="content-screen">
-            <h2 style="font-family: 'Outfit'; font-size: 3rem; margin-bottom: 30px;">MARKET</h2>
-            <div id="shop-list"></div>
+        <div id="view-shop" class="screen">
+            <h2 style="font-family: var(--font-logo); font-size: 3.5rem; margin-bottom: 40px; letter-spacing: -3px;">MARKET</h2>
+            <div id="shop-items"></div>
         </div>
 
-        <div id="screen-top" class="content-screen">
-            <h2 style="font-family: 'Outfit'; font-size: 3rem; margin-bottom: 30px;">TOP 100</h2>
-            <div id="leaderboard"></div>
+        <div id="view-top" class="screen">
+            <h2 style="font-family: var(--font-logo); font-size: 3.5rem; margin-bottom: 40px; letter-spacing: -3px;">FORBES</h2>
+            <div id="leaderboard-list"></div>
         </div>
 
-        <nav class="nav-bar">
-            <button class="nav-item active" onclick="nav('main')">Empire</button>
-            <button class="nav-item" onclick="nav('shop')">Market</button>
-            <button class="nav-item" onclick="nav('top')">Ranks</button>
+        <nav class="nav-dock">
+            <button class="nav-item active" onclick="switchTab('home')">Empire</button>
+            <button class="nav-item" onclick="switchTab('shop')">Market</button>
+            <button class="nav-item" onclick="switchTab('top')">Ranks</button>
         </nav>
     </div>
 
     <script>
-        // CONFIG
-        const CONFIG = {
-            dbUrl: "https://buiznesimperia-default-rtdb.firebaseio.com/", // ВСТАВ СВІЙ
-            upgrades: [
-                { id: 't1', name: 'Inferno Click', d: 'Power x2', cost: 100, mult: 2.5, val: 2, type: 'p' },
-                { id: 's1', name: 'CPU Miner', d: '+$5/s', cost: 500, mult: 1.6, val: 5, type: 's' },
-                { id: 's2', name: 'GPU Farm', d: '+$50/s', cost: 4000, mult: 1.7, val: 50, type: 's' },
-                { id: 's3', name: 'AI Node', d: '+$400/s', cost: 35000, mult: 1.8, val: 400, type: 's' },
-                { id: 's4', name: 'Quantum Core', d: '+$5000/s', cost: 250000, mult: 1.9, val: 5000, type: 's' }
-            ]
+        /* --- FIREBASE CONFIG (ВСТАВ СВОЄ) --- */
+        // Обов'язково встав apiKey зі свого проекту Firebase!
+        const firebaseConfig = {
+            apiKey: "AIzaSyB...", // Твій ключ тут
+            databaseURL: "https://buiznesimperia-default-rtdb.firebaseio.com/"
         };
 
-        let user = { m: 0, p: 1, s: 0, uid: null, name: '' };
-        let isFBReady = false;
+        let state = {
+            money: 0, power: 1, pps: 0,
+            lvl: 1, exp: 0, uid: null,
+            email: '', name: 'Ghost',
+            ready: false
+        };
 
-        // 1. ПОЧИНЕНО: Ініціалізація Firebase тільки після кліку або готовності SDK
-        function initFB() {
+        const SHOP_DATA = [
+            { id: 't1', name: 'Inferno Core', d: 'Click x2', base: 50, m: 2.2, v: 2, t: 'p' },
+            { id: 's1', name: 'Neural Bot', d: '+$10/s', base: 500, m: 1.6, v: 10, t: 's' },
+            { id: 's2', name: 'Shell Corp', d: '+$80/s', base: 4500, m: 1.7, v: 80, t: 's' },
+            { id: 's3', name: 'Swiss Bank', d: '+$450/s', base: 38000, m: 1.8, v: 450, t: 's' },
+            { id: 's4', name: 'Omega AI', d: '+$6k/s', base: 450000, m: 1.9, v: 6000, t: 's' }
+        ];
+
+        /* --- SYNC ENGINE (ПОЧИНЕНО) --- */
+        function initInfernoSync() {
+            const e = document.getElementById('email-in').value;
+            const p = document.getElementById('pass-in').value;
+            const log = document.getElementById('error-log');
+
+            if (e.length < 5 || p.length < 6) {
+                log.innerText = "PROTOCOL ERROR: INVALID CREDENTIALS";
+                return;
+            }
+
+            // Ініціалізуємо Firebase тільки тут, щоб уникнути помилок черговості
             if (!firebase.apps.length) {
-                firebase.initializeApp({ databaseURL: CONFIG.dbUrl });
+                firebase.initializeApp(firebaseConfig);
             }
-            isFBReady = true;
-        }
 
-        async function handleAuth() {
-            const e = document.getElementById('email').value;
-            const p = document.getElementById('pass').value;
-            const err = document.getElementById('auth-err');
+            log.innerText = "BYPASSING FIREWALL... ESTABLISHING SYNC";
 
-            if (e.length < 5) return err.innerText = "INVALID EMAIL";
-            
-            try {
-                initFB(); // Запускаємо базу
-                err.innerText = "CONNECTING TO SATELLITES...";
-                
-                let res = await firebase.auth().signInWithEmailAndPassword(e, p).catch(() => {
-                    return firebase.auth().createUserWithEmailAndPassword(e, p);
+            firebase.auth().signInWithEmailAndPassword(e, p)
+                .catch(() => firebase.auth().createUserWithEmailAndPassword(e, p))
+                .catch(err => {
+                    log.innerText = "SYNC FAIL: " + err.message;
                 });
-
-                user.uid = res.user.uid;
-                user.name = e.split('@')[0];
-                startApp();
-            } catch (e) {
-                err.innerText = "SYSTEM ERROR: " + e.message;
-            }
         }
 
-        function startApp() {
-            document.getElementById('auth-screen').style.display = 'none';
-            const ui = document.getElementById('game-ui');
-            ui.style.display = 'flex';
-            setTimeout(() => ui.style.opacity = '1', 100);
+        firebase.auth().onAuthStateChanged(u => {
+            if (u) {
+                state.uid = u.uid;
+                state.email = u.email;
+                state.name = u.email.split('@')[0];
+                launchApplication();
+            }
+        });
 
-            // Sync Data
-            firebase.database().ref('u/' + user.uid).on('value', s => {
+        function launchApplication() {
+            const auth = document.getElementById('auth-layer');
+            auth.style.opacity = '0';
+            setTimeout(() => auth.style.display = 'none', 1000);
+
+            const root = document.getElementById('root-app');
+            root.style.display = 'flex';
+            setTimeout(() => root.style.opacity = '1', 500);
+
+            // Connect Database
+            firebase.database().ref('users/' + state.uid).on('value', s => {
                 const d = s.val();
                 if (d) {
-                    user.m = d.m || 0;
-                    user.p = d.p || 1;
-                    user.s = d.s || 0;
-                    refreshUI();
+                    state.money = d.m || 0;
+                    state.power = d.p || 1;
+                    state.pps = d.s || 0;
+                    state.lvl = d.l || 1;
+                    state.exp = d.e || 0;
+                    updateUI();
                 }
             });
 
-            // Loop
+            renderMarket();
+            syncLeaderboard();
+            
+            // Loop Engines
             setInterval(() => {
-                if (user.s > 0) {
-                    user.m += (user.s / 10);
-                    refreshUI();
+                if (state.pps > 0) {
+                    state.money += (state.pps / 10);
+                    updateUI();
                 }
             }, 100);
 
-            // Auto-save
-            setInterval(save, 10000);
-            renderShop();
-            syncTop();
+            setInterval(saveCloud, 10000);
+            state.ready = true;
         }
 
-        function tap(ev) {
-            user.m += user.p;
-            
-            // Visuals
-            const fx = document.createElement('div');
-            fx.className = 'tap-fx';
-            fx.style.left = ev.clientX + 'px';
-            fx.style.top = ev.clientY + 'px';
-            fx.innerText = `+$${user.p}`;
-            document.body.appendChild(fx);
-            setTimeout(() => fx.remove(), 1000);
-            
-            if(navigator.vibrate) navigator.vibrate(10);
-            refreshUI();
+        /* --- GAME LOGIC --- */
+        function handleTap(ev) {
+            state.money += state.power;
+            state.exp += 1;
+
+            const nextXp = state.lvl * 200;
+            if (state.exp >= nextXp) {
+                state.lvl++;
+                state.exp = 0;
+                notify("LEVEL UP: " + state.lvl);
+                if (navigator.vibrate) navigator.vibrate([50, 30, 50]);
+            }
+
+            spawnFX(ev);
+            updateUI();
+            if (navigator.vibrate) navigator.vibrate(20);
         }
 
-        function renderShop() {
-            const container = document.getElementById('shop-list');
-            container.innerHTML = '';
-            CONFIG.upgrades.forEach(u => {
-                const card = document.createElement('div');
-                card.className = 'item-card';
-                card.innerHTML = `
-                    <div class="item-info">
-                        <h3>${u.name}</h3>
-                        <p>${u.d}</p>
+        function renderMarket() {
+            const cont = document.getElementById('shop-items');
+            cont.innerHTML = '';
+            SHOP_DATA.forEach(item => {
+                cont.innerHTML += `
+                    <div class="card">
+                        <div class="card-info">
+                            <h3>${item.name}</h3>
+                            <p>${item.d}</p>
+                        </div>
+                        <button class="buy-trigger" id="btn-${item.id}" onclick="buyItem('${item.id}')">$0</button>
                     </div>
-                    <button class="buy-btn" id="btn-${u.id}" onclick="buy('${u.id}')">$0</button>
                 `;
-                container.appendChild(card);
             });
         }
 
-        function buy(id) {
-            const item = CONFIG.upgrades.find(x => x.id === id);
+        function buyItem(id) {
+            const it = SHOP_DATA.find(x => x.id === id);
             let cost = 0;
-            if (item.type === 'p') cost = Math.floor(item.cost * Math.pow(item.mult, Math.log2(user.p || 1)));
-            else cost = Math.floor(item.cost * Math.pow(item.mult, (user.s / item.val)));
+            
+            if (it.t === 'p') cost = Math.floor(it.base * Math.pow(it.m, Math.log2(state.power)));
+            else cost = Math.floor(it.base * Math.pow(it.m, (state.pps / it.v)));
 
-            if (user.m >= cost) {
-                user.m -= cost;
-                if (item.type === 'p') user.p *= item.val;
-                else user.s += item.val;
-                save();
-                refreshUI();
+            if (state.money >= cost) {
+                state.money -= cost;
+                if (it.t === 'p') state.power *= it.v;
+                else state.pps += it.v;
+                updateUI();
+                saveCloud();
             }
         }
 
-        function refreshUI() {
-            document.getElementById('m-val').innerText = '$' + Math.floor(user.m).toLocaleString();
-            document.getElementById('s-val').innerText = user.s.toLocaleString();
+        function updateUI() {
+            document.getElementById('display-money').innerText = '$' + Math.floor(state.money).toLocaleString();
+            document.getElementById('display-pps').innerText = `Mining: $${state.pps.toFixed(2)}/s`;
             
-            // Ranks
-            let r = "HOBO";
-            if (user.m > 1000) r = "STREET HUSTLER";
-            if (user.m > 100000) r = "CORP DRONE";
-            if (user.m > 1000000) r = "SHADOW CEO";
-            if (user.m > 100000000) r = "OMEGA LORD";
-            document.getElementById('rank').innerText = r;
+            const xpPct = (state.exp / (state.lvl * 200)) * 100;
+            document.getElementById('xp-bar').style.width = xpPct + '%';
 
-            // Shop prices
-            CONFIG.upgrades.forEach(u => {
+            // Prices
+            SHOP_DATA.forEach(it => {
                 let cost = 0;
-                if (u.type === 'p') cost = Math.floor(u.cost * Math.pow(u.mult, Math.log2(user.p || 1)));
-                else cost = Math.floor(u.cost * Math.pow(u.mult, (user.s / u.val)));
+                if (it.t === 'p') cost = Math.floor(it.base * Math.pow(it.m, Math.log2(state.power)));
+                else cost = Math.floor(it.base * Math.pow(it.m, (state.pps / it.v)));
                 
-                const btn = document.getElementById('btn-' + u.id);
+                const btn = document.getElementById('btn-' + it.id);
                 if (btn) {
                     btn.innerText = '$' + cost.toLocaleString();
-                    btn.style.opacity = user.m >= cost ? '1' : '0.3';
+                    btn.className = state.money >= cost ? 'buy-trigger' : 'buy-trigger locked';
                 }
             });
+
+            // Rank
+            let r = "HOBO";
+            if (state.lvl > 10) r = "STREET DEALER";
+            if (state.lvl > 30) r = "SHADOW CEO";
+            if (state.lvl > 100) r = "OMEGA LORD";
+            document.getElementById('display-rank').innerText = r;
         }
 
-        function save() {
-            if (!user.uid) return;
-            firebase.database().ref('u/' + user.uid).update({
-                m: user.m, p: user.p, s: user.s, n: user.name
+        /* --- CLOUD SYNC --- */
+        function saveCloud() {
+            if (!state.uid) return;
+            firebase.database().ref('users/' + state.uid).update({
+                m: state.money, p: state.power, s: state.pps,
+                l: state.lvl, e: state.exp, u: state.name
             });
-            showNotify();
+            showNotify("CLOUD SYNC OK");
         }
 
-        function syncTop() {
-            firebase.database().ref('u').orderByChild('m').limitToLast(10).on('value', s => {
-                const list = document.getElementById('leaderboard');
+        function syncLeaderboard() {
+            firebase.database().ref('users').orderByChild('m').limitToLast(10).on('value', s => {
+                const list = document.getElementById('leaderboard-list');
                 list.innerHTML = '';
-                let items = [];
-                s.forEach(child => items.push(child.val()));
-                items.reverse().forEach((u, i) => {
-                    list.innerHTML += `<div class="item-card"><span>#${i+1} ${u.n}</span><b>$${Math.floor(u.m).toLocaleString()}</b></div>`;
+                let ranks = [];
+                s.forEach(c => ranks.push(c.val()));
+                ranks.reverse().forEach((u, i) => {
+                    list.innerHTML += `
+                        <div class="card">
+                            <div class="card-info">
+                                <h3>#${i+1} ${u.u}</h3>
+                                <p>Empire Value</p>
+                            </div>
+                            <div style="font-weight: 900; color: var(--fire-glow)">$${Math.floor(u.m).toLocaleString()}</div>
+                        </div>
+                    `;
                 });
             });
         }
 
-        function nav(s) {
-            document.querySelectorAll('.content-screen').forEach(scr => scr.classList.remove('active-screen'));
+        /* --- UTILS & VISUALS --- */
+        function spawnFX(e) {
+            const t = document.createElement('div');
+            t.className = 'floating-val';
+            const x = e.clientX || e.touches[0].clientX;
+            const y = e.clientY || e.touches[0].clientY;
+            t.style.left = x + 'px';
+            t.style.top = y + 'px';
+            t.innerText = `+$${state.power}`;
+            document.body.appendChild(t);
+            setTimeout(() => t.remove(), 1100);
+        }
+
+        function switchTab(id) {
+            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
             document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-            document.getElementById('screen-' + s).classList.add('active-screen');
+            document.getElementById('view-' + id).classList.add('active');
             event.currentTarget.classList.add('active');
         }
 
-        function showNotify() {
-            const n = document.getElementById('notify');
+        function showNotify(txt) {
+            const n = document.getElementById('notification');
+            n.innerText = txt;
             n.style.display = 'block';
-            setTimeout(() => n.style.display = 'none', 1000);
+            setTimeout(() => n.style.display = 'none', 2000);
         }
 
-        // Background Animation
-        const canvas = document.getElementById('canvas-bg');
+        /* --- CANVAS PARTICLES --- */
+        const canvas = document.getElementById('particle-canvas');
         const ctx = canvas.getContext('2d');
         canvas.width = window.innerWidth;
         canvas.height = window.innerHeight;
 
         let parts = [];
-        for(let i=0; i<30; i++) parts.push({ x: Math.random()*canvas.width, y: Math.random()*canvas.height, r: Math.random()*100+50, s: Math.random()*0.5+0.1 });
-
+        class Particle {
+            constructor() {
+                this.x = Math.random() * canvas.width;
+                this.y = Math.random() * canvas.height;
+                this.size = Math.random() * 2 + 0.5;
+                this.speed = Math.random() * 1 + 0.2;
+                this.alpha = Math.random() * 0.5;
+            }
+            draw() {
+                ctx.fillStyle = `rgba(255, 77, 0, ${this.alpha})`;
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.size, 0, Math.PI*2);
+                ctx.fill();
+                this.y -= this.speed;
+                if (this.y < -10) this.y = canvas.height + 10;
+            }
+        }
+        for(let i=0; i<60; i++) parts.push(new Particle());
         function anim() {
             ctx.clearRect(0,0,canvas.width, canvas.height);
-            ctx.fillStyle = 'rgba(255, 77, 0, 0.05)';
-            parts.forEach(p => {
-                ctx.beginPath();
-                ctx.arc(p.x, p.y, p.r, 0, Math.PI*2);
-                ctx.fill();
-                p.y -= p.s;
-                if(p.y < -100) p.y = canvas.height + 100;
-            });
+            parts.forEach(p => p.draw());
             requestAnimationFrame(anim);
         }
         anim();
-
     </script>
 </body>
 </html>
