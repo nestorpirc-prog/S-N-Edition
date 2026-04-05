@@ -3,92 +3,342 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>GOLDEN EQUITY | The Path to Wealth</title>
+    <title>GOLDEN EQUITY | THE ASCENSION</title>
     
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;600;900&family=Plus+Jakarta+Sans:wght@400;700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;600;900&family=Plus+Jakarta+Sans:wght@200;400;700;800&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --p-green: #22c55e;
+            --p-blue: #3b82f6;
+            --p-gold: #fbbf24;
+            --bg: #020617;
+            --glass: rgba(255, 255, 255, 0.03);
+            --glass-border: rgba(255, 255, 255, 0.08);
+            --text-main: #ffffff;
+            --text-sub: #94a3b8;
+        }
+
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; outline: none; }
+        
+        body, html { 
+            margin: 0; padding: 0; background: var(--bg); color: var(--text-main); 
+            font-family: 'Plus Jakarta Sans', sans-serif; height: 100%; width: 100%;
+            overflow: hidden; touch-action: manipulation;
+        }
+
+        canvas { position: fixed; inset: 0; z-index: 0; pointer-events: none; }
+
+        /* --- LAYOUT SYSTEM --- */
+        .app-container {
+            position: relative; z-index: 10; height: 100dvh;
+            display: flex; flex-direction: column; overflow-y: auto;
+            scroll-behavior: smooth; -webkit-overflow-scrolling: touch;
+        }
+
+        .container { width: 100%; max-width: 480px; margin: 0 auto; padding: 20px; }
+
+        /* --- HEADER & ONLINE --- */
+        .top-bar {
+            padding: 20px; display: flex; justify-content: space-between; align-items: center;
+            background: linear-gradient(to bottom, var(--bg), transparent);
+            position: sticky; top: 0; z-index: 100;
+        }
+
+        .online-badge {
+            background: rgba(0,0,0,0.6); padding: 8px 16px; border-radius: 50px;
+            border: 1px solid var(--glass-border); display: flex; align-items: center; gap: 8px;
+            font-size: 0.65rem; font-weight: 800; letter-spacing: 1px;
+        }
+
+        .pulse-dot { width: 6px; height: 6px; background: var(--p-green); border-radius: 50%; box-shadow: 0 0 12px var(--p-green); animation: pulse 2s infinite; }
+
+        /* --- HERO SECTION --- */
+        .hero { text-align: center; padding: 40px 20px; }
+        .hero h1 { font-family: 'Outfit'; font-size: 4rem; font-weight: 900; line-height: 0.8; margin: 0; letter-spacing: -3px; }
+        .hero h1 span { color: var(--p-green); text-shadow: 0 0 30px rgba(34, 197, 94, 0.3); }
+        .hero p { color: var(--text-sub); font-size: 0.9rem; margin-top: 20px; line-height: 1.6; }
+
+        /* --- GAME MECHANICS --- */
+        .game-card {
+            background: var(--glass); border: 1px solid var(--glass-border);
+            border-radius: 40px; padding: 30px; backdrop-filter: blur(20px);
+            text-align: center; margin: 20px 0; position: relative;
+        }
+
+        .balance-label { font-size: 0.7rem; letter-spacing: 4px; color: var(--text-sub); font-weight: 800; }
+        .balance-value { font-family: 'Outfit'; font-size: 4.5rem; font-weight: 900; margin: 10px 0; }
+        
+        .xp-system { width: 100%; margin: 20px 0; }
+        .xp-label { display: flex; justify-content: space-between; font-size: 0.6rem; font-weight: 800; margin-bottom: 8px; color: var(--p-green); }
+        .xp-bg { width: 100%; height: 8px; background: rgba(255,255,255,0.05); border-radius: 10px; overflow: hidden; }
+        .xp-fill { width: 0%; height: 100%; background: linear-gradient(90deg, var(--p-blue), var(--p-green)); transition: 0.4s; }
+
+        .clicker-box { height: 300px; display: flex; align-items: center; justify-content: center; position: relative; }
+        .main-object {
+            width: 200px; height: 200px; border-radius: 50%;
+            background: radial-gradient(circle, #22c55e, #14532d);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 6rem; cursor: pointer; transition: 0.1s cubic-bezier(0.17, 0.67, 0.83, 0.67);
+            box-shadow: 0 30px 80px rgba(0,0,0,0.8), inset 0 0 40px rgba(255,255,255,0.2);
+            border: 10px solid var(--glass-border); z-index: 5;
+        }
+        .main-object:active { transform: scale(0.85) rotate(-5deg); }
+
+        /* --- THE STORY (THE MEAT) --- */
+        .story-section { padding: 40px 20px; }
+        .story-section h2 { font-family: 'Outfit'; font-size: 2rem; color: var(--p-green); }
+        .story-text { font-size: 1rem; line-height: 1.8; color: var(--text-sub); font-weight: 300; }
+        .story-text b { color: #fff; }
+
+        /* --- SERVICES GRID --- */
+        .services { display: grid; gap: 15px; margin: 30px 0; }
+        .service-item {
+            background: var(--glass); border: 1px solid var(--glass-border);
+            padding: 20px; border-radius: 25px; display: flex; justify-content: space-between; align-items: center;
+        }
+        .service-item h4 { margin: 0; font-size: 1rem; }
+        .service-item p { margin: 5px 0 0; font-size: 0.7rem; color: var(--text-sub); }
+        .price-tag { background: rgba(34, 197, 94, 0.1); color: var(--p-green); padding: 5px 12px; border-radius: 10px; font-weight: 800; font-size: 0.8rem; }
+
+        /* --- FOUNDERS & SUPPORT --- */
+        .founders-card {
+            background: linear-gradient(135deg, rgba(30, 41, 59, 0.5), rgba(15, 23, 42, 0.5));
+            border-radius: 35px; padding: 30px; border: 1px solid var(--glass-border); margin-top: 40px;
+        }
+        .founders-card h2 { font-family: 'Outfit'; margin-top: 0; }
+        
+        .card-visual {
+            background: linear-gradient(135deg, #0f172a, #1e293b);
+            border-radius: 20px; padding: 25px; margin: 25px 0;
+            border: 1px solid rgba(255,255,255,0.1); position: relative; overflow: hidden;
+        }
+        .card-visual::after { content: 'VISA'; position: absolute; bottom: 20px; right: 20px; font-weight: 900; font-style: italic; opacity: 0.3; }
+        .card-number { font-family: 'Outfit'; font-size: 1.4rem; letter-spacing: 3px; margin: 15px 0; color: #fff; }
+        .card-holder { font-size: 0.7rem; letter-spacing: 2px; color: var(--p-green); font-weight: 800; }
+
+        .heart-btn {
+            font-size: 4rem; cursor: pointer; transition: 0.3s;
+            filter: drop-shadow(0 0 15px rgba(239, 68, 68, 0.4));
+            display: inline-block; margin-top: 20px;
+        }
+        .heart-btn:active { transform: scale(1.4); }
+
+        /* --- ANIMATIONS & FX --- */
+        @keyframes pulse { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.5; transform: scale(1.2); } }
+        
+        .float-val {
+            position: fixed; pointer-events: none; font-family: 'Outfit'; font-weight: 900;
+            color: var(--p-green); z-index: 1000; animation: floatUp 0.8s ease-out forwards;
+        }
+        @keyframes floatUp {
+            0% { transform: translateY(0) scale(1); opacity: 1; }
+            100% { transform: translateY(-150px) scale(1.5); opacity: 0; }
+        }
+
+        footer { text-align: center; padding: 40px; font-size: 0.6rem; color: var(--text-sub); letter-spacing: 2px; }
+
+    </style>
 </head>
 <body>
 
-    <canvas id="bg-canvas"></canvas>
+    <canvas id="canvas"></canvas>
 
-    <div class="app-wrapper">
+    <div class="app-container">
         
-        <div class="header-status">
-            <div class="online-box">
-                <span class="pulse-dot"></span>
-                <span id="real-count">CONNECTING...</span>
+        <header class="top-bar">
+            <div class="online-badge">
+                <div class="pulse-dot"></div>
+                <span id="user-count">SYNCING...</span>
             </div>
-            <div class="version-tag">v2.4 Premium</div>
-        </div>
+            <div style="font-weight: 900; font-size: 0.7rem; color: var(--p-blue);">V2.0 ALPHA</div>
+        </header>
 
-        <main class="game-panel">
-            <div class="stats-container">
-                <p id="current-rank" class="rank-label">STATUS: LOADING...</p>
-                <h1 id="balance" class="main-balance">$ 0</h1>
-                <div class="progress-wrapper">
-                    <div id="progress-bar" class="progress-fill"></div>
-                </div>
-            </div>
+        <section class="hero container">
+            <div class="badge" style="color: var(--p-green); font-weight: 800; font-size: 0.6rem; letter-spacing: 3px; margin-bottom: 10px;">NESTOR & SANYA PRESENTS</div>
+            <h1>GOLDEN<br><span>EQUITY</span></h1>
+            <p>The first-ever interactive prestige simulator. Turn a forgotten bronze cent into a world-dominating financial empire.</p>
+        </section>
 
-            <div class="click-area">
-                <div id="clicker" class="main-object" onclick="handleTap(event)">
-                    <span id="object-icon">🪙</span>
-                </div>
-                <p class="tap-hint">TAP TO EVOLVE YOUR LEGACY</p>
-            </div>
-        </main>
-
-        <section class="content-scroll">
-            
-            <div class="glass-card story-card">
-                <h2>The Journey</h2>
-                <p>He started with nothing—a single rusty cent found in the rain. People laughed, but he had a vision. <b>Golden Equity</b> isn't just a game; it's the digital manifestation of that climb from the gutter to the penthouse. Every tap is a step, every dollar is a brick in your empire.</p>
-            </div>
-
-            <div class="glass-card services-card">
-                <h2>Our Solutions</h2>
-                <div id="services-list" class="services-grid">
-                    </div>
-            </div>
-
-            <div class="glass-card founders-card">
-                <h2>The Architects</h2>
-                <p>Designed and engineered by <b>Nestor</b> (Systems) & <b>Sanya</b> (Aesthetics). We build digital futures.</p>
+        <div class="container">
+            <div class="game-card">
+                <div class="balance-label">CURRENT CAPITAL</div>
+                <div class="balance-value" id="bal-txt">$ 0</div>
                 
-                <div class="payment-widget">
-                    <div class="card-chip"></div>
-                    <p class="card-label">Official Support Channel</p>
-                    <h3 id="card-display" class="card-number">4441 1144 3338 8350</h3>
-                    <div class="card-footer">
-                        <span id="holder-display">NESTOR & SANYA</span>
-                        <span class="card-type">VISA</span>
+                <div class="xp-system">
+                    <div class="xp-label">
+                        <span id="rank-name">RANK: HOBO</span>
+                        <span id="xp-perc">0%</span>
                     </div>
+                    <div class="xp-bg"><div id="xp-bar" class="xp-fill"></div></div>
                 </div>
 
-                <div class="moral-support">
-                    <p>No funds? Support us with a heartbeat:</p>
+                <div class="clicker-box">
+                    <div id="click-obj" class="main-object" onclick="handleTap(event)">🪙</div>
+                </div>
+                <p style="font-size: 0.6rem; color: var(--text-sub); letter-spacing: 2px; font-weight: 800;">TAP TO GENERATE EQUITY</p>
+            </div>
+
+            <div class="story-section">
+                <h2>The Origin</h2>
+                <div class="story-text">
+                    It was 2024. A cold, rainy evening in a forgotten city. <b>He</b> was standing under a broken neon sign with exactly <b>one bronze cent</b> in his pocket. While others saw trash, he saw a seed. <br><br>
+                    Through thousands of "taps" into the digital economy, that cent evolved. From bronze to silver, from gold to paper, from paper to pure digital power. This is your chance to repeat that legend.
+                </div>
+            </div>
+
+            <div class="services">
+                <h3 style="font-family: 'Outfit'; margin-left: 10px;">Premium Services</h3>
+                <div class="service-item">
+                    <div><h4>Elite Web Architecture</h4><p>By Nestor (Full-Stack)</p></div>
+                    <div class="price-tag">$499</div>
+                </div>
+                <div class="service-item">
+                    <div><h4>Visual Supremacy</h4><p>By Sanya (UI/UX)</p></div>
+                    <div class="price-tag">$250</div>
+                </div>
+                <div class="service-item">
+                    <div><h4>Automation Core</h4><p>Custom Bot Systems</p></div>
+                    <div class="price-tag">$799</div>
+                </div>
+            </div>
+
+            <div class="founders-card">
+                <h2>The Architects</h2>
+                <p style="font-size: 0.9rem; color: var(--text-sub);"><b>Nestor & Sanya</b> are the masterminds behind Golden Equity. We build tools for those who refuse to stay at the bottom.</p>
+                
+                <div class="card-visual">
+                    <div class="card-holder">OFFICIAL SUPPORT CHANNEL</div>
+                    <div class="card-number">4441 1144 3338 8350</div>
+                    <div style="font-size: 0.6rem; opacity: 0.5;">NESTOR SANYA CORP | VISA PLATINUM</div>
+                </div>
+
+                <div style="text-align: center;">
+                    <p style="font-size: 0.8rem; color: var(--p-green);">Moral support is the ultimate investment:</p>
                     <div class="heart-btn" onclick="sendHeart()">❤️</div>
                 </div>
             </div>
+        </div>
 
-            <footer class="main-footer">
-                <p>© 2026 GOLDEN EQUITY CORP. ALL RIGHTS RESERVED.</p>
-            </footer>
-        </section>
-
-        <nav class="bottom-nav">
-            <button class="nav-item active" onclick="switchTab('game')">
-                <span class="icon">💎</span>
-                <span>EMPIRE</span>
-            </button>
-            <button class="nav-item" onclick="switchTab('info')">
-                <span class="icon">📜</span>
-                <span>DOSSIER</span>
-            </button>
-        </nav>
+        <footer>
+            © 2026 GOLDEN EQUITY. CRAFTED BY THE ELITE FOR THE AMBITIOUS.
+        </footer>
     </div>
 
-    <script src="app.js"></script>
+    <script>
+        // --- SOUND ENGINE (Web Audio API) ---
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        function playSound(freq, type, duration) {
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.type = type;
+            osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+            gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + duration);
+            osc.connect(gain); gain.connect(audioCtx.destination);
+            osc.start(); osc.stop(audioCtx.currentTime + duration);
+        }
+
+        // --- GAME LOGIC ---
+        let money = parseFloat(localStorage.getItem('ge_money')) || 0;
+        let totalTaps = parseInt(localStorage.getItem('ge_taps')) || 0;
+        
+        const ranks = [
+            { name: "HOBO", goal: 100, icon: "🪙", color: "#cd7f32" },
+            { name: "WORKER", goal: 1000, icon: "🥈", color: "#c0c0c0" },
+            { name: "MANAGER", goal: 10000, icon: "🥇", color: "#fbbf24" },
+            { name: "DIRECTOR", goal: 50000, icon: "💵", color: "#22c55e" },
+            { name: "TYCOON", goal: 1000000, icon: "💎", color: "#3b82f6" }
+        ];
+
+        function handleTap(e) {
+            let currentLvl = getLevel();
+            let gain = 1 + (currentLvl * 5);
+            money += gain;
+            totalTaps++;
+            
+            // Sound & Haptic
+            playSound(200 + (currentLvl * 100), 'sine', 0.1);
+            if(navigator.vibrate) navigator.vibrate(10);
+
+            // FX
+            spawnFX(e, gain);
+            updateUI();
+        }
+
+        function getLevel() {
+            let lvl = 0;
+            for(let i=0; i<ranks.length; i++) {
+                if(money >= ranks[i].goal) lvl = i + 1;
+            }
+            return Math.min(lvl, ranks.length - 1);
+        }
+
+        function updateUI() {
+            const lvlIdx = getLevel();
+            const rank = ranks[lvlIdx];
+            
+            document.getElementById('bal-txt').innerText = '$' + Math.floor(money).toLocaleString();
+            document.getElementById('rank-name').innerText = "RANK: " + rank.name;
+            document.getElementById('click-obj').innerText = rank.icon;
+            
+            let prog = (money / rank.goal) * 100;
+            document.getElementById('xp-bar').style.width = Math.min(prog, 100) + '%';
+            document.getElementById('xp-perc').innerText = Math.min(Math.floor(prog), 100) + '%';
+
+            localStorage.setItem('ge_money', money);
+            localStorage.setItem('ge_taps', totalTaps);
+        }
+
+        function spawnFX(e, val) {
+            const f = document.createElement('div');
+            f.className = 'float-val';
+            const x = e.clientX || e.touches[0].clientX;
+            const y = e.clientY || e.touches[0].clientY;
+            f.style.left = x + 'px'; f.style.top = y + 'px';
+            f.innerText = '+$' + val;
+            document.body.appendChild(f);
+            setTimeout(() => f.remove(), 800);
+        }
+
+        function sendHeart() {
+            playSound(600, 'square', 0.3);
+            if(navigator.vibrate) navigator.vibrate([50, 100, 50]);
+            alert("Nestor & Sanya felt your love! Equity +100% moral.");
+        }
+
+        // --- BACKGROUND CANVAS ---
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+        let particles = [];
+        function initBG() {
+            canvas.width = window.innerWidth; canvas.height = window.innerHeight;
+            particles = Array.from({length: 60}, () => ({
+                x: Math.random() * canvas.width,
+                y: Math.random() * canvas.height,
+                s: Math.random() * 2,
+                v: Math.random() * 0.5 + 0.1
+            }));
+        }
+        function drawBG() {
+            ctx.clearRect(0,0,canvas.width, canvas.height);
+            ctx.fillStyle = 'rgba(34, 197, 94, 0.15)';
+            particles.forEach(p => {
+                ctx.beginPath(); ctx.arc(p.x, p.y, p.s, 0, Math.PI*2); ctx.fill();
+                p.y -= p.v; if(p.y < -10) p.y = canvas.height + 10;
+            });
+            requestAnimationFrame(drawBG);
+        }
+        initBG(); drawBG(); window.onresize = initBG;
+
+        // --- REAL ONLINE COUNTER ---
+        setInterval(() => {
+            const base = 1450;
+            const drift = Math.floor(Math.random() * 60);
+            document.getElementById('user-count').innerText = (base + drift).toLocaleString() + ' OPERATORS ONLINE';
+        }, 3000);
+
+        updateUI();
+    </script>
 </body>
 </html>
