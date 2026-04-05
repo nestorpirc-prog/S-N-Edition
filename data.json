@@ -1,23 +1,89 @@
 {
-  "project": {
+  "project_info": {
     "name": "GOLDEN EQUITY",
-    "version": "2.0.1",
-    "founders": "Nestor & Sanya"
+    "version": "2.4.0",
+    "codename": "Ascension",
+    "last_update": "2026-04-06"
   },
-  "levels": [
-    {"rank": "Hobo", "goal": 100, "reward": 1, "icon": "🪙", "color": "#cd7f32"},
-    {"rank": "Street Worker", "goal": 1000, "reward": 5, "icon": "🥈", "color": "#c0c0c0"},
-    {"rank": "Business Manager", "goal": 10000, "reward": 25, "icon": "👑", "color": "#ffd700"},
-    {"rank": "Director", "goal": 100000, "reward": 100, "icon": "💵", "color": "#22c55e"},
-    {"rank": "Global Tycoon", "goal": 1000000, "reward": 500, "icon": "💎", "color": "#3b82f6"}
+  "storyline": {
+    "intro": "Started from a single bronze cent in the rain.",
+    "mission": "To transform digital interaction into a global financial legacy.",
+    "founder_note": "Designed by Nestor & Sanya for those who dare to climb."
+  },
+  "ranks": [
+    {
+      "id": 0,
+      "name": "HOBO",
+      "goal": 150,
+      "reward": 1,
+      "icon": "🪙",
+      "description": "Searching for luck in the digital gutters."
+    },
+    {
+      "id": 1,
+      "name": "STREET HUSTLER",
+      "goal": 1500,
+      "reward": 5,
+      "icon": "🥈",
+      "description": "Turning copper into silver with pure grit."
+    },
+    {
+      "id": 2,
+      "name": "BUSINESS DELEGATE",
+      "goal": 15000,
+      "reward": 25,
+      "icon": "🥇",
+      "description": "Managing high-stakes equity and corporate nodes."
+    },
+    {
+      "id": 3,
+      "name": "EQUITY DIRECTOR",
+      "goal": 100000,
+      "reward": 100,
+      "icon": "💵",
+      "description": "Architect of the financial grid. Cash is your tool."
+    },
+    {
+      "id": 4,
+      "name": "GLOBAL TYCOON",
+      "goal": 1000000,
+      "reward": 500,
+      "icon": "💎",
+      "description": "The peak of existence. Pure diamond supremacy."
+    }
   ],
   "services": [
-    {"title": "Web Architecture", "price": "from $499", "dev": "Nestor"},
-    {"title": "Visual Identity", "price": "from $250", "dev": "Sanya"},
-    {"title": "Custom Software", "price": "Market Price", "dev": "Team"}
+    {
+      "category": "Development",
+      "title": "Elite Web Architecture",
+      "provider": "Nestor",
+      "price": "$499",
+      "details": "Scalable systems and high-performance engines."
+    },
+    {
+      "category": "Design",
+      "title": "Visual Supremacy",
+      "provider": "Sanya",
+      "price": "$250",
+      "details": "World-class UI/UX that captures the soul."
+    },
+    {
+      "category": "Automation",
+      "title": "Crypto Bot AI",
+      "provider": "Team",
+      "price": "$799",
+      "details": "Self-learning algorithms for market domination."
+    }
   ],
-  "payment": {
-    "card": "4441 1144 3338 8350",
-    "holder": "NESTOR & SANYA"
+  "financials": {
+    "receiver": "NESTOR & SANYA CORP",
+    "card_number": "4441 1144 3338 8350",
+    "bank": "VISA PLATINUM",
+    "currency": "USD"
+  },
+  "configs": {
+    "base_online": 1450,
+    "save_interval_ms": 5000,
+    "vibration_enabled": true
   }
 }
