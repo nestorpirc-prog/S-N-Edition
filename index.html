@@ -3,22 +3,24 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Golden Equity | Digital Empire</title>
+    <title>Golden Equity | Nestor & Sanya Edition</title>
     <style>
         :root {
             --gold: #D4AF37;
-            --dark: #050505;
-            --gray: #111111;
+            --dark: #030303;
+            --card-bg: rgba(20, 20, 20, 0.7);
             --green: #00FF41;
+            --neon: #ffd700;
         }
 
         body, html {
             margin: 0; padding: 0;
             background: var(--dark);
             color: white;
-            font-family: 'Segoe UI', sans-serif;
+            font-family: 'Inter', 'Segoe UI', sans-serif;
             height: 100%;
             overflow: hidden;
+            -webkit-tap-highlight-color: transparent;
         }
 
         canvas { position: fixed; top: 0; left: 0; z-index: 1; pointer-events: none; }
@@ -28,82 +30,99 @@
             position: relative; z-index: 10;
             display: flex; flex-direction: column; align-items: center;
             height: 100vh; overflow-y: auto; padding: 40px 20px;
-            box-sizing: border-box; background: rgba(5, 5, 5, 0.85);
+            box-sizing: border-box; background: radial-gradient(circle at center, transparent, var(--dark));
         }
 
         .hero h1 { 
-            color: var(--gold); font-size: 3.5rem; letter-spacing: 10px; 
+            color: var(--gold); font-size: 3rem; letter-spacing: 12px; 
             margin: 20px 0; text-align: center; font-weight: 900;
-            text-shadow: 0 0 15px rgba(212, 175, 55, 0.3);
+            text-shadow: 0 0 30px rgba(212, 175, 55, 0.5);
         }
         
         .play-btn {
-            background: var(--gold); color: black; border: none;
-            padding: 22px 70px; font-size: 1.4rem; font-weight: bold;
-            border-radius: 5px; cursor: pointer; transition: 0.3s;
-            text-transform: uppercase; letter-spacing: 2px;
+            background: linear-gradient(45deg, var(--gold), #fff);
+            color: black; border: none;
+            padding: 24px 80px; font-size: 1.2rem; font-weight: 900;
+            border-radius: 2px; cursor: pointer; transition: 0.4s;
+            text-transform: uppercase; letter-spacing: 4px;
+            box-shadow: 0 0 20px rgba(212, 175, 55, 0.4);
         }
-        .play-btn:hover { background: #fff; transform: translateY(-3px); box-shadow: 0 10px 20px rgba(212, 175, 55, 0.4); }
+        .play-btn:hover { transform: scale(1.05); filter: brightness(1.2); }
 
         .section {
-            max-width: 650px; background: var(--gray);
-            padding: 30px; border-radius: 4px; border: 1px solid #222; margin: 20px 0;
+            max-width: 600px; background: var(--card-bg);
+            padding: 30px; border-radius: 15px; border: 1px solid rgba(212, 175, 55, 0.2); 
+            margin: 20px 0; backdrop-filter: blur(10px);
         }
 
-        .mono-btn {
-            background: #fff; color: #000; border: none;
-            padding: 14px 25px; border-radius: 5px; display: inline-flex;
-            align-items: center; gap: 12px; text-decoration: none;
-            font-weight: bold; transition: 0.3s; margin-top: 20px;
+        .dev-badge {
+            display: inline-block; background: var(--gold); color: black;
+            padding: 5px 15px; border-radius: 20px; font-weight: bold; margin-bottom: 15px;
         }
-        .mono-btn:hover { background: var(--gold); }
+
+        .support-card {
+            border: 2px dashed var(--gold); padding: 25px; border-radius: 15px;
+            text-align: center; background: rgba(212, 175, 55, 0.05);
+        }
+
+        .mono-link {
+            color: #fff; font-family: monospace; font-size: 1.3rem;
+            display: block; margin: 20px 0; text-decoration: none; font-weight: 900;
+            background: #222; padding: 15px; border-radius: 10px;
+        }
 
         /* --- GAME UI --- */
         #game {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            display: none; flex-direction: column; z-index: 20; background: var(--dark);
+            display: none; flex-direction: column; z-index: 20;
         }
 
-        .header { background: #000; padding: 25px; text-align: center; border-bottom: 1px solid #111; }
-        #balance { font-size: 2.8rem; font-weight: bold; color: #fff; letter-spacing: -1px; }
-        #income { color: var(--green); font-size: 0.9rem; margin-top: 5px; font-family: monospace; }
+        .game-header { 
+            background: rgba(0,0,0,0.8); padding: 30px 20px; text-align: center; 
+            border-bottom: 1px solid rgba(212, 175, 55, 0.3); backdrop-filter: blur(15px);
+        }
+        #balance { font-size: 3rem; font-weight: 900; color: #fff; text-shadow: 0 0 20px var(--gold); }
+        #income { color: var(--green); font-size: 1rem; font-family: 'Courier New', monospace; margin-top: 8px; }
 
         .content { flex: 1; overflow-y: auto; display: flex; flex-direction: column; align-items: center; padding: 20px; }
         
-        .click-area { flex: 1; display: flex; flex-direction: column; justify-content: center; align-items: center; }
         .main-button {
-            width: 220px; height: 220px; border-radius: 50%;
-            background: transparent; border: 2px solid var(--gold);
-            color: var(--gold); font-size: 3.5rem; font-weight: bold;
-            box-shadow: inset 0 0 20px rgba(212, 175, 55, 0.1), 0 0 40px rgba(212, 175, 55, 0.1); 
-            transition: 0.1s; cursor: pointer;
+            width: 240px; height: 240px; border-radius: 50%;
+            background: rgba(212, 175, 55, 0.05); border: 2px solid var(--gold);
+            color: var(--gold); font-size: 4rem; font-weight: 900;
+            box-shadow: 0 0 50px rgba(212, 175, 55, 0.15); 
+            transition: 0.1s cubic-bezier(0.175, 0.885, 0.32, 1.275); 
+            cursor: pointer; outline: none; z-index: 5;
         }
-        .main-button:active { transform: scale(0.95); border-width: 4px; background: rgba(212, 175, 175, 0.05); }
+        .main-button:active { transform: scale(0.9); box-shadow: 0 0 80px var(--gold); }
 
-        .market { width: 100%; max-width: 450px; display: none; padding-bottom: 20px; }
         .biz-card {
-            background: #0f0f0f; padding: 18px; border-radius: 2px;
-            margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center;
-            border-left: 3px solid var(--gold);
+            background: var(--card-bg); padding: 20px; border-radius: 15px;
+            margin-bottom: 15px; display: flex; justify-content: space-between; align-items: center;
+            border: 1px solid rgba(255,255,255,0.1); backdrop-filter: blur(5px); width: 100%;
         }
-        .biz-info h3 { margin: 0; font-size: 1.1rem; letter-spacing: 1px; }
-        .biz-info p { margin: 5px 0 0; color: var(--gold); font-size: 0.85rem; font-family: monospace; }
+        .biz-info h3 { margin: 0; font-size: 1.1rem; color: #fff; }
+        .biz-info p { margin: 5px 0 0; color: var(--gold); font-family: monospace; }
         
         .buy-btn {
-            background: #222; color: var(--gold); border: 1px solid var(--gold);
-            padding: 10px 20px; border-radius: 2px; font-weight: bold; transition: 0.2s;
+            background: var(--gold); color: #000; border: none;
+            padding: 12px 20px; border-radius: 10px; font-weight: 900;
         }
-        .buy-btn:not(:disabled):hover { background: var(--gold); color: #000; }
-        .buy-btn:disabled { opacity: 0.3; cursor: not-allowed; }
+        .buy-btn:disabled { opacity: 0.2; filter: grayscale(1); }
 
-        .nav {
-            display: flex; height: 75px; background: #000; border-top: 1px solid #111;
+        .nav { display: flex; height: 80px; background: rgba(0,0,0,0.9); border-top: 1px solid #222; }
+        .nav-item { flex: 1; background: none; border: none; color: #555; font-weight: 900; font-size: 0.8rem; letter-spacing: 2px; }
+        .nav-item.active { color: var(--gold); text-shadow: 0 0 10px var(--gold); }
+
+        /* Floating FX */
+        .click-fx {
+            position: absolute; color: var(--gold); font-weight: bold; 
+            pointer-events: none; animation: flyUp 1s forwards; z-index: 100;
         }
-        .nav-item {
-            flex: 1; background: none; border: none; color: #444;
-            font-weight: bold; font-size: 0.75rem; letter-spacing: 2px; transition: 0.3s;
+        @keyframes flyUp {
+            0% { transform: translateY(0) opacity(1); }
+            100% { transform: translateY(-100px) opacity(0); }
         }
-        .nav-item.active { color: var(--gold); border-bottom: 2px solid var(--gold); }
     </style>
 </head>
 <body>
@@ -112,56 +131,62 @@
 
     <div id="landing">
         <div class="hero">
-            <p style="color: var(--gold); letter-spacing: 7px; margin: 0; font-size: 0.8rem;">ESTABLISHED 2026</p>
+            <p style="color: var(--gold); letter-spacing: 8px;">PREMIUM ACCESS</p>
             <h1>GOLDEN EQUITY</h1>
-            <button class="play-btn" onclick="startGame()">Initialize Session</button>
+            <button class="play-btn" onclick="startGame()">ENTER SYSTEM</button>
         </div>
 
         <div class="section">
-            <h2 style="color: var(--gold); text-transform: uppercase; font-size: 1rem;">Project Overview</h2>
-            <p>Golden Equity is a high-end financial simulator designed for those who seek digital dominance. Our engine calculates real-time market shifts to provide a seamless growth experience.</p>
-            <p style="color: #666; font-style: italic;">"Wealth is not about having money; it's about having options."</p>
+            <div class="dev-badge">Core Developers</div>
+            <h2 style="margin: 0; color: #fff;">Nestor & Sanya</h2>
+            <p style="color: #bbb; line-height: 1.6;">
+                We are a duo of ambitious developers pushing the limits of web technology. 
+                <strong>Golden Equity</strong> is our passion project—a digital ecosystem built from scratch 
+                with precision, sleepless nights, and a lot of energy drinks. 
+                We believe in clean aesthetics and powerful user experiences.
+            </p>
         </div>
 
-        <div class="section">
-            <h2 style="color: var(--gold); text-transform: uppercase; font-size: 1rem;">The Architects</h2>
-            <p>Developed by a duo of independent creators. We focus on clean code, aesthetic UI, and user-driven progression. This is our debut into the world of web-based gaming.</p>
-            
-            <a href="https://send.monobank.ua/jar/XXXXXXXXXX" target="_blank" class="mono-btn">
-                <img src="https://www.monobank.ua/favicon.ico" width="20" alt="mono">
-                SUPPORT OUR DEVELOPMENT
+        <div class="section support-card">
+            <h3 style="margin-top: 0; color: var(--gold);">SUPPORT OUR JOURNEY</h3>
+            <p style="font-size: 0.9rem; color: #888;">Your support helps us stay independent and continue developing this empire.</p>
+            <a href="https://send.monobank.ua/jar/4441114433388350" target="_blank" class="mono-link">
+                4441 1144 3338 8350
             </a>
+            <p style="font-size: 0.8rem; color: #555;">(Click to support via Monobank)</p>
         </div>
     </div>
 
     <div id="game">
-        <div class="header">
+        <div class="game-header">
             <div id="balance">$ 0</div>
-            <div id="income">DATA_STREAM: $0/SEC</div>
+            <div id="income">NET_RATE: +$0/SEC</div>
         </div>
 
-        <div class="content">
-            <div id="officeTab" class="click-area">
-                <button class="main-button" onclick="doClick()">GE</button>
-                <p style="color: #333; margin-top: 30px; letter-spacing: 5px; font-size: 0.7rem;">SYSTEM_ACTIVE</p>
+        <div class="content" id="officeTab">
+            <div class="click-area" style="margin-top: 60px;">
+                <button class="main-button" onclick="doClick(event)">GE</button>
+                <p style="color: #444; margin-top: 40px; letter-spacing: 8px; font-size: 0.7rem;">ESTABLISHING DOMINANCE</p>
             </div>
+        </div>
 
-            <div id="marketTab" class="market">
+        <div class="content" id="marketTab" style="display:none;">
+            <div style="width: 100%; max-width: 450px;">
                 <div class="biz-card">
-                    <div class="biz-info"><h3>Retail Chain</h3><p id="c-coffee">Cost: $50</p></div>
-                    <button class="buy-btn" id="b-coffee" onclick="buy('coffee')">ACQUIRE</button>
+                    <div class="biz-info"><h3>Retail Empire</h3><p id="c-coffee">Cost: $50</p></div>
+                    <button class="buy-btn" id="b-coffee" onclick="buy('coffee')">BUY</button>
                 </div>
                 <div class="biz-card">
-                    <div class="biz-info"><h3>Software House</h3><p id="c-it">Cost: $500</p></div>
-                    <button class="buy-btn" id="b-it" onclick="buy('it')">ACQUIRE</button>
+                    <div class="biz-info"><h3>Cloud Infrastructure</h3><p id="c-it">Cost: $500</p></div>
+                    <button class="buy-btn" id="b-it" onclick="buy('it')">BUY</button>
                 </div>
                 <div class="biz-card">
-                    <div class="biz-info"><h3>Data Center</h3><p id="c-crypto">Cost: $5,000</p></div>
-                    <button class="buy-btn" id="b-crypto" onclick="buy('crypto')">ACQUIRE</button>
+                    <div class="biz-info"><h3>AI Research Lab</h3><p id="c-crypto">Cost: $5,000</p></div>
+                    <button class="buy-btn" id="b-crypto" onclick="buy('crypto')">BUY</button>
                 </div>
                 <div class="biz-card">
-                    <div class="biz-info"><h3>Global Logistics</h3><p id="c-hotel">Cost: $100,000</p></div>
-                    <button class="buy-btn" id="b-hotel" onclick="buy('hotel')">ACQUIRE</button>
+                    <div class="biz-info"><h3>Orbital Logistics</h3><p id="c-hotel">Cost: $100,000</p></div>
+                    <button class="buy-btn" id="b-hotel" onclick="buy('hotel')">BUY</button>
                 </div>
             </div>
         </div>
@@ -173,42 +198,48 @@
     </div>
 
     <script>
-        // --- ЦИФРОВИЙ ФОН (0 та 1) ---
+        // --- LIVE BACKGROUND SYSTEM ---
         const canvas = document.getElementById('bgCanvas');
         const ctx = canvas.getContext('2d');
-        let parts = [];
+        let dots = [];
         function resize() { canvas.width = window.innerWidth; canvas.height = window.innerHeight; }
         window.onresize = resize; resize();
 
-        class Digit {
+        class Particle {
             constructor() { this.reset(); this.y = Math.random() * canvas.height; }
             reset() {
                 this.x = Math.random() * canvas.width;
-                this.y = -30;
-                this.s = Math.random() * 12 + 8;
-                this.v = Math.random() * 0.8 + 0.2;
-                this.o = Math.random() * 0.2;
-                this.char = Math.random() > 0.5 ? '1' : '0';
+                this.y = -20;
+                this.s = Math.random() * 2 + 1;
+                this.v = Math.random() * 1 + 0.3;
+                this.o = Math.random() * 0.4;
             }
-            update() {
-                this.y += this.v;
-                if (this.y > canvas.height) this.reset();
-            }
+            update() { this.y += this.v; if (this.y > canvas.height) this.reset(); }
             draw() {
                 ctx.fillStyle = `rgba(212, 175, 55, ${this.o})`;
-                ctx.font = this.s + 'px monospace';
-                ctx.fillText(this.char, this.x, this.y);
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.s, 0, Math.PI*2);
+                ctx.fill();
             }
         }
-        for(let i=0; i<60; i++) parts.push(new Digit());
+        for(let i=0; i<80; i++) dots.push(new Particle());
+
+        function drawGrid() {
+            ctx.strokeStyle = 'rgba(212, 175, 55, 0.05)';
+            ctx.lineWidth = 1;
+            for(let i=0; i<canvas.width; i+=40) { ctx.beginPath(); ctx.moveTo(i, 0); ctx.lineTo(i, canvas.height); ctx.stroke(); }
+            for(let i=0; i<canvas.height; i+=40) { ctx.beginPath(); ctx.moveTo(0, i); ctx.lineTo(canvas.width, i); ctx.stroke(); }
+        }
+
         function anim() {
-            ctx.clearRect(0,0,canvas.width, canvas.height);
-            parts.forEach(p => { p.update(); p.draw(); });
+            ctx.fillStyle = '#030303'; ctx.fillRect(0,0,canvas.width, canvas.height);
+            drawGrid();
+            dots.forEach(p => { p.update(); p.draw(); });
             requestAnimationFrame(anim);
         }
         anim();
 
-        // --- GAME CORE ---
+        // --- GAME ENGINE ---
         let money = parseFloat(localStorage.getItem('ge_m')) || 0;
         let income = parseFloat(localStorage.getItem('ge_i')) || 0;
 
@@ -220,18 +251,30 @@
         };
 
         function startGame() {
+            document.getElementById('landing').style.transition = '0.5s';
             document.getElementById('landing').style.opacity = '0';
             setTimeout(() => {
                 document.getElementById('landing').style.display = 'none';
                 document.getElementById('game').style.display = 'flex';
                 update();
-            }, 400);
+            }, 500);
         }
 
-        function doClick() {
+        function doClick(e) {
             money += 1;
-            if(navigator.vibrate) navigator.vibrate(10);
+            createClickFX(e);
+            if(navigator.vibrate) navigator.vibrate(15);
             update();
+        }
+
+        function createClickFX(e) {
+            const fx = document.createElement('div');
+            fx.className = 'click-fx';
+            fx.innerText = '+1';
+            fx.style.left = (e.clientX || window.innerWidth/2) + 'px';
+            fx.style.top = (e.clientY || window.innerHeight/2) + 'px';
+            document.body.appendChild(fx);
+            setTimeout(() => fx.remove(), 1000);
         }
 
         function buy(id) {
@@ -239,7 +282,7 @@
             if(money >= b.c) {
                 money -= b.c;
                 income += b.p;
-                b.c = Math.floor(b.c * 1.35);
+                b.c = Math.floor(b.c * 1.4);
                 save(); update();
             }
         }
@@ -247,7 +290,7 @@
         function update() {
             const f = (n) => n.toLocaleString('en-US');
             document.getElementById('balance').innerText = '$ ' + f(Math.floor(money));
-            document.getElementById('income').innerText = 'DATA_STREAM: $' + f(income) + '/SEC';
+            document.getElementById('income').innerText = 'NET_RATE: +$' + f(income) + '/SEC';
             for(let k in data) {
                 document.getElementById('c-'+k).innerText = 'Cost: $' + f(data[k].c);
                 document.getElementById('b-'+k).disabled = money < data[k].c;
@@ -256,7 +299,7 @@
 
         function tab(t) {
             document.getElementById('officeTab').style.display = t=='off' ? 'flex':'none';
-            document.getElementById('marketTab').style.display = t=='mkt' ? 'block':'none';
+            document.getElementById('marketTab').style.display = t=='mkt' ? 'flex':'none';
             document.getElementById('n-off').className = 'nav-item' + (t=='off'?' active':'');
             document.getElementById('n-mkt').className = 'nav-item' + (t=='mkt'?' active':'');
         }
