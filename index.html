@@ -3,230 +3,239 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>GOLDEN EQUITY | LIVE DOMINATION</title>
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;900&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+    <title>Golden Equity | Soft Luxury</title>
+    <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@400;600&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
     <style>
         :root {
-            --gold: #ffcc00;
-            --neon-blue: #00d4ff;
-            --bg: #020202;
-            --panel: rgba(15, 15, 15, 0.9);
+            --gold: #e5c07b;
+            --soft-gold: #f3e5ab;
+            --deep-bg: #0a0e14;
+            --card-bg: rgba(255, 255, 255, 0.03);
         }
 
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
         body, html { 
-            margin: 0; padding: 0; background: var(--bg); color: white; 
-            font-family: 'Share Tech Mono', monospace; height: 100%; overflow: hidden;
+            margin: 0; padding: 0; background: var(--deep-bg); color: #e0e0e0; 
+            font-family: 'Quicksand', sans-serif; height: 100%; overflow: hidden;
         }
 
-        /* --- MATRIX RAIN BACKGROUND --- */
-        canvas { position: fixed; top: 0; left: 0; z-index: 0; opacity: 0.3; }
+        /* --- SOFT FLOATING MONEY BACKGROUND --- */
+        canvas { position: fixed; top: 0; left: 0; z-index: 0; pointer-events: none; }
 
         #app { position: relative; z-index: 10; height: 100vh; display: flex; flex-direction: column; }
 
-        /* --- LOGIN SCREEN --- */
-        .auth-screen {
+        /* --- LANDING --- */
+        .screen-fade {
             display: flex; flex-direction: column; align-items: center; justify-content: center;
-            height: 100%; padding: 20px; text-align: center;
-        }
-        .glitch-header {
-            font-family: 'Orbitron', sans-serif; font-size: 2.5rem; color: var(--gold);
-            text-shadow: 2px 2px var(--neon-blue); letter-spacing: 5px; margin-bottom: 40px;
-        }
-        .input-group { background: var(--panel); border: 1px solid var(--gold); padding: 5px; display: flex; width: 100%; max-width: 300px; }
-        input { 
-            flex: 1; background: none; border: none; color: white; padding: 15px; 
-            font-family: inherit; outline: none; font-size: 1.1rem;
-        }
-        .enter-btn { background: var(--gold); border: none; padding: 0 20px; cursor: pointer; font-weight: bold; }
-
-        /* --- GAME HUD --- */
-        .hud { padding: 20px; border-bottom: 1px solid #222; background: rgba(0,0,0,0.85); backdrop-filter: blur(10px); }
-        .bal { font-family: 'Orbitron', sans-serif; font-size: 2.4rem; color: #fff; text-align: center; }
-        .inc { color: var(--neon-blue); font-size: 0.8rem; text-align: center; margin-top: 5px; opacity: 0.8; }
-
-        /* --- LIVE FEED --- */
-        .live-feed {
-            height: 30px; background: rgba(0, 212, 255, 0.1); color: var(--neon-blue);
-            font-size: 0.7rem; display: flex; align-items: center; padding: 0 15px;
-            border-bottom: 1px solid rgba(0, 212, 255, 0.2); overflow: hidden;
+            height: 100%; padding: 30px; text-align: center; overflow-y: auto;
         }
 
-        /* --- CLICK AREA --- */
-        .main-engine { flex: 1; display: flex; flex-direction: column; justify-content: center; align-items: center; }
-        .core {
-            width: 220px; height: 220px; border-radius: 40px;
-            border: 2px solid var(--gold); background: rgba(255, 204, 0, 0.03);
+        h1 { 
+            font-family: 'Playfair Display', serif; font-size: 3rem; color: var(--gold);
+            margin-bottom: 10px; letter-spacing: 2px;
+        }
+
+        .description {
+            max-width: 500px; line-height: 1.8; color: #aaa; margin-bottom: 30px; font-size: 0.95rem;
+        }
+
+        .btn-luxe {
+            background: var(--gold); color: var(--deep-bg); border: none;
+            padding: 18px 50px; font-weight: 600; border-radius: 40px;
+            font-size: 1.1rem; cursor: pointer; transition: 0.4s;
+            box-shadow: 0 10px 20px rgba(229, 192, 123, 0.2);
+        }
+        .btn-luxe:hover { transform: translateY(-3px); box-shadow: 0 15px 30px rgba(229, 192, 123, 0.3); }
+
+        /* --- GAME INTERFACE --- */
+        .game-hud { padding: 40px 20px; text-align: center; }
+        .balance { font-family: 'Playfair Display', serif; font-size: 3.5rem; color: #fff; margin: 10px 0; }
+        .income { color: var(--gold); opacity: 0.8; letter-spacing: 2px; font-size: 0.8rem; }
+
+        .click-zone { flex: 1; display: flex; justify-content: center; align-items: center; }
+        .main-coin {
+            width: 220px; height: 220px; border-radius: 50%;
+            background: radial-gradient(circle, var(--soft-gold) 0%, var(--gold) 100%);
             display: flex; justify-content: center; align-items: center;
-            box-shadow: 0 0 40px rgba(255, 204, 0, 0.1); transition: 0.1s;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.5), inset 0 0 20px rgba(255,255,255,0.5);
+            cursor: pointer; transition: 0.1s; border: 5px solid rgba(255,255,255,0.1);
         }
-        .core:active { transform: scale(0.92) rotate(5deg); background: rgba(255, 204, 0, 0.1); }
+        .main-coin:active { transform: scale(0.95); }
+        .main-coin span { font-family: 'Playfair Display', serif; font-size: 4rem; color: rgba(0,0,0,0.6); }
 
-        /* --- TABS --- */
-        .tab-content { display: none; flex: 1; padding: 20px; overflow-y: auto; padding-bottom: 100px; }
-        .active-tab { display: block; }
+        /* --- CARDS & NAVIGATION --- */
+        .panel { padding: 20px; display: none; overflow-y: auto; padding-bottom: 100px; width: 100%; max-width: 500px; margin: 0 auto; }
+        .active-panel { display: block; }
 
-        /* --- LISTS --- */
-        .card {
-            background: var(--panel); border: 1px solid #222; padding: 15px; margin-bottom: 10px;
+        .luxe-card {
+            background: var(--card-bg); border-radius: 20px; padding: 20px;
+            margin-bottom: 15px; border: 1px solid rgba(255,255,255,0.05);
             display: flex; justify-content: space-between; align-items: center;
+            backdrop-filter: blur(10px);
         }
-        .online-dot { width: 8px; height: 8px; background: #00FF41; border-radius: 50%; display: inline-block; margin-right: 8px; box-shadow: 0 0 10px #00FF41; }
+        .luxe-card h3 { margin: 0; font-size: 1.1rem; color: var(--soft-gold); }
+        .luxe-card p { margin: 5px 0 0; font-size: 0.8rem; color: #777; }
 
-        /* --- NAV --- */
-        .nav { position: fixed; bottom: 0; width: 100%; height: 75px; background: #000; border-top: 1px solid #222; display: flex; }
-        .nav-btn { flex: 1; background: none; border: none; color: #444; font-family: 'Orbitron', sans-serif; font-size: 0.6rem; }
+        .nav-bar {
+            position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%);
+            width: 90%; max-width: 400px; height: 70px;
+            background: rgba(20, 25, 33, 0.8); backdrop-filter: blur(20px);
+            border-radius: 35px; display: flex; align-items: center;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+        .nav-btn { flex: 1; background: none; border: none; color: #555; font-weight: 600; cursor: pointer; }
         .nav-btn.active { color: var(--gold); }
 
         .hidden { display: none !important; }
+
+        /* Support Text */
+        .support-info { font-size: 0.8rem; color: #555; margin-top: 20px; }
     </style>
 </head>
 <body>
 
-<canvas id="matrix"></canvas>
+<canvas id="bgCanvas"></canvas>
 
 <div id="app">
-    <div id="auth-screen" class="auth-screen">
-        <h1 class="glitch-header">GOLDEN EQUITY</h1>
-        <p style="color: #444; letter-spacing: 4px; font-size: 0.8rem; margin-bottom: 20px;">SYSTEM ARCHITECTS: NESTOR & SANYA</p>
-        <div class="input-group">
-            <input type="text" id="user-input" placeholder="ACCESS_ID" maxlength="12">
-            <button class="enter-btn" onclick="startApp()">></button>
+    <div id="landing" class="screen-fade">
+        <p style="letter-spacing: 5px; font-size: 0.7rem; color: var(--gold);">ESTABLISHED 2026</p>
+        <h1>Golden Equity</h1>
+        <div class="description">
+            Experience the art of wealth creation. <strong>Nestor & Sanya</strong> present a refined financial simulator designed for those who appreciate elegance and growth. We pour our hearts into every line of code to give you the most peaceful clicking experience.
+        </div>
+        <button class="btn-luxe" onclick="enterGame()">Enter The Empire</button>
+        
+        <div class="support-info">
+            Created with passion by Nestor & Sanya<br>
+            Support our journey: <span style="color: var(--gold);">4441 1144 3338 8350</span>
         </div>
     </div>
 
-    <div id="game-screen" class="hidden" style="height: 100%; display: flex; flex-direction: column;">
-        <div class="hud">
-            <div class="bal" id="bal-val">$ 0</div>
-            <div class="inc" id="inc-val">SYSTEM_LOAD: +$0/SEC</div>
-        </div>
-        
-        <div class="live-feed">
-            <span id="feed-text">>> SYSTEM INITIALIZED. WELCOME, OPERATOR.</span>
+    <div id="game" class="hidden" style="height: 100%; display: flex; flex-direction: column;">
+        <div class="game-hud">
+            <div class="income" id="inc-text">PASSIVE GROWTH: $0/SEC</div>
+            <div class="balance" id="bal-text">$ 0</div>
         </div>
 
-        <div id="tab-core" class="tab-content active-tab">
-            <div class="main-engine">
-                <div class="core" onclick="tap(event)">
-                    <span style="font-size: 3rem; color: var(--gold); font-family: 'Orbitron';">GE</span>
-                </div>
-                <p style="margin-top: 40px; color: #333; letter-spacing: 10px;">DATA_MINING</p>
+        <div id="tab-click" class="click-zone active-panel">
+            <div class="main-coin" onclick="tap(event)">
+                <span>G</span>
             </div>
         </div>
 
-        <div id="tab-online" class="tab-content">
-            <h3 style="color: var(--gold); border-bottom: 1px solid #222; padding-bottom: 10px;">LIVE OPERATORS</h3>
-            <div id="online-list">
-                <div class="card">
-                    <div><span class="online-dot"></span><strong>NESTOR</strong></div>
-                    <div style="color: var(--gold);">$999T</div>
-                </div>
-                <div class="card">
-                    <div><span class="online-dot"></span><strong>SANYA</strong></div>
-                    <div style="color: var(--gold);">$999T</div>
-                </div>
+        <div id="tab-assets" class="panel">
+            <div class="luxe-card">
+                <div><h3>Real Estate</h3><p id="c-house">Cost: $100</p></div>
+                <button class="btn-luxe" style="padding: 10px 20px; font-size: 0.8rem;" onclick="buy('house', 100, 2)">Acquire</button>
+            </div>
+            <div class="luxe-card">
+                <div><h3>Gold Mine</h3><p id="c-mine">Cost: $2,500</p></div>
+                <button class="btn-luxe" style="padding: 10px 20px; font-size: 0.8rem;" onclick="buy('mine', 2500, 50)">Acquire</button>
             </div>
         </div>
 
-        <div id="tab-shop" class="tab-content">
-            <div class="card">
-                <div><h3>Botnet</h3><p>+$5/s | Cost: $100</p></div>
-                <button class="enter-btn" style="height: 40px;" onclick="buy(100, 5)">BUY</button>
+        <div id="tab-about" class="panel">
+            <div class="luxe-card" style="flex-direction: column; text-align: center;">
+                <h3>The Founders</h3>
+                <p style="margin: 15px 0; line-height: 1.6;">
+                    Nestor & Sanya are dedicated developers focused on creating premium digital experiences. We believe that games should be beautiful and stress-free. Your support helps us keep building.
+                </p>
+                <div style="color: var(--gold); font-weight: bold; margin-top: 10px;">Support: 4441 1144 3338 8350</div>
             </div>
         </div>
 
-        <nav class="nav">
-            <button class="nav-btn active" onclick="showTab('core', this)">CORE</button>
-            <button class="nav-btn" onclick="showTab('shop', this)">ASSETS</button>
-            <button class="nav-item" style="flex:1; border:none; background:none; color:#444;" onclick="showTab('online', this)">LIVE</button>
+        <nav class="nav-bar">
+            <button class="nav-btn active" onclick="showTab('click', this)">Main</button>
+            <button class="nav-btn" onclick="showTab('assets', this)">Assets</button>
+            <button class="nav-btn" onclick="showTab('about', this)">Team</button>
         </nav>
     </div>
 </div>
 
 <script>
-    // --- MATRIX BACKGROUND ---
-    const canvas = document.getElementById('matrix');
+    // --- SOFT FLOATING MONEY ENGINE ---
+    const canvas = document.getElementById('bgCanvas');
     const ctx = canvas.getContext('2d');
-    let columns;
-    const charSize = 18;
-    let drops = [];
+    let items = [];
 
-    function initMatrix() {
+    function initBG() {
         canvas.width = window.innerWidth; canvas.height = window.innerHeight;
-        columns = Math.floor(canvas.width / charSize);
-        drops = new Array(columns).fill(1);
-    }
-    initMatrix(); window.onresize = initMatrix;
-
-    function drawMatrix() {
-        ctx.fillStyle = 'rgba(0, 0, 0, 0.05)'; ctx.fillRect(0, 0, canvas.width, canvas.height);
-        ctx.fillStyle = '#ffcc00'; ctx.font = charSize + 'px monospace';
-        for(let i=0; i<drops.length; i++) {
-            const text = Math.floor(Math.random()*2);
-            ctx.fillText(text, i*charSize, drops[i]*charSize);
-            if(drops[i]*charSize > canvas.height && Math.random() > 0.975) drops[i] = 0;
-            drops[i]++;
+        items = [];
+        for(let i=0; i<25; i++) {
+            items.push({
+                x: Math.random() * canvas.width,
+                y: Math.random() * canvas.height,
+                s: Math.random() * 20 + 10,
+                vx: (Math.random() - 0.5) * 0.5,
+                vy: (Math.random() - 0.5) * 0.5,
+                o: Math.random() * 0.15 + 0.05
+            });
         }
     }
-    setInterval(drawMatrix, 50);
+
+    function drawBG() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        ctx.fillStyle = '#e5c07b';
+        items.forEach(p => {
+            ctx.globalAlpha = p.o;
+            ctx.font = p.s + 'px serif';
+            ctx.fillText('$', p.x, p.y);
+            p.x += p.vx; p.y += p.vy;
+            if(p.x < -20) p.x = canvas.width + 20;
+            if(p.x > canvas.width + 20) p.x = -20;
+            if(p.y < -20) p.y = canvas.height + 20;
+            if(p.y > canvas.height + 20) p.y = -20;
+        });
+        requestAnimationFrame(drawBG);
+    }
+    initBG(); drawBG(); window.onresize = initBG;
 
     // --- GAME LOGIC ---
-    let stats = {
-        name: '',
-        money: parseFloat(localStorage.getItem('g_m')) || 0,
-        pps: parseFloat(localStorage.getItem('g_p')) || 0
+    let bank = {
+        m: parseFloat(localStorage.getItem('m_soft')) || 0,
+        i: parseFloat(localStorage.getItem('i_soft')) || 0
     };
 
-    function startApp() {
-        const input = document.getElementById('user-input').value;
-        if(input.length < 2) return alert("ENTER VALID ID");
-        stats.name = input.toUpperCase();
-        document.getElementById('auth-screen').classList.add('hidden');
-        document.getElementById('game-screen').classList.remove('hidden');
+    function enterGame() {
+        document.getElementById('landing').classList.add('hidden');
+        document.getElementById('game').classList.remove('hidden');
         updateUI();
-        addToFeed(`PLAYER ${stats.name} CONNECTED TO GRID.`);
     }
 
     function tap(e) {
-        stats.money += 1;
-        if(navigator.vibrate) navigator.vibrate(10);
+        bank.m += 1;
+        if(navigator.vibrate) navigator.vibrate(5);
         updateUI();
     }
 
-    function buy(cost, p) {
-        if(stats.money >= cost) {
-            stats.money -= cost;
-            stats.pps += p;
+    function buy(id, cost, inc) {
+        let realCost = Math.floor(cost * Math.pow(1.5, getOwnCount(id)));
+        if(bank.m >= realCost) {
+            bank.m -= realCost;
+            bank.i += inc;
+            saveOwn(id);
             updateUI();
-            addToFeed(`ASSET ACQUIRED BY ${stats.name}.`);
         }
     }
 
+    function getOwnCount(id) { return parseInt(localStorage.getItem('count_'+id)) || 0; }
+    function saveOwn(id) { localStorage.setItem('count_'+id, getOwnCount(id) + 1); }
+
     function updateUI() {
-        document.getElementById('bal-val').innerText = '$ ' + Math.floor(stats.money).toLocaleString();
-        document.getElementById('inc-val').innerText = 'SYSTEM_LOAD: +$' + stats.pps.toLocaleString() + '/SEC';
-        localStorage.setItem('g_m', stats.money);
-        localStorage.setItem('g_p', stats.pps);
+        document.getElementById('bal-text').innerText = '$ ' + Math.floor(bank.m).toLocaleString();
+        document.getElementById('inc-text').innerText = 'PASSIVE GROWTH: $' + bank.i.toLocaleString() + '/SEC';
+        localStorage.setItem('m_soft', bank.m);
+        localStorage.setItem('i_soft', bank.i);
     }
 
     function showTab(t, btn) {
-        document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active-tab'));
-        document.getElementById('tab-'+t).classList.add('active-tab');
+        document.querySelectorAll('.panel').forEach(p => p.classList.remove('active-panel'));
+        document.getElementById('tab-'+t).classList.add('active-panel');
         document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
         btn.classList.add('active');
     }
 
-    function addToFeed(msg) {
-        document.getElementById('feed-text').innerText = '>> ' + msg;
-    }
-
-    setInterval(() => { stats.money += stats.pps; updateUI(); }, 1000);
-</script>
-
-<script type="module">
-  // Сюди в майбутньому додається код Firebase, який:
-  // 1. При вході пише в базу: users[stats.name] = { online: true, money: stats.money }
-  // 2. Функція onDisconnect() автоматично видаляє юзера з бази, коли він закриває вкладку
+    setInterval(() => { bank.m += bank.i; updateUI(); }, 1000);
 </script>
 
 </body>
