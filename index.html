@@ -3,290 +3,233 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Golden Equity | Beyond Limits</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;500;700&family=Outfit:wght@400;600;800&display=swap" rel="stylesheet">
+    <title>Golden Equity | The Soft Empire</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;600;800&family=Plus+Jakarta+Sans:wght@400;700&display=swap" rel="stylesheet">
     <style>
         :root {
-            --primary: #007AFF;
-            --accent: #5856D6;
-            --bg: #0A0C10;
-            --card: rgba(28, 28, 30, 0.7);
-            --text: #F2F2F7;
-            --soft-white: rgba(255, 255, 255, 0.9);
+            --accent: #6366f1;
+            --glass: rgba(255, 255, 255, 0.03);
+            --border: rgba(255, 255, 255, 0.1);
+            --text-main: #ffffff;
+            --text-sub: #94a3b8;
         }
 
-        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; outline: none; }
-        
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
         body, html { 
-            margin: 0; padding: 0; background: var(--bg); color: var(--text); 
-            font-family: 'Inter', sans-serif; height: 100dvh; width: 100%;
-            overflow: hidden; touch-action: manipulation;
+            margin: 0; padding: 0; background: #020617; color: var(--text-main); 
+            font-family: 'Plus Jakarta Sans', sans-serif; height: 100dvh; overflow: hidden;
         }
 
-        /* --- BACKGROUND PARTICLES --- */
-        #canvas-bg { position: fixed; top: 0; left: 0; z-index: 0; pointer-events: none; opacity: 0.6; }
+        #bg-canvas { position: fixed; inset: 0; z-index: 0; pointer-events: none; }
 
-        .app-wrapper {
-            position: relative; z-index: 10; height: 100%; display: flex; flex-direction: column;
-            padding: env(safe-area-inset-top) 0 env(safe-area-inset-bottom);
-        }
+        .wrapper { position: relative; z-index: 10; height: 100%; display: flex; flex-direction: column; padding: env(safe-area-inset-top) 20px env(safe-area-inset-bottom); }
 
-        /* --- LANDING PAGE --- */
-        #landing-view {
+        /* --- PRE-GAME LANDING --- */
+        #landing {
             flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center;
-            padding: 40px; text-align: center; transition: all 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+            text-align: center; transition: 1s ease-in-out;
         }
 
-        .welcome-badge {
-            background: rgba(0, 122, 255, 0.1); color: var(--primary);
-            padding: 8px 16px; border-radius: 20px; font-size: 0.7rem; font-weight: 700;
-            letter-spacing: 2px; margin-bottom: 20px; text-transform: uppercase;
+        .pre-title { font-size: 0.7rem; letter-spacing: 4px; color: var(--accent); font-weight: 700; margin-bottom: 10px; opacity: 0; animation: fadeIn 1s forwards 0.5s; }
+        h1 { font-family: 'Outfit', sans-serif; font-size: 3.5rem; margin: 0; font-weight: 800; opacity: 0; animation: fadeIn 1s forwards 0.8s; }
+        .description { color: var(--text-sub); line-height: 1.7; margin: 25px 0 45px; font-weight: 400; max-width: 320px; opacity: 0; animation: fadeIn 1s forwards 1.1s; }
+
+        .start-trigger {
+            background: var(--accent); color: white; border: none; padding: 22px 50px; border-radius: 20px;
+            font-weight: 700; font-size: 1rem; cursor: pointer; box-shadow: 0 20px 40px rgba(99, 102, 241, 0.2);
+            opacity: 0; animation: fadeIn 1s forwards 1.4s; transition: 0.3s;
         }
+        .start-trigger:active { transform: scale(0.95); }
 
-        h1 { font-family: 'Outfit', sans-serif; font-size: 3rem; margin: 0; font-weight: 800; line-height: 1.1; }
-        .hero-desc { color: #8E8E93; line-height: 1.6; margin: 25px 0 40px; font-weight: 300; font-size: 1.05rem; max-width: 320px; }
+        /* --- THE EMPIRE (GAME) --- */
+        #empire-view { display: none; flex: 1; flex-direction: column; opacity: 0; transition: 1s; }
 
-        .start-btn {
-            background: linear-gradient(135deg, var(--primary), var(--accent));
-            color: white; border: none; padding: 20px 60px; border-radius: 18px;
-            font-family: 'Outfit', sans-serif; font-weight: 600; font-size: 1.1rem;
-            box-shadow: 0 10px 30px rgba(0, 122, 255, 0.3); transition: 0.3s; cursor: pointer;
-        }
-        .start-btn:active { transform: scale(0.95); opacity: 0.9; }
+        .top-hud { padding: 30px 0; text-align: center; }
+        .score-label { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 2px; color: var(--text-sub); }
+        .score-val { font-family: 'Outfit', sans-serif; font-size: 4rem; font-weight: 800; margin-top: 5px; }
 
-        /* --- GAME INTERFACE --- */
-        #game-view { 
-            flex: 1; display: flex; flex-direction: column; opacity: 0; visibility: hidden;
-            transform: translateY(30px); transition: all 0.8s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-
-        .game-header { padding: 30px 20px; text-align: center; }
-        .stat-label { font-size: 0.75rem; color: #8E8E93; letter-spacing: 1px; text-transform: uppercase; font-weight: 600; }
-        .stat-value { font-family: 'Outfit', sans-serif; font-size: 3.5rem; font-weight: 800; margin-top: 5px; }
-
-        .main-action { flex: 1; display: flex; align-items: center; justify-content: center; position: relative; }
+        .interact-zone { flex: 1; display: flex; align-items: center; justify-content: center; perspective: 1000px; }
         
-        /* The New Button Style */
-        .power-orb {
-            width: 220px; height: 220px; border-radius: 60px;
-            background: var(--card); border: 1px solid rgba(255,255,255,0.1);
-            display: flex; flex-direction: column; align-items: center; justify-content: center;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.4); transition: 0.1s; position: relative;
+        /* The Glass Card Button */
+        .glass-card {
+            width: 240px; height: 320px; background: var(--glass);
+            border: 1px solid var(--border); border-radius: 30px;
+            backdrop-filter: blur(20px); display: flex; flex-direction: column;
+            align-items: center; justify-content: center; transition: 0.1s cubic-bezier(0.17, 0.67, 0.83, 0.67);
+            box-shadow: 0 40px 80px rgba(0,0,0,0.5);
         }
-        .power-orb::before {
-            content: ''; position: absolute; inset: -2px; border-radius: 62px;
-            background: linear-gradient(135deg, var(--primary), var(--accent)); z-index: -1; opacity: 0.3;
-        }
-        .power-orb:active { transform: scale(0.94); border-color: var(--primary); }
-        .orb-icon { font-size: 3rem; margin-bottom: 10px; }
-        .orb-text { font-weight: 700; color: var(--primary); font-size: 0.9rem; letter-spacing: 2px; }
+        .glass-card:active { transform: scale(0.96) translateZ(-20px); border-color: var(--accent); }
+        .card-icon { font-size: 4rem; margin-bottom: 20px; filter: drop-shadow(0 0 10px var(--accent)); }
+        .card-label { font-weight: 800; font-size: 0.8rem; letter-spacing: 3px; color: var(--accent); }
 
-        /* --- TABS & PANELS --- */
-        .panel { padding: 25px; display: none; height: 100%; overflow-y: auto; }
-        .panel-active { display: block; animation: fadeIn 0.5s ease; }
+        /* --- MASTERS (ABOUT) --- */
+        .panel { display: none; padding: 20px; overflow-y: auto; }
+        .active-panel { display: block; animation: slideUp 0.6s ease forwards; }
 
-        .info-card {
-            background: var(--card); border-radius: 24px; padding: 25px; margin-bottom: 20px;
-            border: 1px solid rgba(255,255,255,0.05); backdrop-filter: blur(20px);
+        .bio-card {
+            background: var(--glass); border: 1px solid var(--border); border-radius: 25px;
+            padding: 30px; backdrop-filter: blur(20px);
         }
-        .info-card h3 { margin: 0 0 15px; font-family: 'Outfit', sans-serif; color: var(--primary); }
-        .info-card p { line-height: 1.6; color: #aeaeb2; font-size: 0.95rem; margin-bottom: 20px; }
+        .bio-card h2 { color: var(--accent); font-family: 'Outfit'; margin-top: 0; }
+        .bio-card p { line-height: 1.8; color: var(--text-sub); font-size: 0.95rem; }
 
-        .support-box {
-            background: rgba(255, 59, 48, 0.05); border: 1px dashed rgba(255, 59, 48, 0.2);
-            border-radius: 20px; padding: 20px; text-align: center;
+        .heart-section {
+            margin-top: 30px; padding: 20px; border-top: 1px solid var(--border); text-align: center;
         }
-        .heart-btn { 
-            font-size: 2.5rem; margin: 15px 0; display: inline-block; cursor: pointer;
-            filter: drop-shadow(0 0 10px rgba(255,59,48,0.3)); transition: 0.3s;
-        }
-        .heart-btn:active { transform: scale(1.4); }
+        .heart-icon { font-size: 3rem; cursor: pointer; transition: 0.4s; display: inline-block; }
+        .heart-icon:active { transform: scale(1.5); filter: hue-rotate(45deg); }
 
-        /* --- BOTTOM NAVIGATION --- */
-        .nav-bar {
-            background: rgba(28, 28, 30, 0.8); backdrop-filter: blur(25px);
-            margin: 0 20px 20px; height: 75px; border-radius: 25px;
-            display: flex; align-items: center; justify-content: space-around;
-            border: 1px solid rgba(255,255,255,0.08);
+        /* --- NAVIGATION --- */
+        .nav {
+            height: 80px; background: rgba(15, 23, 42, 0.8); backdrop-filter: blur(30px);
+            margin: 10px 20px 20px; border-radius: 25px; display: flex; 
+            border: 1px solid var(--border); overflow: hidden;
         }
-        .nav-item { 
-            display: flex; flex-direction: column; align-items: center; 
-            background: none; border: none; color: #636366; transition: 0.3s;
-        }
-        .nav-item.active { color: var(--primary); }
-        .nav-icon { font-size: 1.4rem; margin-bottom: 4px; }
-        .nav-label { font-size: 0.65rem; font-weight: 700; letter-spacing: 1px; }
+        .nav-link { flex: 1; border: none; background: none; color: #475569; font-weight: 700; font-size: 0.7rem; letter-spacing: 1px; }
+        .nav-link.active { color: var(--accent); background: rgba(99, 102, 241, 0.05); }
 
-        /* --- ANIMATIONS --- */
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-        .hidden { display: none !important; }
-        .view-visible { opacity: 1 !important; visibility: visible !important; transform: translateY(0) !important; }
-
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes slideUp { from { opacity: 0; transform: translateY(40px); } to { opacity: 1; transform: translateY(0); } }
     </style>
 </head>
 <body>
 
-    <canvas id="canvas-bg"></canvas>
+    <canvas id="bg-canvas"></canvas>
 
-    <div class="app-wrapper">
-        <section id="landing-view">
-            <div class="welcome-badge">Creators: Nestor & Sanya</div>
+    <div class="wrapper">
+        <div id="landing">
+            <span class="pre-title">A NESTOR & SANYA PRODUCTION</span>
             <h1>Golden<br>Equity</h1>
-            <p class="hero-desc">
-                Welcome to a refined financial simulator. A journey of growth, built with precision and soul for those who value progress.
+            <p class="description">
+                Experience a polite and refined world of growth. Crafted with care for the modern operator. 
+                Shall we begin your journey?
             </p>
-            <button class="start-btn" onclick="initExperience()">BEGIN JOURNEY</button>
-        </section>
+            <button class="start-trigger" onclick="launchApp()">INITIALIZE SYSTEM</button>
+        </div>
 
-        <main id="game-view">
-            <header class="game-header">
-                <div class="stat-label">Total Capital</div>
-                <div class="stat-value" id="main-bal">$ 0</div>
-                <div class="stat-label" style="margin-top: 10px; font-size: 0.65rem;">Growth Rate: +$0/s</div>
-            </header>
+        <div id="empire-view">
+            <div class="top-hud">
+                <div class="score-label">Current Holdings</div>
+                <div class="score-val" id="money-display">$ 0</div>
+            </div>
 
-            <div id="tab-action" class="panel panel-active main-action">
-                <div class="power-orb" onclick="makeAction(event)">
-                    <div class="orb-icon">💎</div>
-                    <div class="orb-text">COLLECT</div>
+            <div id="view-game" class="panel active-panel interact-zone">
+                <div class="glass-card" id="card" onclick="processClick(event)">
+                    <div class="card-icon">⚡</div>
+                    <div class="card-label">GENERATE</div>
                 </div>
             </div>
 
-            <div id="tab-about" class="panel">
-                <div class="info-card">
-                    <h3>The Founders</h3>
+            <div id="view-about" class="panel">
+                <div class="bio-card">
+                    <h2>Our Philosophy</h2>
                     <p>
-                        "Golden Equity" is an independent project by <b>Nestor & Sanya</b>. Our mission is to create digital experiences that combine aesthetic beauty with engaging mechanics. We appreciate every operator who joins our grid.
+                        <b>Nestor & Sanya</b> are more than just developers; we are architects of digital peace. Golden Equity is our gift to those who appreciate polite interaction and steady progress. 
+                        <br><br>
+                        This empire is built on the foundation of our friendship and your ambition.
                     </p>
-                    <div class="support-box">
-                        <div class="stat-label" style="color: #FF3B30;">Emotional Support</div>
-                        <div class="heart-btn" onclick="sendLove()">❤️</div>
-                        <p style="font-size: 0.8rem; margin: 0;">If financial support isn't an option, a simple heart means the world to us. This is also a huge support :)</p>
+                    <div class="heart-section">
+                        <div class="score-label" style="color: #ef4444;">Spiritual Support</div>
+                        <div class="heart-icon" onclick="pulseHeart()">❤️</div>
+                        <p style="font-size: 0.8rem; margin-top: 10px;">If you can't support us financially, this heart is more than enough. It's a huge support too :)</p>
                     </div>
                 </div>
             </div>
 
-            <nav class="nav-bar">
-                <button class="nav-item active" onclick="navTo('action', this)">
-                    <span class="nav-icon">📊</span>
-                    <span class="nav-label">EMPIRE</span>
-                </button>
-                <button class="nav-item" onclick="navTo('about', this)">
-                    <span class="nav-icon">🤝</span>
-                    <span class="nav-label">MASTERS</span>
-                </button>
+            <nav class="nav">
+                <button class="nav-link active" onclick="showTab('game', this)">EMPIRE</button>
+                <button class="nav-link" onclick="showTab('about', this)">MASTERS</button>
             </nav>
-        </main>
+        </div>
     </div>
 
     <script>
-        // --- LUXURY BACKGROUND PHYSICS ---
-        const canvas = document.getElementById('canvas-bg');
+        // --- AMBIENT BG ---
+        const canvas = document.getElementById('bg-canvas');
         const ctx = canvas.getContext('2d');
-        let particles = [];
-
-        function resize() {
-            canvas.width = window.innerWidth;
-            canvas.height = window.innerHeight;
-        }
-
-        class Particle {
-            constructor() {
-                this.x = Math.random() * canvas.width;
-                this.y = Math.random() * canvas.height;
-                this.size = Math.random() * 2 + 1;
-                this.speedX = (Math.random() - 0.5) * 0.5;
-                this.speedY = (Math.random() - 0.5) * 0.5;
-            }
-            update() {
-                this.x += this.speedX;
-                this.y += this.speedY;
-                if (this.x > canvas.width) this.x = 0;
-                if (this.x < 0) this.x = canvas.width;
-                if (this.y > canvas.height) this.y = 0;
-                if (this.y < 0) this.y = canvas.height;
-            }
-            draw() {
-                ctx.fillStyle = 'rgba(0, 122, 255, 0.3)';
-                ctx.beginPath();
-                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
-                ctx.fill();
-            }
-        }
+        let dots = [];
 
         function initBG() {
-            resize();
-            for (let i = 0; i < 40; i++) particles.push(new Particle());
-            animate();
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+            dots = Array.from({length: 30}, () => ({
+                x: Math.random() * canvas.width,
+                y: Math.random() * canvas.height,
+                vx: (Math.random() - 0.5) * 0.3,
+                vy: (Math.random() - 0.5) * 0.3,
+                s: Math.random() * 2
+            }));
         }
 
-        function animate() {
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            particles.forEach(p => { p.update(); p.draw(); });
-            requestAnimationFrame(animate);
+        function drawBG() {
+            ctx.clearRect(0,0,canvas.width, canvas.height);
+            ctx.fillStyle = 'rgba(99, 102, 241, 0.2)';
+            dots.forEach(d => {
+                ctx.beginPath();
+                ctx.arc(d.x, d.y, d.s, 0, Math.PI*2);
+                ctx.fill();
+                d.x += d.vx; d.y += d.vy;
+                if(d.x < 0 || d.x > canvas.width) d.vx *= -1;
+                if(d.y < 0 || d.y > canvas.height) d.vy *= -1;
+            });
+            requestAnimationFrame(drawBG);
         }
+        initBG(); drawBG(); window.onresize = initBG;
 
-        window.addEventListener('resize', resize);
-        initBG();
+        // --- CORE ENGINE ---
+        let money = parseFloat(localStorage.getItem('ge_m_v2')) || 0;
 
-        // --- CORE LOGIC ---
-        let state = {
-            money: parseFloat(localStorage.getItem('ge_val')) || 0,
-            activeTab: 'action'
-        };
-
-        function initExperience() {
-            document.getElementById('landing-view').style.opacity = '0';
+        function launchApp() {
+            document.getElementById('landing').style.opacity = '0';
             setTimeout(() => {
-                document.getElementById('landing-view').classList.add('hidden');
-                document.getElementById('game-view').classList.add('view-visible');
+                document.getElementById('landing').style.display = 'none';
+                document.getElementById('empire-view').style.display = 'flex';
+                setTimeout(() => document.getElementById('empire-view').style.opacity = '1', 50);
                 updateUI();
-            }, 600);
+            }, 1000);
         }
 
-        function makeAction(e) {
-            state.money += 1;
-            if (navigator.vibrate) navigator.vibrate(12);
-            createFloatingText(e);
+        function processClick(e) {
+            money += 1;
+            if(navigator.vibrate) navigator.vibrate(10);
+            spawnParticle(e.clientX, e.clientY);
             updateUI();
         }
 
-        function createFloatingText(e) {
-            const el = document.createElement('div');
-            el.innerText = '+$1';
-            el.style.position = 'fixed';
-            el.style.left = e.clientX + 'px';
-            el.style.top = e.clientY + 'px';
-            el.style.color = '#007AFF';
-            el.style.fontWeight = 'bold';
-            el.style.pointerEvents = 'none';
-            el.style.animation = 'floatUp 0.6s ease-out forwards';
-            document.body.appendChild(el);
-            setTimeout(() => el.remove(), 600);
+        function spawnParticle(x, y) {
+            const p = document.createElement('div');
+            p.innerText = '+$1';
+            p.style.cssText = `position:fixed; left:${x}px; top:${y}px; color:var(--accent); font-weight:800; pointer-events:none; z-index:100; font-size:1.2rem;`;
+            p.animate([{transform:'translate(-50%, 0)', opacity:1}, {transform:'translate(-50%, -100px)', opacity:0}], {duration:800, easing:'ease-out'});
+            document.body.appendChild(p);
+            setTimeout(() => p.remove(), 800);
         }
 
-        function sendLove() {
-            if (navigator.vibrate) navigator.vibrate([40, 60, 40]);
-            alert("Nestor & Sanya felt your support. Thank you, Operator.");
+        function pulseHeart() {
+            if(navigator.vibrate) navigator.vibrate([30, 50, 30]);
+            alert("Your kindness has reached Nestor & Sanya. Thank you, Master.");
         }
 
-        function navTo(tab, btn) {
-            document.querySelectorAll('.panel').forEach(p => p.classList.remove('panel-active'));
-            document.getElementById('tab-' + tab).classList.add('panel-active');
-            document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
+        function showTab(tab, btn) {
+            document.querySelectorAll('.panel').forEach(p => p.classList.remove('active-panel'));
+            document.getElementById('view-' + tab).classList.add('active-panel');
+            document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
             btn.classList.add('active');
         }
 
         function updateUI() {
-            document.getElementById('main-bal').innerText = '$ ' + Math.floor(state.money).toLocaleString();
-            localStorage.setItem('ge_val', state.money);
+            document.getElementById('money-display').innerText = '$ ' + Math.floor(money).toLocaleString();
+            localStorage.setItem('ge_m_v2', money);
         }
 
-        // Animation for floating text
-        const style = document.createElement('style');
-        style.innerHTML = `@keyframes floatUp { 0% { transform: translate(-50%, 0); opacity: 1; } 100% { transform: translate(-50%, -80px); opacity: 0; } }`;
-        document.head.appendChild(style);
-
+        // Tilt Effect
+        const card = document.getElementById('card');
+        document.addEventListener('mousemove', (e) => {
+            const rect = card.getBoundingClientRect();
+            const x = e.clientX - rect.left - rect.width/2;
+            const y = e.clientY - rect.top - rect.height/2;
+            card.style.transform = `rotateY(${x/10}deg) rotateX(${-y/10}deg)`;
+        });
     </script>
 </body>
 </html>
