@@ -2,344 +2,275 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-select=none">
-    <title>Golden Equity | Corporate Empire Builder</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Golden Equity | Digital Empire</title>
     <style>
         :root {
             --gold: #D4AF37;
-            --gold-dim: #b8860b;
-            --dark: #080808;
-            --gray: #151515;
-            --text-gray: #888;
+            --dark: #050505;
+            --gray: #111111;
             --green: #00FF41;
         }
 
         body, html {
-            margin: 0;
-            padding: 0;
-            background-color: var(--dark);
+            margin: 0; padding: 0;
+            background: var(--dark);
             color: white;
-            font-family: 'Segoe UI', Roboto, Helvetica, sans-serif;
-            overflow-x: hidden;
+            font-family: 'Segoe UI', sans-serif;
             height: 100%;
+            overflow: hidden;
         }
 
-        /* --- BACKGROUND PARTICLES (MONEY) --- */
-        #money-canvas {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            z-index: 0;
-            pointer-events: none;
+        canvas { position: fixed; top: 0; left: 0; z-index: 1; pointer-events: none; }
+
+        /* --- LANDING PAGE --- */
+        #landing {
+            position: relative; z-index: 10;
+            display: flex; flex-direction: column; align-items: center;
+            height: 100vh; overflow-y: auto; padding: 40px 20px;
+            box-sizing: border-box; background: rgba(5, 5, 5, 0.85);
         }
 
-        /* --- PRE-GAME SITE (LANDING PAGE) --- */
-        .site-container {
-            position: relative;
-            z-index: 10;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            min-height: 100vh;
-            padding: 40px 20px;
-            box-sizing: border-box;
-            opacity: 1;
-            transition: opacity 0.5s ease-out;
-        }
-
-        .hero { text-align: center; margin-bottom: 60px; }
         .hero h1 { 
-            color: var(--gold); 
-            font-size: 3.5em; 
-            letter-spacing: 8px; 
-            margin: 0; 
-            text-shadow: 0 0 20px rgba(212, 175, 55, 0.4); 
+            color: var(--gold); font-size: 3.5rem; letter-spacing: 10px; 
+            margin: 20px 0; text-align: center; font-weight: 900;
+            text-shadow: 0 0 15px rgba(212, 175, 55, 0.3);
         }
-        .hero p { color: var(--text-gray); font-size: 1.2em; letter-spacing: 2px; }
-
-        .btn-play {
-            background: none;
-            border: 2px solid var(--gold);
-            color: var(--gold);
-            padding: 15px 50px;
-            font-size: 1.2em;
-            font-weight: bold;
-            letter-spacing: 2px;
-            cursor: pointer;
-            transition: all 0.3s;
-            box-shadow: 0 0 15px rgba(212, 175, 55, 0.2);
-            border-radius: 30px;
+        
+        .play-btn {
+            background: var(--gold); color: black; border: none;
+            padding: 22px 70px; font-size: 1.4rem; font-weight: bold;
+            border-radius: 5px; cursor: pointer; transition: 0.3s;
+            text-transform: uppercase; letter-spacing: 2px;
         }
-        .btn-play:hover { background: var(--gold); color: black; box-shadow: 0 0 30px rgba(212, 175, 55, 0.5); }
+        .play-btn:hover { background: #fff; transform: translateY(-3px); box-shadow: 0 10px 20px rgba(212, 175, 55, 0.4); }
 
-        .about-section { max-width: 700px; width: 100%; margin: 60px 0; }
-        .card { background: var(--gray); border-radius: 12px; padding: 30px; border: 1px solid #333; margin-bottom: 30px; }
-        .card h2 { color: var(--gold); margin-top: 0; }
-        .card p { color: #ccc; line-height: 1.6; }
-        .feature-list { list-style-type: none; padding: 0; }
-        .feature-list li { margin-bottom: 10px; color: #aaa; }
-        .feature-list li::before { content: "✔ "; color: var(--gold); }
-
-        .dev-section { text-align: center; max-width: 700px; }
-        .support-btn {
-            background: #FF4444; color: white; border: none; padding: 10px 20px; border-radius: 20px;
-            font-weight: bold; text-decoration: none; display: inline-block; margin-top: 15px; cursor: pointer;
+        .section {
+            max-width: 650px; background: var(--gray);
+            padding: 30px; border-radius: 4px; border: 1px solid #222; margin: 20px 0;
         }
 
-        /* --- THE GAME INTERFACE (Hiding by default) --- */
-        #game-container {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            display: none; /* Show later */
-            flex-direction: column;
-            z-index: 100;
-            opacity: 0;
-            background-color: var(--dark);
-            transition: opacity 0.5s ease-in;
+        .mono-btn {
+            background: #fff; color: #000; border: none;
+            padding: 14px 25px; border-radius: 5px; display: inline-flex;
+            align-items: center; gap: 12px; text-decoration: none;
+            font-weight: bold; transition: 0.3s; margin-top: 20px;
+        }
+        .mono-btn:hover { background: var(--gold); }
+
+        /* --- GAME UI --- */
+        #game {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            display: none; flex-direction: column; z-index: 20; background: var(--dark);
         }
 
-        /* (Rest of the previous game CSS, adjusted) */
-        .game-header { background: var(--gray); padding: 15px 20px; text-align: center; border-bottom: 1px solid #333; }
-        .game-brand { color: var(--gold); font-size: 12px; letter-spacing: 4px; font-weight: bold; margin-bottom: 5px; }
-        #balance { font-size: 36px; font-weight: bold; margin: 0; }
-        #income { color: var(--green); font-size: 13px; margin-top: 3px; }
+        .header { background: #000; padding: 25px; text-align: center; border-bottom: 1px solid #111; }
+        #balance { font-size: 2.8rem; font-weight: bold; color: #fff; letter-spacing: -1px; }
+        #income { color: var(--green); font-size: 0.9rem; margin-top: 5px; font-family: monospace; }
 
-        .tab-content { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 20px; overflow-y: auto; }
-        #market-view { display: none; width: 100%; box-sizing: border-box; }
+        .content { flex: 1; overflow-y: auto; display: flex; flex-direction: column; align-items: center; padding: 20px; }
+        
+        .click-area { flex: 1; display: flex; flex-direction: column; justify-content: center; align-items: center; }
+        .main-button {
+            width: 220px; height: 220px; border-radius: 50%;
+            background: transparent; border: 2px solid var(--gold);
+            color: var(--gold); font-size: 3.5rem; font-weight: bold;
+            box-shadow: inset 0 0 20px rgba(212, 175, 55, 0.1), 0 0 40px rgba(212, 175, 55, 0.1); 
+            transition: 0.1s; cursor: pointer;
+        }
+        .main-button:active { transform: scale(0.95); border-width: 4px; background: rgba(212, 175, 175, 0.05); }
 
-        .main-btn { width: 180px; height: 180px; border-radius: 50%; background: var(--gray); border: 3px solid var(--gold); color: var(--gold); font-size: 44px; font-weight: bold; cursor: pointer; transition: transform 0.05s; box-shadow: 0 0 25px rgba(212, 175, 55, 0.2); }
-        .main-btn:active { transform: scale(0.95); }
+        .market { width: 100%; max-width: 450px; display: none; padding-bottom: 20px; }
+        .biz-card {
+            background: #0f0f0f; padding: 18px; border-radius: 2px;
+            margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center;
+            border-left: 3px solid var(--gold);
+        }
+        .biz-info h3 { margin: 0; font-size: 1.1rem; letter-spacing: 1px; }
+        .biz-info p { margin: 5px 0 0; color: var(--gold); font-size: 0.85rem; font-family: monospace; }
+        
+        .buy-btn {
+            background: #222; color: var(--gold); border: 1px solid var(--gold);
+            padding: 10px 20px; border-radius: 2px; font-weight: bold; transition: 0.2s;
+        }
+        .buy-btn:not(:disabled):hover { background: var(--gold); color: #000; }
+        .buy-btn:disabled { opacity: 0.3; cursor: not-allowed; }
 
-        .business-card { background: var(--gray); border-radius: 12px; padding: 15px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; border: 1px solid #333; }
-        .card-info h3 { margin: 0; font-size: 15px; }
-        .card-info p { margin: 3px 0 0; color: var(--gold); font-size: 12px; }
-
-        .buy-btn { background: var(--gold); color: black; border: none; padding: 8px 15px; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 12px; }
-        .buy-btn:disabled { background: #555; cursor: not-allowed; }
-
-        .nav { display: grid; grid-template-columns: 1fr 1fr; height: 60px; background: var(--gray); border-top: 1px solid #333; }
-        .nav-btn { background: none; border: none; color: #888; font-weight: bold; cursor: pointer; }
-        .nav-btn.active { color: var(--gold); }
+        .nav {
+            display: flex; height: 75px; background: #000; border-top: 1px solid #111;
+        }
+        .nav-item {
+            flex: 1; background: none; border: none; color: #444;
+            font-weight: bold; font-size: 0.75rem; letter-spacing: 2px; transition: 0.3s;
+        }
+        .nav-item.active { color: var(--gold); border-bottom: 2px solid var(--gold); }
     </style>
 </head>
 <body>
 
-    <canvas id="money-canvas"></canvas>
+    <canvas id="bgCanvas"></canvas>
 
-    <div id="site-landing" class="site-container">
+    <div id="landing">
         <div class="hero">
-            <div class="brand">INTRODUCING</div>
+            <p style="color: var(--gold); letter-spacing: 7px; margin: 0; font-size: 0.8rem;">ESTABLISHED 2026</p>
             <h1>GOLDEN EQUITY</h1>
-            <p>BUILD YOUR CORPORATE EMPIRE</p>
-            <button class="btn-play" onclick="startGame()">PLAY GAME</button>
+            <button class="play-btn" onclick="startGame()">Initialize Session</button>
         </div>
 
-        <div class="about-section">
-            <div class="card">
-                <h2>About the Game</h2>
-                <p>Welcome to <strong>Golden Equity</strong>, the ultimate corporate empire builder. Start from zero and grow your wealth into trillions of dollars. Manage investments, acquire strategic businesses, and watch your income grow passively.</p>
-                <h3>Core Features:</h3>
-                <ul class="feature-list">
-                    <li>Dynamic Clicker Mechanic with Vibrate Feedback</li>
-                    <li>Scalable Passive Income System</li>
-                    <li>Strategic Business Acquisition (Market Tab)</li>
-                    <li>Aesthetic VIP UI with Particle FX</li>
-                    <li>Progress Saving (Persistent Balance)</li>
-                    <li>Future Prestige System (Coming Soon)</li>
-                </ul>
-            </div>
+        <div class="section">
+            <h2 style="color: var(--gold); text-transform: uppercase; font-size: 1rem;">Project Overview</h2>
+            <p>Golden Equity is a high-end financial simulator designed for those who seek digital dominance. Our engine calculates real-time market shifts to provide a seamless growth experience.</p>
+            <p style="color: #666; font-style: italic;">"Wealth is not about having money; it's about having options."</p>
+        </div>
+
+        <div class="section">
+            <h2 style="color: var(--gold); text-transform: uppercase; font-size: 1rem;">The Architects</h2>
+            <p>Developed by a duo of independent creators. We focus on clean code, aesthetic UI, and user-driven progression. This is our debut into the world of web-based gaming.</p>
             
-            <div class="dev-section card">
-                <h2>Meet the Developers</h2>
-                <p>We are a two-person team of passionate beginning developers. This is our first major project, and we've put our hearts into creating a smooth, aesthetic, and engaging experience. Your feedback means everything to us.</p>
-                <p>If you like what you see and want to support our journey, please consider donating or just sharing the game with friends. We appreciate any support!</p>
-                <button class="support-btn" onclick="alert('Support feature coming soon!')">♥ Support Us</button>
-            </div>
+            <a href="https://send.monobank.ua/jar/XXXXXXXXXX" target="_blank" class="mono-btn">
+                <img src="https://www.monobank.ua/favicon.ico" width="20" alt="mono">
+                SUPPORT OUR DEVELOPMENT
+            </a>
         </div>
     </div>
 
-    <div id="game-container">
-        <div class="game-header">
-            <div class="game-brand">GOLDEN EQUITY</div>
+    <div id="game">
+        <div class="header">
             <div id="balance">$ 0</div>
-            <div id="income">Passive: $0/sec</div>
+            <div id="income">DATA_STREAM: $0/SEC</div>
         </div>
 
-        <div id="office-view" class="tab-content">
-            <button class="main-btn" onclick="handleClick()">GE</button>
-            <p style="margin-top: 25px; color: #444; letter-spacing: 1px; font-size: 12px;">TAP TO GENERATE CAPITAL</p>
-        </div>
+        <div class="content">
+            <div id="officeTab" class="click-area">
+                <button class="main-button" onclick="doClick()">GE</button>
+                <p style="color: #333; margin-top: 30px; letter-spacing: 5px; font-size: 0.7rem;">SYSTEM_ACTIVE</p>
+            </div>
 
-        <div id="market-view" class="tab-content">
-            <div style="width: 100%; max-width: 400px; overflow-y: auto;">
-                <div class="business-card">
-                    <div class="card-info"><h3>Small Cafe</h3><p id="cost-coffee">Cost: $50</p></div>
-                    <button class="buy-btn" id="btn-coffee" onclick="buyBusiness('coffee')">BUY</button>
+            <div id="marketTab" class="market">
+                <div class="biz-card">
+                    <div class="biz-info"><h3>Retail Chain</h3><p id="c-coffee">Cost: $50</p></div>
+                    <button class="buy-btn" id="b-coffee" onclick="buy('coffee')">ACQUIRE</button>
                 </div>
-                <div class="business-card">
-                    <div class="card-info"><h3>IT Agency</h3><p id="cost-it">Cost: $500</p></div>
-                    <button class="buy-btn" id="btn-it" onclick="buyBusiness('it')">BUY</button>
+                <div class="biz-card">
+                    <div class="biz-info"><h3>Software House</h3><p id="c-it">Cost: $500</p></div>
+                    <button class="buy-btn" id="b-it" onclick="buy('it')">ACQUIRE</button>
                 </div>
-                <div class="business-card">
-                    <div class="card-info"><h3>Bank Branch</h3><p id="cost-bank">Cost: $10,000</p></div>
-                    <button class="buy-btn" id="btn-bank" onclick="buyBusiness('bank')">BUY</button>
+                <div class="biz-card">
+                    <div class="biz-info"><h3>Data Center</h3><p id="c-crypto">Cost: $5,000</p></div>
+                    <button class="buy-btn" id="b-crypto" onclick="buy('crypto')">ACQUIRE</button>
                 </div>
-                <div class="business-card">
-                    <div class="card-info"><h3>Oil Rig</h3><p id="cost-oil">Cost: $1M</p></div>
-                    <button class="buy-btn" id="btn-oil" onclick="buyBusiness('oil')">BUY</button>
+                <div class="biz-card">
+                    <div class="biz-info"><h3>Global Logistics</h3><p id="c-hotel">Cost: $100,000</p></div>
+                    <button class="buy-btn" id="b-hotel" onclick="buy('hotel')">ACQUIRE</button>
                 </div>
             </div>
         </div>
 
         <div class="nav">
-            <button class="nav-btn active" id="nav-office" onclick="showTab('office')">OFFICE</button>
-            <button class="nav-btn" id="nav-market" onclick="showTab('market')">MARKET</button>
+            <button class="nav-item active" id="n-off" onclick="tab('off')">TERMINAL</button>
+            <button class="nav-item" id="n-mkt" onclick="tab('mkt')">ASSETS</button>
         </div>
     </div>
 
     <script>
-        // --- 1. BACKGROUND PARTICLES (MONEY) ---
-        const canvas = document.getElementById('money-canvas');
+        // --- ЦИФРОВИЙ ФОН (0 та 1) ---
+        const canvas = document.getElementById('bgCanvas');
         const ctx = canvas.getContext('2d');
-        let particles = [];
-        const moneyIcons = ['$', '₿', '€', '£', '¥'];
+        let parts = [];
+        function resize() { canvas.width = window.innerWidth; canvas.height = window.innerHeight; }
+        window.onresize = resize; resize();
 
-        function resizeCanvas() {
-            canvas.width = window.innerWidth;
-            canvas.height = window.innerHeight;
-        }
-        window.addEventListener('resize', resizeCanvas);
-        resizeCanvas();
-
-        class Particle {
-            constructor() {
+        class Digit {
+            constructor() { this.reset(); this.y = Math.random() * canvas.height; }
+            reset() {
                 this.x = Math.random() * canvas.width;
-                this.y = Math.random() * canvas.height;
-                this.size = Math.random() * 15 + 10;
-                this.speedY = Math.random() * 0.5 + 0.1; // Slow falling
-                this.speedX = Math.random() * 0.2 - 0.1;
-                this.opacity = Math.random() * 0.2 + 0.05; // Faded
-                this.icon = moneyIcons[Math.floor(Math.random() * moneyIcons.length)];
+                this.y = -30;
+                this.s = Math.random() * 12 + 8;
+                this.v = Math.random() * 0.8 + 0.2;
+                this.o = Math.random() * 0.2;
+                this.char = Math.random() > 0.5 ? '1' : '0';
             }
             update() {
-                this.y += this.speedY;
-                this.x += this.speedX;
-                if (this.y > canvas.height) { this.y = -20; this.x = Math.random() * canvas.width; }
-                if (this.x > canvas.width || this.x < 0) this.speedX = -this.speedX;
+                this.y += this.v;
+                if (this.y > canvas.height) this.reset();
             }
             draw() {
-                ctx.fillStyle = `rgba(212, 175, 55, ${this.opacity})`; // Gold color
-                ctx.font = `${this.size}px Arial`;
-                ctx.fillText(this.icon, this.x, this.y);
+                ctx.fillStyle = `rgba(212, 175, 55, ${this.o})`;
+                ctx.font = this.s + 'px monospace';
+                ctx.fillText(this.char, this.x, this.y);
             }
         }
-
-        function initParticles() { for (let i = 0; i < 50; i++) particles.push(new Particle()); }
-        function animateParticles() {
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            particles.forEach(p => { p.update(); p.draw(); });
-            requestAnimationFrame(animateParticles);
+        for(let i=0; i<60; i++) parts.push(new Digit());
+        function anim() {
+            ctx.clearRect(0,0,canvas.width, canvas.height);
+            parts.forEach(p => { p.update(); p.draw(); });
+            requestAnimationFrame(anim);
         }
-        initParticles();
-        animateParticles();
+        anim();
 
-        // --- 2. TRANSITION LANDING TO GAME ---
-        function startGame() {
-            const site = document.getElementById('site-landing');
-            const game = document.getElementById('game-container');
-            
-            site.style.opacity = '0'; // Start fading out
-            setTimeout(() => {
-                site.style.display = 'none'; // Hide site
-                game.style.display = 'flex'; // Show game
-                setTimeout(() => { game.style.opacity = '1'; }, 50); // Fade in game
-            }, 500); // Wait for fade out
-        }
+        // --- GAME CORE ---
+        let money = parseFloat(localStorage.getItem('ge_m')) || 0;
+        let income = parseFloat(localStorage.getItem('ge_i')) || 0;
 
-        // --- 3. THE GAME LOGIC ---
-        let money = parseFloat(localStorage.getItem('ge_money')) || 0;
-        let income = parseFloat(localStorage.getItem('ge_income')) || 0;
-
-        const businesses = {
-            coffee: { cost: parseFloat(localStorage.getItem('ge_coffee_cost')) || 50, profit: 2, count: 0 },
-            it: { cost: parseFloat(localStorage.getItem('ge_it_cost')) || 500, profit: 15, count: 0 },
-            bank: { cost: parseFloat(localStorage.getItem('ge_bank_cost')) || 10000, profit: 250, count: 0 },
-            oil: { cost: parseFloat(localStorage.getItem('ge_oil_cost')) || 1000000, profit: 25000, count: 0 }
+        const data = {
+            coffee: { c: parseFloat(localStorage.getItem('ge_c_c')) || 50, p: 2 },
+            it: { c: parseFloat(localStorage.getItem('ge_c_it')) || 500, p: 15 },
+            crypto: { c: parseFloat(localStorage.getItem('ge_c_cr')) || 5000, p: 120 },
+            hotel: { c: parseFloat(localStorage.getItem('ge_c_ho')) || 100000, p: 2500 }
         };
 
-        function handleClick() {
+        function startGame() {
+            document.getElementById('landing').style.opacity = '0';
+            setTimeout(() => {
+                document.getElementById('landing').style.display = 'none';
+                document.getElementById('game').style.display = 'flex';
+                update();
+            }, 400);
+        }
+
+        function doClick() {
             money += 1;
-            updateUI();
-            if (window.navigator.vibrate) window.navigator.vibrate(10); // Small vibrate
+            if(navigator.vibrate) navigator.vibrate(10);
+            update();
         }
 
-        function buyBusiness(id) {
-            let b = businesses[id];
-            if (money >= b.cost) {
-                money -= b.cost;
-                b.count++;
-                income += b.profit;
-                b.cost = Math.floor(b.cost * 1.35); // Price increases
-                updateUI();
-                saveGame();
+        function buy(id) {
+            let b = data[id];
+            if(money >= b.c) {
+                money -= b.c;
+                income += b.p;
+                b.c = Math.floor(b.c * 1.35);
+                save(); update();
             }
         }
 
-        function updateUI() {
-            // Money formatting
-            const format = (num) => `$ ${Math.floor(num).toLocaleString('en-US')}`;
-            
-            document.getElementById('balance').innerText = format(money);
-            document.getElementById('income').innerText = `Passive: ${format(income)}/sec`;
-            
-            // Costs
-            const setCost = (id, b) => document.getElementById(`cost-${id}`).innerText = `Cost: ${format(b.cost)}`;
-            setCost('coffee', businesses.coffee);
-            setCost('it', businesses.it);
-            setCost('bank', businesses.bank);
-            setCost('oil', businesses.oil);
-
-            // Disable buttons if not enough money
-            const setBtn = (id, b) => document.getElementById(`btn-${id}`).disabled = money < b.cost;
-            setBtn('coffee', businesses.coffee);
-            setBtn('it', businesses.it);
-            setBtn('bank', businesses.bank);
-            setBtn('oil', businesses.oil);
-        }
-
-        function showTab(tab) {
-            document.getElementById('office-view').style.display = tab === 'office' ? 'flex' : 'none';
-            document.getElementById('market-view').style.display = tab === 'market' ? 'flex' : 'none';
-            document.getElementById('nav-office').classList.toggle('active', tab === 'office');
-            document.getElementById('nav-market').classList.toggle('active', tab === 'market');
-        }
-
-        function saveGame() {
-            localStorage.setItem('ge_money', money);
-            localStorage.setItem('ge_income', income);
-            localStorage.setItem('ge_coffee_cost', businesses.coffee.cost);
-            localStorage.setItem('ge_it_cost', businesses.it.cost);
-            localStorage.setItem('ge_bank_cost', businesses.bank.cost);
-            localStorage.setItem('ge_oil_cost', businesses.oil.cost);
-        }
-
-        // Passive income & auto-save loop
-        setInterval(() => {
-            if (income > 0) {
-                money += income;
-                updateUI();
-                saveGame(); // Save every second
+        function update() {
+            const f = (n) => n.toLocaleString('en-US');
+            document.getElementById('balance').innerText = '$ ' + f(Math.floor(money));
+            document.getElementById('income').innerText = 'DATA_STREAM: $' + f(income) + '/SEC';
+            for(let k in data) {
+                document.getElementById('c-'+k).innerText = 'Cost: $' + f(data[k].c);
+                document.getElementById('b-'+k).disabled = money < data[k].c;
             }
-        }, 1000);
+        }
 
-        // Initial UI update
-        updateUI();
+        function tab(t) {
+            document.getElementById('officeTab').style.display = t=='off' ? 'flex':'none';
+            document.getElementById('marketTab').style.display = t=='mkt' ? 'block':'none';
+            document.getElementById('n-off').className = 'nav-item' + (t=='off'?' active':'');
+            document.getElementById('n-mkt').className = 'nav-item' + (t=='mkt'?' active':'');
+        }
 
+        function save() {
+            localStorage.setItem('ge_m', money);
+            localStorage.setItem('ge_i', income);
+            localStorage.setItem('ge_c_c', data.coffee.c);
+            localStorage.setItem('ge_c_it', data.it.c);
+            localStorage.setItem('ge_c_cr', data.crypto.c);
+            localStorage.setItem('ge_c_ho', data.hotel.c);
+        }
+
+        setInterval(() => { money += income; update(); save(); }, 1000);
     </script>
 </body>
 </html>
