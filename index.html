@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>BUIZNES IMPERIA | ELITE SYSTEM</title>
+    <title>BUIZNES IMPERIA | BOSS EDITION</title>
     
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
@@ -14,247 +14,300 @@
     <style>
         :root {
             --p-green: #22c55e; --p-blue: #3b82f6; --bg: #020617;
-            --glass: rgba(255, 255, 255, 0.03); --glass-border: rgba(255, 255, 255, 0.08);
+            --glass: rgba(255, 255, 255, 0.04); --glass-border: rgba(255, 255, 255, 0.1);
         }
 
-        * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; font-family: 'Plus Jakarta Sans', sans-serif; }
-        body, html { background: var(--bg); color: #fff; height: 100dvh; overflow: hidden; }
+        * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+        body, html { 
+            background: var(--bg); color: #fff; font-family: 'Plus Jakarta Sans', sans-serif; 
+            height: 100dvh; width: 100vw; overflow: hidden; position: fixed;
+        }
 
-        /* --- AUTH SCREEN --- */
-        #auth-screen {
-            position: fixed; inset: 0; background: var(--bg); z-index: 1000;
+        /* --- LOADING & AUTH --- */
+        #auth-overlay {
+            position: fixed; inset: 0; background: var(--bg); z-index: 9999;
             display: flex; flex-direction: column; justify-content: center; padding: 30px;
+            transition: 0.5s;
         }
-        .auth-card { background: var(--glass); padding: 30px; border-radius: 30px; border: 1px solid var(--glass-border); backdrop-filter: blur(20px); }
-        .auth-input { 
-            width: 100%; background: rgba(255,255,255,0.05); border: 1px solid var(--glass-border); 
-            padding: 15px; border-radius: 15px; color: #fff; margin-bottom: 15px; outline: none;
+        .auth-form { 
+            background: var(--glass); padding: 35px; border-radius: 40px; 
+            border: 1px solid var(--glass-border); backdrop-filter: blur(30px);
+            box-shadow: 0 25px 50px rgba(0,0,0,0.5);
         }
-        .auth-btn { 
+        input { 
+            width: 100%; background: rgba(0,0,0,0.3); border: 1px solid var(--glass-border); 
+            padding: 18px; border-radius: 20px; color: #fff; margin-bottom: 15px; font-size: 1rem;
+        }
+        .btn-main { 
             width: 100%; background: var(--p-green); color: #000; border: none; 
-            padding: 15px; border-radius: 15px; font-weight: 900; cursor: pointer;
+            padding: 20px; border-radius: 20px; font-weight: 900; font-family: 'Outfit';
+            font-size: 1.1rem; cursor: pointer; transition: 0.2s;
         }
+        .btn-main:active { transform: scale(0.95); opacity: 0.8; }
 
-        /* --- GAME ENGINE UI --- */
-        .app { height: 100%; display: flex; flex-direction: column; }
-        .screen { display: none; height: 100%; overflow-y: auto; padding: 20px; padding-bottom: 120px; }
-        .screen.active { display: block; }
+        /* --- MAIN APP LAYOUT --- */
+        .main-container { height: 100dvh; display: flex; flex-direction: column; opacity: 0; transition: 1s; }
+        .main-container.ready { opacity: 1; }
 
-        /* --- 3D-ISH COIN MODEL --- */
-        .coin-wrapper { height: 40vh; display: flex; align-items: center; justify-content: center; perspective: 1000px; }
-        .coin-model {
-            width: 180px; height: 180px; background: #fbbf24; border-radius: 50%;
+        .screen { display: none; height: 100%; overflow-y: auto; padding: 25px; padding-bottom: 140px; }
+        .screen.active { display: block; animation: fadeIn 0.3s ease; }
+        @keyframes fadeIn { from { opacity: 0; transform: scale(0.98); } to { opacity: 1; transform: scale(1); } }
+
+        /* --- GAME VISUALS --- */
+        .stat-card { text-align: center; padding: 30px 0; }
+        .balance { font-family: 'Outfit'; font-size: 4.5rem; font-weight: 900; line-height: 1; margin: 10px 0; letter-spacing: -2px; }
+        .sub-stat { font-size: 0.75rem; color: var(--p-blue); font-weight: 800; letter-spacing: 2px; }
+
+        .click-area { height: 40vh; display: flex; align-items: center; justify-content: center; position: relative; }
+        .empire-coin {
+            width: 220px; height: 220px; border-radius: 50%;
+            background: radial-gradient(circle at 30% 30%, #fbbf24, #d97706);
             display: flex; align-items: center; justify-content: center;
-            font-family: 'Outfit'; font-weight: 900; font-size: 5rem; color: #d97706;
-            box-shadow: 
-                0 0 0 10px #d97706,
-                0 20px 50px rgba(251, 191, 36, 0.3);
-            transform-style: preserve-3d; transition: 0.1s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            border: 5px solid #fef3c7;
+            font-family: 'Outfit'; font-size: 6rem; font-weight: 900; color: #78350f;
+            box-shadow: 0 20px 60px rgba(217, 119, 6, 0.4), inset 0 0 40px rgba(255,255,255,0.3);
+            border: 8px solid #fef3c7; cursor: pointer; transition: 0.05s;
+            z-index: 10;
         }
-        .coin-model:active { transform: scale(0.9) rotateX(20deg); }
+        .empire-coin:active { transform: scale(0.85) rotate(-5deg); }
 
-        /* --- UPGRADES & LEADERBOARD --- */
-        .upgrade-item {
+        /* --- SHOP & LEADERBOARD --- */
+        .list-item {
             background: var(--glass); border: 1px solid var(--glass-border);
-            padding: 15px; border-radius: 20px; display: flex; justify-content: space-between;
-            align-items: center; margin-bottom: 10px; transition: 0.2s;
+            padding: 20px; border-radius: 25px; display: flex; justify-content: space-between;
+            align-items: center; margin-bottom: 12px;
         }
-        .upgrade-item:active { background: rgba(255,255,255,0.1); }
-        .buy-btn { background: var(--p-blue); color: #fff; border: none; padding: 8px 15px; border-radius: 10px; font-weight: 800; font-size: 0.7rem; }
-
-        .leader-row { display: flex; justify-content: space-between; padding: 12px; border-bottom: 1px solid var(--glass-border); font-size: 0.85rem; }
-        .leader-row span:first-child { color: var(--p-green); font-weight: 800; }
-
-        /* --- NAVIGATION --- */
-        .nav { 
-            position: fixed; bottom: 0; width: 100%; background: rgba(2,6,23,0.95); 
-            backdrop-filter: blur(20px); border-top: 1px solid var(--glass-border);
-            display: flex; justify-content: space-around; padding: 15px 10px 30px;
+        .buy-btn { 
+            background: var(--p-blue); color: #fff; border: none; padding: 12px 20px; 
+            border-radius: 15px; font-weight: 900; font-size: 0.8rem;
         }
-        .nav-item { background: none; border: none; color: #64748b; font-size: 0.65rem; font-weight: 900; display: flex; flex-direction: column; align-items: center; gap: 5px; }
-        .nav-item.active { color: var(--p-green); }
+        .buy-btn:disabled { opacity: 0.3; background: #475569; }
 
-        .balance-header { text-align: center; padding: 20px 0; }
-        .money-txt { font-family: 'Outfit'; font-size: 3.5rem; font-weight: 900; margin: 0; }
+        .rank-row { display: flex; justify-content: space-between; padding: 15px; border-bottom: 1px solid var(--glass-border); }
+        .rank-row.me { background: rgba(59, 130, 246, 0.1); border-radius: 15px; border: 1px solid var(--p-blue); }
+
+        /* --- NAV BAR --- */
+        .bottom-nav {
+            position: fixed; bottom: 0; width: 100%; background: rgba(2,6,23,0.9);
+            backdrop-filter: blur(25px); border-top: 1px solid var(--glass-border);
+            display: flex; justify-content: space-around; padding: 15px 10px 40px; z-index: 100;
+        }
+        .nav-tab { background: none; border: none; color: #64748b; display: flex; flex-direction: column; align-items: center; gap: 8px; }
+        .nav-tab.active { color: var(--p-green); }
+        .nav-tab i { font-size: 1.5rem; font-style: normal; }
+        .nav-tab span { font-size: 0.6rem; font-weight: 900; text-transform: uppercase; }
 
         /* FX */
-        .float-text { position: fixed; pointer-events: none; color: var(--p-green); font-weight: 900; animation: floatUp 0.8s forwards; z-index: 2000; }
-        @keyframes floatUp { to { transform: translateY(-120px); opacity: 0; } }
+        .plus-one { position: fixed; color: var(--p-green); font-weight: 900; font-size: 2rem; pointer-events: none; animation: flyUp 0.8s forwards; z-index: 999; }
+        @keyframes flyUp { 0% { opacity: 1; transform: translateY(0); } 100% { opacity: 0; transform: translateY(-150px) scale(1.5); } }
     </style>
 </head>
 <body>
 
-    <div id="auth-screen">
-        <div class="auth-card">
-            <h2 style="font-family:'Outfit'; margin-bottom: 20px; text-align: center;">BUIZNES LOGIN</h2>
-            <input type="email" id="email" class="auth-input" placeholder="Email (any email)">
-            <input type="password" id="pass" class="auth-input" placeholder="Password (6+ chars)">
-            <button class="auth-btn" onclick="handleAuth()">ENTER IMPERIA</button>
-            <p id="auth-error" style="font-size: 0.7rem; color: #ef4444; margin-top: 10px; text-align: center;"></p>
+    <div id="auth-overlay">
+        <div class="auth-form">
+            <h1 style="font-family:'Outfit'; text-align: center; margin-bottom: 10px;">BUIZNES ENTRY</h1>
+            <p style="text-align: center; font-size: 0.8rem; color: var(--p-blue); margin-bottom: 25px;">Enter your credentials to sync progress</p>
+            <input type="email" id="user-email" placeholder="Empire Email">
+            <input type="password" id="user-pass" placeholder="Master Password (6+ chars)">
+            <button class="btn-main" onclick="startEngine()">ACCESS DATABASE</button>
+            <p id="error-msg" style="color: #ef4444; font-size: 0.7rem; text-align: center; margin-top: 15px; height: 10px;"></p>
         </div>
+        <p style="text-align: center; margin-top: 30px; font-size: 0.6rem; opacity: 0.3;">SECURE CONNECTION BY NESTOR & SANYA</p>
     </div>
 
-    <div class="app">
-        <div id="screen-game" class="screen active">
-            <div class="balance-header">
-                <p style="font-size: 0.6rem; letter-spacing: 3px; color: var(--p-blue);">TOTAL EQUITY</p>
-                <h1 class="money-txt" id="money-display">$ 0</h1>
-                <p id="pps-display" style="font-size: 0.7rem; color: #94a3b8;">Passive: $0/sec</p>
+    <div class="main-container" id="app-ui">
+        
+        <div id="tab-game" class="screen active">
+            <div class="stat-card">
+                <p class="sub-stat" id="rank-tag">RANK: HOBO</p>
+                <h1 class="balance" id="cash-txt">$ 0</h1>
+                <p style="font-size: 0.8rem; color: #94a3b8;" id="auto-txt">Passive: $0/sec</p>
             </div>
-            <div class="coin-wrapper">
-                <div class="coin-model" onclick="handleTap(event)">B</div>
-            </div>
-        </div>
-
-        <div id="screen-shop" class="screen">
-            <h2 style="font-family:'Outfit'; margin-bottom: 20px;">BLACK MARKET</h2>
-            <div id="upgrades-list">
-                <div class="upgrade-item">
-                    <div>
-                        <h4 style="font-size: 0.9rem;">Hustler Grip</h4>
-                        <p style="font-size: 0.7rem; color: #94a3b8;">+1 per click</p>
-                    </div>
-                    <button class="buy-btn" onclick="buyUpgrade('click', 50)">$50</button>
-                </div>
-                <div class="upgrade-item">
-                    <div>
-                        <h4 style="font-size: 0.9rem;">Street Bot</h4>
-                        <p style="font-size: 0.7rem; color: #94a3b8;">+$2 / sec</p>
-                    </div>
-                    <button class="buy-btn" onclick="buyUpgrade('passive', 200)">$200</button>
-                </div>
+            <div class="click-area">
+                <div class="empire-coin" id="coin-trigger" onclick="handleTap(event)">B</div>
             </div>
         </div>
 
-        <div id="screen-top" class="screen">
-            <h2 style="font-family:'Outfit'; margin-bottom: 20px;">TOP 10 FOUNDERS</h2>
-            <div id="leaderboard-list">
+        <div id="tab-shop" class="screen">
+            <h2 style="font-family:'Outfit'; margin-bottom: 25px;">UPGRADES</h2>
+            <div id="shop-items">
+                <div class="list-item">
+                    <div><h4 style="font-size: 0.9rem;">Hustler Grip</h4><p style="font-size: 0.7rem; color: #94a3b8;">+1 per click</p></div>
+                    <button class="buy-btn" id="up-click" onclick="buy('click')">$50</button>
+                </div>
+                <div class="list-item">
+                    <div><h4 style="font-size: 0.9rem;">Street Bot</h4><p style="font-size: 0.7rem; color: #94a3b8;">+$2 per sec</p></div>
+                    <button class="buy-btn" id="up-auto" onclick="buy('auto')">$250</button>
+                </div>
+                <div class="list-item">
+                    <div><h4 style="font-size: 0.9rem;">Office Suite</h4><p style="font-size: 0.7rem; color: #94a3b8;">+$15 per sec</p></div>
+                    <button class="buy-btn" id="up-office" onclick="buy('office')">$2,000</button>
+                </div>
+            </div>
+        </div>
+
+        <div id="tab-top" class="screen">
+            <h2 style="font-family:'Outfit'; margin-bottom: 25px;">GLOBAL LEADERBOARD</h2>
+            <div id="leaderboard-box">
                 </div>
         </div>
 
-        <nav class="nav">
-            <button class="nav-item active" onclick="showTab('game')">EMPIRE</button>
-            <button class="nav-item" onclick="showTab('shop')">SHOP</button>
-            <button class="nav-item" onclick="showTab('top')">TOP</button>
+        <nav class="bottom-nav">
+            <button class="nav-tab active" onclick="nav('game')"><i>💰</i><span>Empire</span></button>
+            <button class="nav-tab" onclick="nav('shop')"><i>⚡</i><span>Upgrades</span></button>
+            <button class="nav-tab" onclick="nav('top')"><i>🏆</i><span>Rankings</span></button>
         </nav>
     </div>
 
     <script>
-        // --- CONFIG ---
+        // --- FIREBASE SETUP ---
         const firebaseConfig = { databaseURL: "https://buiznesimperia-default-rtdb.firebaseio.com/" };
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
         const auth = firebase.auth();
 
-        let userData = { money: 0, clickPower: 1, pps: 0, lastUpdate: Date.now() };
-        let currentUid = null;
+        let state = { cash: 0, clickPower: 1, pps: 0, lastSync: 0 };
+        let uid = null;
 
-        // --- AUTH LOGIC ---
-        function handleAuth() {
-            const e = document.getElementById('email').value;
-            const p = document.getElementById('pass').value;
-            auth.signInWithEmailAndPassword(e, p).catch(() => auth.createUserWithEmailAndPassword(e, p))
-            .catch(err => document.getElementById('auth-error').innerText = err.message);
+        // --- AUTH ENGINE (NO BUGS) ---
+        async function startEngine() {
+            const email = document.getElementById('user-email').value;
+            const pass = document.getElementById('user-pass').value;
+            const err = document.getElementById('error-msg');
+            
+            if (pass.length < 6) { err.innerText = "Password too short!"; return; }
+
+            try {
+                // Спершу пробуємо створити, якщо не виходить - входимо
+                await auth.createUserWithEmailAndPassword(email, pass).catch(() => {
+                    return auth.signInWithEmailAndPassword(email, pass);
+                });
+            } catch (e) {
+                err.innerText = e.message;
+            }
         }
 
         auth.onAuthStateChanged(user => {
             if (user) {
-                currentUid = user.uid;
-                document.getElementById('auth-screen').style.display = 'none';
-                syncFromDb();
-                startPassiveIncome();
-                initLeaderboard();
+                uid = user.uid;
+                document.getElementById('auth-overlay').style.opacity = '0';
+                setTimeout(() => {
+                    document.getElementById('auth-overlay').style.display = 'none';
+                    document.getElementById('app-ui').classList.add('ready');
+                }, 500);
+                
+                initData();
+                startLoops();
+                syncLeaderboard();
             }
         });
 
-        // --- GAME LOGIC ---
+        // --- GAMEPLAY ---
         function handleTap(e) {
-            userData.money += userData.clickPower;
+            state.cash += state.clickPower;
             updateUI();
-            spawnText(e, `+$${userData.clickPower}`);
-            if(navigator.vibrate) navigator.vibrate(10);
-            saveToDb();
+            fx(e, `+$${state.clickPower}`);
+            if(navigator.vibrate) navigator.vibrate(12);
         }
 
-        function buyUpgrade(type, cost) {
-            if (userData.money >= cost) {
-                userData.money -= cost;
-                if (type === 'click') userData.clickPower += 1;
-                if (type === 'passive') userData.pps += 2;
-                updateUI();
-                saveToDb();
+        function buy(type) {
+            const costs = { click: 50 * state.clickPower, auto: 250 + (state.pps * 10), office: 2000 + (state.pps * 5) };
+            let cost = 0;
+            
+            if(type === 'click') {
+                cost = 50 + (state.clickPower * 25);
+                if(state.cash >= cost) { state.cash -= cost; state.clickPower++; }
+            } else if(type === 'auto') {
+                cost = 250 + (state.pps * 50);
+                if(state.cash >= cost) { state.cash -= cost; state.pps += 2; }
+            } else if(type === 'office') {
+                cost = 2000 + (state.pps * 100);
+                if(state.cash >= cost) { state.cash -= cost; state.pps += 15; }
             }
+            updateUI();
+            save();
         }
 
-        function startPassiveIncome() {
+        // --- DATA & SYNC ---
+        function initData() {
+            db.ref('users/' + uid).on('value', snap => {
+                const d = snap.val();
+                if (d && Date.now() - state.lastSync > 2000) { // Захист від циклічного оновлення
+                    state.cash = d.c || 0;
+                    state.clickPower = d.cp || 1;
+                    state.pps = d.p || 0;
+                    updateUI();
+                }
+            });
+        }
+
+        function save() {
+            if(!uid) return;
+            state.lastSync = Date.now();
+            db.ref('users/' + uid).set({
+                c: state.cash, cp: state.clickPower, p: state.pps,
+                u: auth.currentUser.email.split('@')[0], t: Date.now()
+            });
+        }
+
+        function startLoops() {
+            // Пасивний дохід (кожні 100мс для плавності)
             setInterval(() => {
-                if (userData.pps > 0) {
-                    userData.money += userData.pps / 10;
+                if(state.pps > 0) {
+                    state.cash += (state.pps / 10);
                     updateUI();
                 }
             }, 100);
-            // Auto-save every 10s
-            setInterval(() => saveToDb(), 10000);
+            
+            // Авто-сейв кожні 5 сек
+            setInterval(() => save(), 5000);
         }
 
-        // --- SYNC ---
-        function saveToDb() {
-            if (currentUid) {
-                db.ref('users/' + currentUid).set({
-                    m: userData.money,
-                    cp: userData.clickPower,
-                    pps: userData.pps,
-                    email: auth.currentUser.email.split('@')[0]
-                });
-            }
-        }
-
-        function syncFromDb() {
-            db.ref('users/' + currentUid).once('value', (snap) => {
-                const data = snap.val();
-                if (data) {
-                    userData.money = data.m || 0;
-                    userData.clickPower = data.cp || 1;
-                    userData.pps = data.pps || 0;
-                    updateUI();
-                }
-            });
-        }
-
-        function initLeaderboard() {
-            db.ref('users').orderByChild('m').limitToLast(10).on('value', snap => {
-                const list = document.getElementById('leaderboard-list');
-                list.innerHTML = '';
-                let entries = [];
-                snap.forEach(child => { entries.push(child.val()); });
-                entries.reverse().forEach((u, i) => {
-                    list.innerHTML += `<div class="leader-row"><span>#${i+1} ${u.email}</span><span>$${Math.floor(u.m).toLocaleString()}</span></div>`;
+        function syncLeaderboard() {
+            db.ref('users').orderByChild('c').limitToLast(10).on('value', snap => {
+                const box = document.getElementById('leaderboard-box');
+                box.innerHTML = '';
+                let rows = [];
+                snap.forEach(c => { rows.push(c.val()); });
+                rows.reverse().forEach((r, i) => {
+                    const isMe = r.u === auth.currentUser.email.split('@')[0] ? 'me' : '';
+                    box.innerHTML += `<div class="rank-row ${isMe}"><span>#${i+1} ${r.u}</span><b>$${Math.floor(r.c).toLocaleString()}</b></div>`;
                 });
             });
         }
 
-        // --- UI UTILS ---
+        // --- UI & FX ---
         function updateUI() {
-            document.getElementById('money-display').innerText = '$ ' + Math.floor(userData.money).toLocaleString();
-            document.getElementById('pps-display').innerText = `Passive: $${userData.pps}/sec`;
+            document.getElementById('cash-txt').innerText = '$ ' + Math.floor(state.cash).toLocaleString();
+            document.getElementById('auto-txt').innerText = `Passive: $${state.pps}/sec`;
+            
+            let rank = "HOBO";
+            if(state.cash > 1000) rank = "STREET HUSTLER";
+            if(state.cash > 10000) rank = "BUSINESS DELEGATE";
+            if(state.cash > 100000) rank = "GLOBAL TYCOON";
+            document.getElementById('rank-tag').innerText = "RANK: " + rank;
+            
+            // Оновлення цін на кнопках
+            document.getElementById('up-click').innerText = '$' + (50 + (state.clickPower * 25)).toLocaleString();
+            document.getElementById('up-auto').innerText = '$' + (250 + (state.pps * 50)).toLocaleString();
+            document.getElementById('up-office').innerText = '$' + (2000 + (state.pps * 100)).toLocaleString();
         }
 
-        function showTab(id) {
+        function nav(id) {
             document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-            document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-            document.getElementById('screen-' + id).classList.add('active');
+            document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+            document.getElementById('tab-' + id).classList.add('active');
             event.currentTarget.classList.add('active');
         }
 
-        function spawnText(e, txt) {
-            const f = document.createElement('div');
-            f.className = 'float-text';
-            f.style.left = (e.clientX || e.touches[0].clientX) + 'px';
-            f.style.top = (e.clientY || e.touches[0].clientY) + 'px';
-            f.innerText = txt;
-            document.body.appendChild(f);
-            setTimeout(() => f.remove(), 800);
+        function fx(e, t) {
+            const d = document.createElement('div');
+            d.className = 'plus-one';
+            d.style.left = (e.clientX || e.touches[0].clientX) + 'px';
+            d.style.top = (e.clientY || e.touches[0].clientY) + 'px';
+            d.innerText = t;
+            document.body.appendChild(d);
+            setTimeout(() => d.remove(), 800);
         }
     </script>
 </body>
