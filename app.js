@@ -1,185 +1,152 @@
-/**
- * GOLDEN EQUITY SYSTEM ENGINE v2.4
- * Architects: Nestor & Sanya
- */
+import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js";
+import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js";
+import { getDatabase, ref, set, onValue, update } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-database.js";
 
-// --- 1. ПЕРЕМІННІ ТА СТАН ГРИ ---
-let state = {
-    money: parseFloat(localStorage.getItem('ge_balance')) || 0,
-    totalTaps: parseInt(localStorage.getItem('ge_taps')) || 0,
-    currentLevel: parseInt(localStorage.getItem('ge_level')) || 0,
-    onlineUsers: 1450
+// ТВІЙ РЕАЛЬНИЙ КОНФІГ
+const firebaseConfig = {
+    apiKey: "AIzaSyBn7mwTIJaICFCKHZQJwAvHRKsF8lHUDZ8",
+    authDomain: "buiznesimperia.firebaseapp.com",
+    databaseURL: "https://buiznesimperia-default-rtdb.firebaseio.com",
+    projectId: "buiznesimperia",
+    storageBucket: "buiznesimperia.firebasestorage.app",
+    messagingSenderId: "1045081555968",
+    appId: "1:1045081555968:web:e413ec99eb7dee630cc4e5"
 };
 
-const RANKS = [
-    { name: "HOBO", goal: 150, reward: 1, icon: "🪙", sound: 220 },
-    { name: "STREET HUSTLER", goal: 1500, reward: 5, icon: "🥈", sound: 330 },
-    { name: "BUSINESS DELEGATE", goal: 15000, reward: 25, icon: "🥇", sound: 440 },
-    { name: "EQUITY DIRECTOR", goal: 100000, reward: 100, icon: "💵", sound: 550 },
-    { name: "GLOBAL TYCOON", goal: 1000000, reward: 500, icon: "💎", sound: 880 }
+// Ініціалізація
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getDatabase(app);
+
+let state = {
+    money: 0, click: 1, pps: 0, lvl: 1, exp: 0,
+    items: { i1: 0, i2: 0, i3: 0, i4: 0, i5: 0 },
+    uid: null, user: ''
+};
+
+const MARKET = [
+    { id: 'i1', name: 'Street Hustle', price: 15, val: 1, type: 'pps', mult: 1.15 },
+    { id: 'i2', name: 'Inferno GPU', price: 200, val: 12, type: 'pps', mult: 1.2 },
+    { id: 'i3', name: 'Shadow Bank', price: 1000, val: 2, type: 'click', mult: 2.5 },
+    { id: 'i4', name: 'Neural Bot', price: 5000, val: 140, type: 'pps', mult: 1.25 },
+    { id: 'i5', name: 'Void Corp', price: 50000, val: 1200, type: 'pps', mult: 1.3 }
 ];
 
-// --- 2. AUDIO ENGINE (Синтезатор звуку) ---
-const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+// ЛОГІКА ВХОДУ
+document.getElementById('auth-btn').onclick = () => {
+    const email = document.getElementById('email').value;
+    const pass = document.getElementById('password').value;
+    const status = document.getElementById('auth-status');
 
-function playTone(freq, type = 'sine', duration = 0.1) {
-    const osc = audioCtx.createOscillator();
-    const gain = audioCtx.createGain();
-    
-    osc.type = type;
-    osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
-    
-    gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
-    gain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + duration);
-    
-    osc.connect(gain);
-    gain.connect(audioCtx.destination);
-    
-    osc.start();
-    osc.stop(audioCtx.currentTime + duration);
+    status.innerText = "INITIALIZING SECURE LINK...";
+    signInWithEmailAndPassword(auth, email, pass)
+        .catch(() => createUserWithEmailAndPassword(auth, email, pass))
+        .catch(e => status.innerText = "ERROR: " + e.message);
+};
+
+onAuthStateChanged(auth, user => {
+    if (user) {
+        state.uid = user.uid;
+        state.user = user.email.split('@')[0];
+        launch();
+    }
+});
+
+function launch() {
+    document.getElementById('auth-screen').style.display = 'none';
+    document.getElementById('game-ui').style.display = 'flex';
+
+    // Завантаження даних
+    onValue(ref(db, 'users/' + state.uid), snap => {
+        if (snap.exists()) {
+            state = { ...state, ...snap.val() };
+            updateUI();
+        }
+    });
+
+    renderMarket();
+    setInterval(gameLoop, 100);
+    setInterval(autoSave, 10000);
 }
 
-// --- 3. ЛОГІКА КЛІКУ ---
-function handleTap(e) {
-    const rank = RANKS[state.currentLevel];
+// ГЕЙМПЛЕЙ
+document.getElementById('clicker-core').onclick = (e) => {
+    state.money += state.click;
+    state.exp += 1;
+    if (state.exp >= state.lvl * 500) { state.lvl++; state.exp = 0; }
     
-    // Нарахування
-    state.money += rank.reward;
-    state.totalTaps++;
-    
-    // Ефекти
-    playTone(rank.sound + (Math.random() * 20), 'sine', 0.1);
-    if (navigator.vibrate) navigator.vibrate(12);
-    
-    spawnMoneyFX(e, rank.reward);
-    checkLevelUp();
+    spawnFx(e);
     updateUI();
-    saveData();
-}
+};
 
-// --- 4. СИСТЕМА ПРОГРЕСУ ---
-function checkLevelUp() {
-    const current = RANKS[state.currentLevel];
-    if (state.money >= current.goal && state.currentLevel < RANKS.length - 1) {
-        state.currentLevel++;
-        
-        // Святковий звук "Level Up"
-        playTone(523.25, 'square', 0.2); // До
-        setTimeout(() => playTone(659.25, 'square', 0.2), 100); // Мі
-        setTimeout(() => playTone(783.99, 'square', 0.4), 200); // Соль
-        
-        showNotification(`NEW STATUS: ${RANKS[state.currentLevel].name}`);
+function gameLoop() {
+    if (state.pps > 0) {
+        state.money += (state.pps / 10);
+        updateUI();
     }
 }
 
-// --- 5. ВІЗУАЛЬНІ ЕФЕКТИ ---
-function spawnMoneyFX(e, val) {
-    const float = document.createElement('div');
-    float.className = 'float-val';
-    
-    // Координати кліку (підтримка тач та мишки)
-    const x = e.clientX || (e.touches ? e.touches[0].clientX : 0);
-    const y = e.clientY || (e.touches ? e.touches[0].clientY : 0);
-    
-    float.style.left = `${x}px`;
-    float.style.top = `${y}px`;
-    float.innerText = `+$${val}`;
-    
-    document.body.appendChild(float);
-    setTimeout(() => float.remove(), 800);
+function renderMarket() {
+    const cont = document.getElementById('items-grid');
+    cont.innerHTML = '';
+    MARKET.forEach(it => {
+        const count = state.items[it.id] || 0;
+        const cost = Math.floor(it.price * Math.pow(it.mult, count));
+        cont.innerHTML += `
+            <div class="item-card">
+                <div class="info">
+                    <strong>${it.name} [x${count}]</strong><br>
+                    <small>+${it.val}${it.type === 'pps' ? '/s' : ' Click'}</small>
+                </div>
+                <button class="buy-btn" id="btn-${it.id}" onclick="window.buy('${it.id}')">$${cost}</button>
+            </div>
+        `;
+    });
 }
 
-// --- 6. ОНОВЛЕННЯ ІНТЕРФЕЙСУ ---
+window.buy = (id) => {
+    const it = MARKET.find(x => x.id === id);
+    const count = state.items[id] || 0;
+    const cost = Math.floor(it.price * Math.pow(it.mult, count));
+
+    if (state.money >= cost) {
+        state.money -= cost;
+        state.items[id] = count + 1;
+        if (it.type === 'pps') state.pps += it.val;
+        else state.click *= it.val;
+        renderMarket();
+        updateUI();
+    }
+};
+
 function updateUI() {
-    const rank = RANKS[state.currentLevel];
+    document.getElementById('money').innerText = Math.floor(state.money).toLocaleString();
+    document.getElementById('pps').innerText = '$' + state.pps;
+    document.getElementById('lvl').innerText = state.lvl;
     
-    // Баланс та статус
-    document.getElementById('bal-txt').innerText = `$${Math.floor(state.money).toLocaleString()}`;
-    document.getElementById('rank-name').innerText = `RANK: ${rank.name}`;
-    document.getElementById('click-obj').innerText = rank.icon;
-    
-    // Прогрес-бар
-    const progress = (state.money / rank.goal) * 100;
-    const bar = document.getElementById('xp-bar');
-    if (bar) bar.style.width = `${Math.min(progress, 100)}%`;
-    
-    const perc = document.getElementById('xp-perc');
-    if (perc) perc.innerText = `${Math.min(Math.floor(progress), 100)}%`;
+    let r = "NEOPHYTE";
+    if (state.money > 10000) r = "STREET LORD";
+    if (state.money > 1000000) r = "OLIGARCH";
+    document.getElementById('rank-display').innerText = r;
 }
 
-// --- 7. ПІДТРИМКА ТА ОНЛАЙН ---
-function sendHeart() {
-    playTone(660, 'triangle', 0.5);
-    if (navigator.vibrate) navigator.vibrate([50, 100, 50]);
-    alert("❤️ Nestor & Sanya received your signal. Faith in the empire restored!");
+function spawnFx(e) {
+    const fx = document.createElement('div');
+    fx.className = 'tap-fx';
+    fx.style.left = e.pageX + 'px';
+    fx.style.top = e.pageY + 'px';
+    fx.innerText = `+$${state.click}`;
+    document.body.appendChild(fx);
+    setTimeout(() => fx.remove(), 800);
 }
 
-function initOnlineCounter() {
-    setInterval(() => {
-        // Рандомна флуктуація справжнього числа
-        const fluctuation = Math.floor(Math.random() * 40) - 20;
-        state.onlineUsers = Math.max(1400, state.onlineUsers + fluctuation);
-        const el = document.getElementById('user-count');
-        if (el) el.innerText = `${state.onlineUsers.toLocaleString()} OPERATORS ONLINE`;
-    }, 4000);
+function autoSave() {
+    if (state.uid) update(ref(db, 'users/' + state.uid), state);
 }
 
-// --- 8. ФОНОВИЙ КАНВАС (ЧАСТИНКИ) ---
-function initBackground() {
-    const canvas = document.getElementById('canvas');
-    if (!canvas) return;
-    const ctx = canvas.getContext('2d');
-    let particles = [];
-
-    const resize = () => {
-        canvas.width = window.innerWidth;
-        canvas.height = window.innerHeight;
-    };
-
-    window.addEventListener('resize', resize);
-    resize();
-
-    for (let i = 0; i < 50; i++) {
-        particles.push({
-            x: Math.random() * canvas.width,
-            y: Math.random() * canvas.height,
-            size: Math.random() * 2 + 1,
-            speed: Math.random() * 0.5 + 0.2,
-            opacity: Math.random() * 0.5
-        });
-    }
-
-    function animate() {
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-        ctx.fillStyle = 'rgba(34, 197, 94, 0.2)';
-        
-        particles.forEach(p => {
-            ctx.beginPath();
-            ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
-            ctx.fill();
-            p.y -= p.speed;
-            if (p.y < -10) p.y = canvas.height + 10;
-        });
-        requestAnimationFrame(animate);
-    }
-    animate();
-}
-
-// --- 9. ЗБЕРЕЖЕННЯ ---
-function saveData() {
-    localStorage.setItem('ge_balance', state.money);
-    localStorage.setItem('ge_taps', state.totalTaps);
-    localStorage.setItem('ge_level', state.currentLevel);
-}
-
-function showNotification(msg) {
-    console.log(`%c GOLDEN EQUITY: ${msg}`, 'background: #22c55e; color: #000; font-weight: bold; padding: 5px;');
-}
-
-// --- СТАРТ СИСТЕМИ ---
-window.onload = () => {
-    initBackground();
-    initOnlineCounter();
-    updateUI();
-    showNotification("SYSTEM ONLINE. WELCOME, FOUNDER.");
+// Навігація
+window.showTab = (id) => {
+    document.querySelectorAll('.panel').forEach(p => p.style.display = 'none');
+    document.getElementById('view-home').style.display = id === 'home' ? 'flex' : 'none'; // Потрібно додати id до MAIN блоку
+    document.getElementById(id + '-view').style.display = 'block';
 };
