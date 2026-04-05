@@ -2,35 +2,91 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Golden Equity | Pro</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>GOLDEN EQUITY | The Path to Wealth</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;600;900&family=Plus+Jakarta+Sans:wght@400;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@900&family=Plus+Jakarta+Sans:wght@400;800&display=swap" rel="stylesheet">
 </head>
 <body>
+
     <canvas id="bg-canvas"></canvas>
 
     <div class="app-wrapper">
-        <div class="online-indicator">
-            <div class="dot"></div>
-            <span id="real-count">1 OPERATOR ONLINE</span>
+        
+        <div class="header-status">
+            <div class="online-box">
+                <span class="pulse-dot"></span>
+                <span id="real-count">CONNECTING...</span>
+            </div>
+            <div class="version-tag">v2.4 Premium</div>
         </div>
 
-        <div class="hud">
-            <p class="rank" id="status">INITIATING...</p>
-            <h1 class="balance" id="balance">$ 0</h1>
-            <div class="progress-container"><div id="progress-bar"></div></div>
-        </div>
+        <main class="game-panel">
+            <div class="stats-container">
+                <p id="current-rank" class="rank-label">STATUS: LOADING...</p>
+                <h1 id="balance" class="main-balance">$ 0</h1>
+                <div class="progress-wrapper">
+                    <div id="progress-bar" class="progress-fill"></div>
+                </div>
+            </div>
 
-        <div class="click-zone">
-            <div class="main-btn" id="clicker" onclick="handleTap(event)">💸</div>
-        </div>
+            <div class="click-area">
+                <div id="clicker" class="main-object" onclick="handleTap(event)">
+                    <span id="object-icon">🪙</span>
+                </div>
+                <p class="tap-hint">TAP TO EVOLVE YOUR LEGACY</p>
+            </div>
+        </main>
 
-        <div class="glass-card">
-            <p style="font-size: 0.6rem; letter-spacing: 2px; opacity: 0.6;">OFFICIAL PAYMENT CHANNEL</p>
-            <div class="card-num" id="card-display">0000 0000 0000 0000</div>
-            <p id="holder-display" style="font-size: 0.7rem; color: #22c55e; font-weight: 800;"></p>
-        </div>
+        <section class="content-scroll">
+            
+            <div class="glass-card story-card">
+                <h2>The Journey</h2>
+                <p>He started with nothing—a single rusty cent found in the rain. People laughed, but he had a vision. <b>Golden Equity</b> isn't just a game; it's the digital manifestation of that climb from the gutter to the penthouse. Every tap is a step, every dollar is a brick in your empire.</p>
+            </div>
+
+            <div class="glass-card services-card">
+                <h2>Our Solutions</h2>
+                <div id="services-list" class="services-grid">
+                    </div>
+            </div>
+
+            <div class="glass-card founders-card">
+                <h2>The Architects</h2>
+                <p>Designed and engineered by <b>Nestor</b> (Systems) & <b>Sanya</b> (Aesthetics). We build digital futures.</p>
+                
+                <div class="payment-widget">
+                    <div class="card-chip"></div>
+                    <p class="card-label">Official Support Channel</p>
+                    <h3 id="card-display" class="card-number">4441 1144 3338 8350</h3>
+                    <div class="card-footer">
+                        <span id="holder-display">NESTOR & SANYA</span>
+                        <span class="card-type">VISA</span>
+                    </div>
+                </div>
+
+                <div class="moral-support">
+                    <p>No funds? Support us with a heartbeat:</p>
+                    <div class="heart-btn" onclick="sendHeart()">❤️</div>
+                </div>
+            </div>
+
+            <footer class="main-footer">
+                <p>© 2026 GOLDEN EQUITY CORP. ALL RIGHTS RESERVED.</p>
+            </footer>
+        </section>
+
+        <nav class="bottom-nav">
+            <button class="nav-item active" onclick="switchTab('game')">
+                <span class="icon">💎</span>
+                <span>EMPIRE</span>
+            </button>
+            <button class="nav-item" onclick="switchTab('info')">
+                <span class="icon">📜</span>
+                <span>DOSSIER</span>
+            </button>
+        </nav>
     </div>
 
     <script src="app.js"></script>
