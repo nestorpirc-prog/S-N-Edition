@@ -2,390 +2,48 @@
 <html lang="uk">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>BUIZNES IMPERIA | INFERNO OMEGA</title>
-    
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
-
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@900&family=JetBrains+Mono:wght@400;800&family=Space+Grotesk:wght@300;700&display=swap" rel="stylesheet">
-    
-    <style>
-        :root {
-            --fire: #ff4d00;
-            --fire-glow: #ffae00;
-            --void: #050508;
-            --card-bg: rgba(20, 20, 25, 0.8);
-            --border: rgba(255, 77, 0, 0.2);
-            --font-main: 'Space Grotesk', sans-serif;
-            --font-logo: 'Outfit', sans-serif;
-        }
-
-        /* --- ГЛОБАЛЬНИЙ СТИЛЬ --- */
-        * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
-        body { 
-            background: var(--void); 
-            color: #fff; 
-            font-family: var(--font-main); 
-            height: 100vh; 
-            overflow: hidden;
-            background-image: radial-gradient(circle at 50% 50%, #1a0a00 0%, #050508 100%);
-        }
-
-        /* Анімований фон */
-        #bg-canvas { position: fixed; inset: 0; z-index: -1; opacity: 0.4; }
-
-        /* --- AUTH SCREEN --- */
-        #auth-screen {
-            position: fixed; inset: 0; z-index: 10000;
-            background: var(--void);
-            display: flex; align-items: center; justify-content: center;
-            transition: 0.8s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-
-        .auth-card {
-            width: 90%; max-width: 400px;
-            padding: 40px;
-            background: var(--card-bg);
-            border: 1px solid var(--border);
-            border-radius: 40px;
-            text-align: center;
-            backdrop-filter: blur(20px);
-            box-shadow: 0 0 80px rgba(255, 77, 0, 0.15);
-        }
-
-        .auth-card h1 { font-family: var(--font-logo); font-size: 3.5rem; letter-spacing: -2px; line-height: 0.9; margin-bottom: 40px; }
-        .auth-card h1 span { color: var(--fire); }
-
-        .input-group { text-align: left; margin-bottom: 20px; }
-        .input-group label { font-family: 'JetBrains Mono'; font-size: 0.7rem; color: #666; margin-left: 15px; text-transform: uppercase; }
-        
-        .inf-input {
-            width: 100%; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.1);
-            padding: 20px; border-radius: 20px; color: #fff; font-family: 'JetBrains Mono'; margin-top: 5px;
-            transition: 0.3s;
-        }
-        .inf-input:focus { border-color: var(--fire); background: rgba(255, 77, 0, 0.05); outline: none; }
-
-        .btn-sync {
-            width: 100%; padding: 22px; border-radius: 20px; border: none;
-            background: linear-gradient(135deg, var(--fire), var(--fire-glow));
-            color: #000; font-family: var(--font-logo); font-weight: 900; font-size: 1.2rem;
-            cursor: pointer; margin-top: 20px; transition: 0.3s;
-        }
-        .btn-sync:active { transform: scale(0.95); }
-
-        /* --- GAME UI --- */
-        #app-interface { display: none; opacity: 0; height: 100vh; flex-direction: column; }
-
-        .hud { padding: 60px 20px 20px; text-align: center; }
-        .balance { font-family: var(--font-logo); font-size: 5rem; letter-spacing: -4px; margin: 10px 0; }
-        .stats-bar { display: flex; justify-content: center; gap: 20px; font-family: 'JetBrains Mono'; font-size: 0.8rem; color: #888; }
-        .stats-bar span { color: var(--fire-glow); }
-
-        /* CLICKER */
-        .click-area { flex: 1; display: flex; align-items: center; justify-content: center; position: relative; }
-        .main-coin {
-            width: 280px; height: 280px; border-radius: 50%;
-            background: radial-gradient(circle at 30% 30%, #333, #000);
-            border: 10px solid #fff;
-            box-shadow: 0 40px 100px rgba(0,0,0,0.8), inset 0 0 50px rgba(255, 77, 0, 0.2);
-            display: flex; align-items: center; justify-content: center;
-            font-family: var(--font-logo); font-size: 8rem; color: rgba(255,255,255,0.1);
-            cursor: pointer; transition: 0.05s; z-index: 5;
-        }
-        .main-coin:active { transform: scale(0.9) rotate(-3deg); }
-
-        /* SCREENS */
-        .screen { display: none; padding: 20px 25px 120px; height: 100%; overflow-y: auto; }
-        .screen.active { display: block; animation: slideUp 0.5s ease-out; }
-        @keyframes slideUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
-
-        .upgrade-card {
-            background: var(--card-bg); border: 1px solid var(--border);
-            padding: 20px; border-radius: 30px; margin-bottom: 15px;
-            display: flex; justify-content: space-between; align-items: center;
-        }
-        .u-info h4 { font-family: var(--font-logo); font-size: 1.4rem; }
-        .u-info p { font-size: 0.75rem; color: #666; font-family: 'JetBrains Mono'; }
-        
-        .u-buy {
-            background: #fff; color: #000; border: none; padding: 12px 20px;
-            border-radius: 15px; font-weight: 900; font-family: 'JetBrains Mono'; font-size: 0.8rem;
-        }
-        .u-buy.disabled { opacity: 0.3; }
-
-        /* NAV */
-        .nav {
-            position: fixed; bottom: 0; width: 100%; padding: 25px;
-            background: linear-gradient(0deg, var(--void) 80%, transparent);
-            display: flex; justify-content: space-around; backdrop-filter: blur(10px);
-        }
-        .nav-btn { background: none; border: none; color: #444; font-weight: 900; font-family: 'JetBrains Mono'; font-size: 0.7rem; text-transform: uppercase; }
-        .nav-btn.active { color: var(--fire); }
-
-        /* FX */
-        .tap-fx { position: fixed; pointer-events: none; font-family: var(--font-logo); font-weight: 900; color: var(--fire); font-size: 3rem; animation: floatUp 1s forwards; z-index: 100; }
-        @keyframes floatUp { 0% { opacity: 1; transform: translateY(0); } 100% { opacity: 0; transform: translateY(-200px) scale(1.5); } }
-    </style>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>BUIZNES IMPERIA | OMEGA MODULE</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@900&family=JetBrains+Mono:wght@400;800&display=swap" rel="stylesheet">
 </head>
 <body>
-
-    <canvas id="bg-canvas"></canvas>
-
     <div id="auth-screen">
         <div class="auth-card">
             <h1>BUIZNES<span>.</span></h1>
             <div class="input-group">
                 <label>Terminal Login</label>
-                <input type="email" id="log-email" class="inf-input" placeholder="root@imperia.io">
+                <input type="email" id="log-email" class="inf-input" placeholder="root@empire.io">
             </div>
             <div class="input-group">
-                <label>Access Key</label>
+                <label>Security Key</label>
                 <input type="password" id="log-pass" class="inf-input" placeholder="••••••••">
             </div>
-            <button class="btn-sync" onclick="startSync()">INITIALIZE SYNC</button>
-            <p id="auth-err" style="color: var(--fire); font-size: 0.7rem; margin-top: 15px; font-family: 'JetBrains Mono';"></p>
+            <button class="btn-sync" id="btn-login">INITIALIZE SYNC</button>
+            <p id="auth-err"></p>
         </div>
     </div>
 
-    <div id="app-interface">
-        <div id="scr-home" class="screen active">
-            <div class="hud">
-                <div class="stats-bar">RANK: <span id="rank-name">HOBO</span> | LVL: <span id="lvl-val">1</span></div>
-                <h2 class="balance" id="money-display">$ 0</h2>
-                <div class="stats-bar">PROFIT: <span id="pps-display">$0/s</span></div>
-            </div>
-            <div class="click-area">
-                <div class="main-coin" onclick="handleTap(event)">Ω</div>
-            </div>
+    <div id="app-interface" style="display:none;">
+        <div class="hud">
+            <div class="stats-bar">RANK: <span id="rank-name">NEOPHYTE</span> | LVL: <span id="lvl-val">1</span></div>
+            <h2 class="balance" id="money-display">$ 0</h2>
+            <div class="stats-bar">PROFIT: <span id="pps-display">$0/s</span></div>
         </div>
 
-        <div id="scr-shop" class="screen">
-            <h2 style="font-family: var(--font-logo); font-size: 3rem; margin-bottom: 30px;">MARKET</h2>
-            <div id="shop-container"></div>
+        <div class="main-engine">
+            <div class="coin" id="main-clicker">Ω</div>
         </div>
 
-        <div id="scr-top" class="screen">
-            <h2 style="font-family: var(--font-logo); font-size: 3rem; margin-bottom: 30px;">FORBES</h2>
-            <div id="leaderboard"></div>
-        </div>
+        <div class="shop-grid" id="shop-container"></div>
 
-        <nav class="nav">
-            <button class="nav-btn active" onclick="tab('home')">Empire</button>
-            <button class="nav-btn" onclick="tab('shop')">Market</button>
-            <button class="nav-btn" onclick="tab('top')">Ranks</button>
+        <nav class="nav-bar">
+            <button onclick="showScr('home')">EMPIRE</button>
+            <button onclick="showScr('shop')">MARKET</button>
+            <button onclick="showScr('top')">FORBES</button>
         </nav>
     </div>
 
-    <script>
-        // ТВІЙ РЕАЛЬНИЙ КОНФІГ
-        const firebaseConfig = {
-            apiKey: "AIzaSyBn7mwTIJaICFCKHZQJwAvHRKsF8lHUDZ8",
-            authDomain: "buiznesimperia.firebaseapp.com",
-            databaseURL: "https://buiznesimperia-default-rtdb.firebaseio.com",
-            projectId: "buiznesimperia",
-            storageBucket: "buiznesimperia.firebasestorage.app",
-            messagingSenderId: "1045081555968",
-            appId: "1:1045081555968:web:e413ec99eb7dee630cc4e5"
-        };
-
-        // СТАН ГРИ
-        let state = {
-            m: 0, p: 1, s: 0, l: 1, e: 0,
-            uid: null, user: 'User',
-            items: { i1: 0, i2: 0, i3: 0, i4: 0 }
-        };
-
-        const SHOP = [
-            { id: 'i1', n: 'Street Hustle', d: '+$1/s', b: 15, m: 1.15, v: 1, t: 's' },
-            { id: 'i2', n: 'Inferno GPU', d: '+$10/s', b: 200, m: 1.2, v: 10, t: 's' },
-            { id: 'i3', n: 'Shadow Bank', d: 'Click x2', b: 1000, m: 2.5, v: 2, t: 'p' },
-            { id: 'i4', n: 'Neural Network', d: '+$150/s', b: 5000, m: 1.3, v: 150, t: 's' }
-        ];
-
-        // INITIALIZATION
-        firebase.initializeApp(firebaseConfig);
-        const db = firebase.database();
-        const auth = firebase.auth();
-
-        function startSync() {
-            const email = document.getElementById('log-email').value;
-            const pass = document.getElementById('log-pass').value;
-            const err = document.getElementById('auth-err');
-
-            if (email.length < 5) return err.innerText = "INVALID TERMINAL ID";
-
-            err.innerText = "BYPASSING FIREWALL...";
-            auth.signInWithEmailAndPassword(email, pass)
-                .catch(() => auth.createUserWithEmailAndPassword(email, pass))
-                .catch(e => err.innerText = "LINK FAILED: " + e.message);
-        }
-
-        auth.onAuthStateChanged(u => {
-            if (u) {
-                state.uid = u.uid;
-                state.user = u.email.split('@')[0];
-                launch();
-            }
-        });
-
-        function launch() {
-            document.getElementById('auth-screen').style.transform = 'translateY(-100%)';
-            document.getElementById('app-interface').style.display = 'flex';
-            setTimeout(() => document.getElementById('app-interface').style.opacity = '1', 100);
-
-            db.ref('users/' + state.uid).on('value', snap => {
-                const data = snap.val();
-                if (data) {
-                    state = { ...state, ...data };
-                    updateUI();
-                }
-            });
-
-            renderShop();
-            syncTop();
-            setInterval(loop, 100);
-            setInterval(save, 5000);
-        }
-
-        // КЛІК ТА ЛОГІКА
-        function handleTap(e) {
-            state.m += state.p;
-            state.e += 1;
-            
-            // FX
-            const fx = document.createElement('div');
-            fx.className = 'tap-fx';
-            fx.style.left = (e.clientX || e.touches[0].clientX) + 'px';
-            fx.style.top = (e.clientY || e.touches[0].clientY) + 'px';
-            fx.innerText = '+$' + state.p;
-            document.body.appendChild(fx);
-            setTimeout(() => fx.remove(), 1000);
-
-            // Level up
-            if (state.e >= state.l * 500) {
-                state.l++;
-                state.e = 0;
-            }
-            updateUI();
-        }
-
-        function loop() {
-            if (state.s > 0) {
-                state.m += (state.s / 10);
-                updateUI();
-            }
-        }
-
-        function renderShop() {
-            const cont = document.getElementById('shop-container');
-            cont.innerHTML = '';
-            SHOP.forEach(it => {
-                cont.innerHTML += `
-                    <div class="upgrade-card">
-                        <div class="u-info">
-                            <h4>${it.n}</h4>
-                            <p>${it.d}</p>
-                        </div>
-                        <button id="btn-${it.id}" class="u-buy" onclick="buy('${it.id}')">$0</button>
-                    </div>
-                `;
-            });
-        }
-
-        function buy(id) {
-            const it = SHOP.find(x => x.id === id);
-            const count = state.items[id] || 0;
-            const cost = Math.floor(it.b * Math.pow(it.m, count));
-
-            if (state.m >= cost) {
-                state.m -= cost;
-                state.items[id] = count + 1;
-                if (it.t === 's') state.s += it.v;
-                else state.p *= it.v;
-                updateUI();
-                save();
-            }
-        }
-
-        function updateUI() {
-            document.getElementById('money-display').innerText = '$' + Math.floor(state.m).toLocaleString();
-            document.getElementById('pps-display').innerText = '$' + state.s + '/s';
-            document.getElementById('lvl-val').innerText = state.l;
-            
-            let rank = "HOBO";
-            if (state.m > 1000) rank = "STREET BOSS";
-            if (state.m > 100000) rank = "OLIGARCH";
-            if (state.m > 10000000) rank = "ILLUMINATI";
-            document.getElementById('rank-name').innerText = rank;
-
-            SHOP.forEach(it => {
-                const count = state.items[it.id] || 0;
-                const cost = Math.floor(it.b * Math.pow(it.m, count));
-                const btn = document.getElementById('btn-' + it.id);
-                if (btn) {
-                    btn.innerText = '$' + cost.toLocaleString();
-                    btn.className = state.m >= cost ? 'u-buy' : 'u-buy disabled';
-                }
-            });
-        }
-
-        function save() {
-            if (state.uid) db.ref('users/' + state.uid).set(state);
-        }
-
-        function syncTop() {
-            db.ref('users').orderByChild('m').limitToLast(10).on('value', s => {
-                const list = document.getElementById('leaderboard');
-                list.innerHTML = '';
-                let arr = [];
-                s.forEach(child => arr.push(child.val()));
-                arr.reverse().forEach((u, i) => {
-                    list.innerHTML += `
-                        <div class="upgrade-card">
-                            <div class="u-info"><h4>#${i+1} ${u.user}</h4><p>Empire Value</p></div>
-                            <div style="color: var(--fire-glow); font-weight: 900">$${Math.floor(u.m).toLocaleString()}</div>
-                        </div>
-                    `;
-                });
-            });
-        }
-
-        function tab(id) {
-            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-            document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
-            document.getElementById('scr-' + id).classList.add('active');
-            event.target.classList.add('active');
-        }
-
-        // BACKGROUND ANIMATION
-        const canvas = document.getElementById('bg-canvas');
-        const ctx = canvas.getContext('2d');
-        canvas.width = window.innerWidth;
-        canvas.height = window.innerHeight;
-        let particles = [];
-        class P {
-            constructor() { 
-                this.x = Math.random() * canvas.width; 
-                this.y = Math.random() * canvas.height; 
-                this.s = Math.random() * 2; 
-                this.v = Math.random() * 0.5 + 0.1; 
-            }
-            draw() {
-                ctx.fillStyle = "rgba(255, 77, 0, 0.5)";
-                ctx.beginPath(); ctx.arc(this.x, this.y, this.s, 0, Math.PI*2); ctx.fill();
-                this.y -= this.v; if (this.y < 0) this.y = canvas.height;
-            }
-        }
-        for(let i=0; i<100; i++) particles.push(new P());
-        function anim() {
-            ctx.clearRect(0,0,canvas.width, canvas.height);
-            particles.forEach(p => p.draw());
-            requestAnimationFrame(anim);
-        }
-        anim();
-    </script>
+    <script type="module" src="app.js"></script>
 </body>
 </html>
